@@ -36,7 +36,7 @@ The script saves 4 plots in the data directory:
     1) Compressed Ratio for each file
     2) Execution Time for each file
     3) Average Compression Ratio for each algorithm
-    3) Average Execution Time for each algorithm
+    4) Average Execution Time for each algorithm
 Also 2 csv files are generated:
     1) Compressed Ratio for each file
         * Columns are each algorithm
@@ -158,7 +158,7 @@ def main(argv):
     bar_width = 0.15
 
     fig1, axes = plt.subplots(1)
-    fig1.suptitle("Compression Ratio")
+    plt.title("Compression Ratio")
     
     flac_label = 'FLAC -b ' + str(block_size) + ' -l ' + str(filter_order)
     shorten_label = 'Shorten -b ' + str(block_size) + ' -l ' + str(filter_order)
@@ -172,15 +172,15 @@ def main(argv):
     plt.ylabel('Ratio')
     plt.xticks(index + bar_width, filenames, rotation='30')
     plt.legend()
-    
+    plt.tight_layout()
     fig1.show()
     name1 = "Ratio_block" + str(block_size) + "_filter" + str(filter_order)
-    fig1.savefig(name1 + ".png", bbox_inches = "tight")
+    fig1.savefig(name1 + ".svg", format="svg", dpi=1000)
     save_csv(compress_ratios, filenames, name1 + ".csv")
 
     # Execution time plot for each file
     fig2, axes = plt.subplots(1)
-    fig2.suptitle("Execution Time")
+    plt.title("Execution Time")
 
     plt.xlabel('File')
     plt.ylabel('Time (s)')
@@ -192,11 +192,11 @@ def main(argv):
     plt.bar(index + 3*bar_width, compress_times['LZMA'], bar_width, label='LZMA', align='edge')
  
     plt.legend()
-    
+    plt.tight_layout()
     fig2.show()
     name2 = "Time_block" + str(block_size) + "_filter" + str(filter_order)
     save_csv(compress_times, filenames, name2 + ".csv")
-    fig2.savefig(name2 + ".png", bbox_inches = "tight")
+    fig2.savefig(name2 + ".svg", format="svg", dpi=1000)
 
     # Average Compression Ratio plot for each algorithm
     fig3 = plt.figure(3)
@@ -208,9 +208,10 @@ def main(argv):
     means = [np.mean(compress_ratios['FLAC']), np.mean(compress_ratios['Shorten']),
              np.mean(compress_ratios['LZ77']), np.mean(compress_ratios['LZMA'])]
     plt.bar(range(len(compress_ratios)), means, tick_label=list(compress_ratios.keys()))
-
+    plt.tight_layout()
     fig3.show()
-    fig3.savefig("MeanRatio_block" + str(block_size) + "_filter" + str(filter_order) + ".png") 
+    fig3.savefig("MeanRatio_block" + str(block_size) + "_filter" + str(filter_order) + ".svg",
+                 format="svg", dpi=1000) 
 
     # Average Execution Time plot for each algorithm
     fig4 = plt.figure(4)
@@ -222,8 +223,9 @@ def main(argv):
     means = [np.mean(compress_times['FLAC']), np.mean(compress_times['Shorten']),
              np.mean(compress_times['LZ77']), np.mean(compress_times['LZMA'])]
     plt.bar(range(len(compress_times)), means, tick_label=list(compress_times.keys()))
-
-    fig4.savefig("MeanTime_block" + str(block_size) + "_filter" + str(filter_order) + ".png")
+    plt.tight_layout()
+    fig4.savefig("MeanTime_block" + str(block_size) + "_filter" + str(filter_order) + ".svg",
+                 format="svg", dpi=1000)
 
     plt.show()
     
