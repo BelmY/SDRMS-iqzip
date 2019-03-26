@@ -121,10 +121,11 @@ endif(DOXYGEN_FOUND)
 ########################################################################
 include_directories(
 	${CMAKE_SOURCE_DIR}
-    ${CMAKE_SOURCE_DIR}/src
+    ${CMAKE_SOURCE_DIR}/lib
     ${CMAKE_SOURCE_DIR}/include
-    ${CMAKE_BINARY_DIR}/src
+    ${CMAKE_BINARY_DIR}/lib
     ${CMAKE_BINARY_DIR}/include
+    ${CMAKE_SOURCE_DIR}/libaec/include
 )
 
 # Set component parameters
@@ -153,12 +154,11 @@ message( \"${CMAKE_INSTALL_PREFIX}/${IQZIP_PKG_DATA_DIR}\" )
 # Add subdirectories
 ########################################################################
 add_subdirectory(include/iqzip)
-add_subdirectory(src)
+add_subdirectory(lib)
 add_subdirectory(scripts)
 add_subdirectory(apps)
 add_subdirectory(docs)
 add_subdirectory(data)
-
 
 ########################################################################
 # Install cmake search helper for this library
