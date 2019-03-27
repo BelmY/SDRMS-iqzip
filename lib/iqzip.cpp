@@ -104,6 +104,9 @@ main (int argc, char *argv[])
   int dflag;
   char *opt;
   int iarg;
+  compression_identification_packet *cip =
+      new compression_identification_packet (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                             0, 0);
 
   chunk = CHUNK;
   strm.bits_per_sample = 8;
@@ -124,6 +127,7 @@ main (int argc, char *argv[])
         break;
       case 'N':
         strm.flags &= ~AEC_DATA_PREPROCESS;
+        cip->set_enable_preprocessing (1);
         break;
       case 'b':
         if (get_param (&chunk, &iarg, argv))
@@ -133,15 +137,19 @@ main (int argc, char *argv[])
         dflag = 1;
         break;
       case 'j':
-        if (get_param (&strm.block_size, &iarg, argv))
-          goto FAIL;
+        if (get_param (&strm.block_size, &iarg, argv)) {
+          cip->set_block_size (chunk);
+        }
+        goto FAIL;
         break;
       case 'm':
         strm.flags |= AEC_DATA_MSB;
         break;
       case 'n':
-        if (get_param (&strm.bits_per_sample, &iarg, argv))
-          goto FAIL;
+        if (get_param (&strm.bits_per_sample, &iarg, argv)) {
+          cip->set_sample_resolution (chunk);
+        }
+        goto FAIL;
         break;
       case 'p':
         strm.flags |= AEC_PAD_RSI;
@@ -153,9 +161,11 @@ main (int argc, char *argv[])
       case 's':
         printf ("Flags: %d\n", strm.flags);
         strm.flags |= AEC_DATA_SIGNED;
+        cip->set_data_sense (0);
         break;
       case 't':
         strm.flags |= AEC_RESTRICTED;
+        cip->set_restricted_codes (1);
         break;
       default:
         goto FAIL;
@@ -170,7 +180,7 @@ main (int argc, char *argv[])
   outfn = argv[iarg + 1];
 
   if (strm.bits_per_sample > 16) {
-    if (strm.bits_per_sample <= 24 && strm.flags & AEC_DATA_3BYTE)
+    if (strm.bits_per_sample <= 24 && (strm.flags & AEC_DATA_3BYTE))
       chunk *= 3;
     else
       chunk *= 4;
@@ -182,8 +192,9 @@ main (int argc, char *argv[])
   out = (unsigned char *) malloc (chunk);
   in = (unsigned char *) malloc (chunk);
 
-  if (in == NULL || out == NULL)
+  if (in == NULL || out == NULL) {
     exit (-1);
+  }
 
   total_out = 0;
   strm.avail_in = 0;
@@ -202,11 +213,14 @@ main (int argc, char *argv[])
     return 1;
   }
 
-  if (dflag)
+  if (dflag) {
     status = aec_decode_init (&strm);
-  else
+  }
+  else {
+    cip->initialize_cip_header ();
+    cip->write_header_to_file (outfn);
     status = aec_encode_init (&strm);
-
+  }
   if (status != AEC_OK) {
     fprintf (stderr, "ERROR: initialization failed (%d)\n", status);
     return 1;
@@ -220,10 +234,12 @@ main (int argc, char *argv[])
       strm.next_in = in;
     }
 
-    if (dflag)
+    if (dflag) {
       status = aec_decode (&strm, AEC_NO_FLUSH);
-    else
+    }
+    else {
       status = aec_encode (&strm, AEC_NO_FLUSH);
+    }
 
     if (status != AEC_OK) {
       fprintf (stderr, "ERROR: %i\n", status);
@@ -257,7 +273,6 @@ main (int argc, char *argv[])
       fwrite (out, strm.total_out - total_out, 1, outfp);
       printf ("Wrote: %d\n", strm.total_out - total_out);
     }
-
     aec_encode_end (&strm);
   }
 
@@ -265,6 +280,7 @@ main (int argc, char *argv[])
   fclose (outfp);
   free (in);
   free (out);
+  delete cip;
   return 0;
 
   FAIL: fprintf (stderr, "NAME\n\taec - encode or decode files ");

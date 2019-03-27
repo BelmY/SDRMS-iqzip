@@ -35,7 +35,7 @@ compression_identification_packet::compression_identification_packet (
         d_sample_resolution (sample_resolution),
         d_reference_sample_interval (reference_sample_interval),
         d_data_sense (data_sense),
-        d_restricted_code (restricted_codes),
+        d_restricted_codes (restricted_codes),
         d_version (version),
         d_type (type),
         d_sec_hdr_flag (sec_hdr_flag),
@@ -62,6 +62,18 @@ compression_identification_packet::write_header_to_file (std::string path)
   FILE* f = fopen (path.c_str (), "wb+");
   fwrite (&(get_ccsds_primary_header ()), sizeof(packet_primary_header_t), 1,
           f);
+  fwrite (&(get_source_data_field_fixed ()), sizeof(source_data_field_fixed_t),
+          1, f);
+  fwrite (&(get_source_configuration ().preprocessor), sizeof(preprocessor_t),
+          1, f);
+  fwrite (&(get_source_configuration ().entropy_coder), sizeof(entropy_coder_t),
+          1, f);
+  //TODO: Add a parameter that indicates the use of Instrument Configuration subfield
+  if (d_block_size > 16 || d_reference_sample_interval > 256
+      || d_restricted_codes) {
+    fwrite (&(get_source_configuration ().extended_parameters),
+            sizeof(extended_parameters_t), 1, f);
+  }
   fclose (f);
 }
 
@@ -86,7 +98,7 @@ compression_identification_packet::set_source_configuration (
 }
 
 void
-compression_identification_packet::set_grouping_data_length (uint16_t length)
+compression_identification_packet::set_grouping_data_length (int length)
 {
   d_src_data_field_fixed.grouping_data_length = (length - 1) % 4096;
 }
@@ -109,9 +121,13 @@ compression_identification_packet::set_preprocessor_status (uint8_t status)
 {
   switch (status)
     {
-    case (int) (PREPROCESSOR_STATUS::ABSENT):
-    case (int) (PREPROCESSOR_STATUS::PRESENT):
-      d_source_configuration.preprocessor.status = status;
+    case 0:
+      d_source_configuration.preprocessor.status =
+          (uint8_t) (PREPROCESSOR_STATUS::ABSENT);
+      break;
+    case 1:
+      d_source_configuration.preprocessor.status =
+          (uint8_t) (PREPROCESSOR_STATUS::PRESENT);
       break;
     default:
       std::runtime_error ("Invalid preprocessor status");
@@ -155,20 +171,20 @@ compression_identification_packet::set_preprocessor_block_size (uint8_t size)
     std::runtime_error ("Invalid preprocessor block size");
   }
   else if (size == 8) {
-    d_source_configuration.preprocessor.block_size = (uint8_t) (
-        PREPROCESSOR_BLOCK_SIZE::SAMPLES_8);
+    d_source_configuration.preprocessor.block_size =
+        (uint8_t) (PREPROCESSOR_BLOCK_SIZE::SAMPLES_8);
   }
   else if (size == 16) {
-    d_source_configuration.preprocessor.block_size = (uint8_t) (
-        PREPROCESSOR_BLOCK_SIZE::SAMPLES_16);
+    d_source_configuration.preprocessor.block_size =
+        (uint8_t) (PREPROCESSOR_BLOCK_SIZE::SAMPLES_16);
   }
   else if (size == 32 || size == 64) {
-    d_source_configuration.preprocessor.block_size = (uint8_t) (
-        PREPROCESSOR_BLOCK_SIZE::SAMPLES_32_64);
+    d_source_configuration.preprocessor.block_size =
+        (uint8_t) (PREPROCESSOR_BLOCK_SIZE::SAMPLES_32_64);
   }
   else {
-    d_source_configuration.preprocessor.block_size = (uint8_t) (
-        PREPROCESSOR_BLOCK_SIZE::APPLICATION_SPECIFIC);
+    d_source_configuration.preprocessor.block_size =
+        (uint8_t) (PREPROCESSOR_BLOCK_SIZE::APPLICATION_SPECIFIC);
   }
 }
 
@@ -178,9 +194,11 @@ compression_identification_packet::set_preprocessor_data_sense (
 {
   switch (data_sense)
     {
-    case (int) (PREPROCESSOR_DATA_SENSE::POSITIVE):
-    case (int) (PREPROCESSOR_DATA_SENSE::TWO_COMPLEMENT):
-      d_source_configuration.preprocessor.data_sense = data_sense;
+    case 1:
+      d_source_configuration.preprocessor.data_sense = (uint8_t) (PREPROCESSOR_DATA_SENSE::POSITIVE);
+      break;
+    case 0:
+    d_source_configuration.preprocessor.data_sense = (uint8_t) (PREPROCESSOR_DATA_SENSE::TWO_COMPLEMENT);
       break;
     default:
       std::runtime_error ("Invalid preprocessor data sense");
@@ -207,20 +225,20 @@ compression_identification_packet::set_entropy_coder_resolution_range (
     std::runtime_error ("Invalid entropy coder resolution range");
   }
   else if (resolution <= 8) {
-    d_source_configuration.entropy_coder.resolution_range = (uint8_t) (
-        ENTROPY_CODER_RESOLUTION_RANGE::LESS_EQUAL_8);
+    d_source_configuration.entropy_coder.resolution_range =
+        (uint8_t) (ENTROPY_CODER_RESOLUTION_RANGE::LESS_EQUAL_8);
   }
   else if (resolution <= 16) {
-    d_source_configuration.entropy_coder.resolution_range = (uint8_t) (
-        ENTROPY_CODER_RESOLUTION_RANGE::LESS_EQUAL_16);
+    d_source_configuration.entropy_coder.resolution_range =
+        (uint8_t) (ENTROPY_CODER_RESOLUTION_RANGE::LESS_EQUAL_16);
   }
   else if (resolution <= 32) {
-    d_source_configuration.entropy_coder.resolution_range = (uint8_t) (
-        ENTROPY_CODER_RESOLUTION_RANGE::LESS_EQUAL_32);
+    d_source_configuration.entropy_coder.resolution_range =
+        (uint8_t) (ENTROPY_CODER_RESOLUTION_RANGE::LESS_EQUAL_32);
   }
   else {
-    d_source_configuration.preprocessor.block_size = (uint8_t) (
-        ENTROPY_CODER_RESOLUTION_RANGE::SPARE);
+    d_source_configuration.preprocessor.block_size =
+        (uint8_t) (ENTROPY_CODER_RESOLUTION_RANGE::SPARE);
   }
 }
 
@@ -243,24 +261,24 @@ compression_identification_packet::set_extended_parameters_block_size (
     std::runtime_error ("Invalid extended parameters block size");
   }
   else if (size == 8) {
-    d_source_configuration.extended_parameters.block_size = (uint8_t) (
-        EXTENDED_PARAMETERS_BLOCK_SIZE::SAMPLES_8);
+    d_source_configuration.extended_parameters.block_size =
+        (uint8_t) (EXTENDED_PARAMETERS_BLOCK_SIZE::SAMPLES_8);
   }
   else if (size == 16) {
-    d_source_configuration.extended_parameters.block_size = (uint8_t) (
-        EXTENDED_PARAMETERS_BLOCK_SIZE::SAMPLES_16);
+    d_source_configuration.extended_parameters.block_size =
+        (uint8_t) (EXTENDED_PARAMETERS_BLOCK_SIZE::SAMPLES_16);
   }
   else if (size == 32) {
-    d_source_configuration.extended_parameters.block_size = (uint8_t) (
-        EXTENDED_PARAMETERS_BLOCK_SIZE::SAMPLES_32);
+    d_source_configuration.extended_parameters.block_size =
+        (uint8_t) (EXTENDED_PARAMETERS_BLOCK_SIZE::SAMPLES_32);
   }
   else if (size == 64) {
-    d_source_configuration.extended_parameters.block_size = (uint8_t) (
-        EXTENDED_PARAMETERS_BLOCK_SIZE::SAMPLES_64);
+    d_source_configuration.extended_parameters.block_size =
+        (uint8_t) (EXTENDED_PARAMETERS_BLOCK_SIZE::SAMPLES_64);
   }
   else {
-    d_source_configuration.extended_parameters.block_size = (uint8_t) (
-        EXTENDED_PARAMETERS_BLOCK_SIZE::APPLICATION_SPECIFIC);
+    d_source_configuration.extended_parameters.block_size =
+        (uint8_t) (EXTENDED_PARAMETERS_BLOCK_SIZE::APPLICATION_SPECIFIC);
   }
 }
 
@@ -270,10 +288,13 @@ compression_identification_packet::set_extended_parameters_restricted_code_optio
 {
   switch (option)
     {
-    case (int) (EXTENDED_PARAMETERS_RESTRICTED_CODES::BASIC):
-    case (int) (EXTENDED_PARAMETERS_RESTRICTED_CODES::RESTRICTED):
+    case 0:
       d_source_configuration.extended_parameters.restricted_code_options =
-          option;
+          (uint8_t) (EXTENDED_PARAMETERS_RESTRICTED_CODES::BASIC);
+      break;
+    case 1:
+      d_source_configuration.extended_parameters.restricted_code_options =
+          (uint8_t) (EXTENDED_PARAMETERS_RESTRICTED_CODES::RESTRICTED);
       break;
     default:
       std::runtime_error ("Invalid extended parameters restricted code option");
@@ -288,14 +309,14 @@ compression_identification_packet::set_extended_parameters_reference_sample_inte
       (interval - 1) % 256);
 }
 
-source_data_field_fixed_t
-compression_identification_packet::get_source_data_field_fixed () const
+source_data_field_fixed_t&
+compression_identification_packet::get_source_data_field_fixed ()
 {
   return d_src_data_field_fixed;
 }
 
-source_configuration_t
-compression_identification_packet::get_source_configuration () const
+source_configuration_t&
+compression_identification_packet::get_source_configuration ()
 {
   return d_source_configuration;
 }
@@ -359,6 +380,8 @@ compression_identification_packet::initialize_cip_header ()
 {
   memset (&d_src_data_field_fixed, 0, sizeof(source_data_field_fixed_t));
   memset (&d_source_configuration, 0, sizeof(source_configuration_t));
+  d_src_data_field_fixed.compression_technique_id =
+      (uint8_t) COMPRESSION_TECHNIQUE_IDENTIFICATION::CCSDS_LOSSLESS_COMPRESSION;
   d_source_configuration.preprocessor.block_size = d_block_size;
   d_source_configuration.preprocessor.data_sense = d_data_sense;
   // FIXME
@@ -373,6 +396,80 @@ compression_identification_packet::initialize_cip_header ()
   d_source_configuration.extended_parameters.reference_sample_interval =
       d_reference_sample_interval;
   d_source_configuration.extended_parameters.restricted_code_options =
-      d_restricted_code;
+      d_restricted_codes;
 }
 
+uint16_t
+compression_identification_packet::get_block_size () const
+{
+  return d_block_size;
+}
+
+void
+compression_identification_packet::set_block_size (uint16_t block_size)
+{
+  d_block_size = block_size;
+}
+
+uint8_t
+compression_identification_packet::get_data_sense () const
+{
+  return d_data_sense;
+}
+
+void
+compression_identification_packet::set_data_sense (uint8_t data_sense)
+{
+  d_data_sense = data_sense;
+}
+
+uint8_t
+compression_identification_packet::get_enable_preprocessing () const
+{
+  return d_enable_preprocessing;
+}
+
+void
+compression_identification_packet::set_enable_preprocessing (
+    uint8_t enable_preprocessing)
+{
+  d_enable_preprocessing = enable_preprocessing;
+}
+
+uint8_t
+compression_identification_packet::get_endiannes () const
+{
+  return d_endiannes;
+}
+
+void
+compression_identification_packet::set_endiannes (uint8_t endiannes)
+{
+  d_endiannes = endiannes;
+}
+
+uint8_t
+compression_identification_packet::get_restricted_codes () const
+{
+  return d_restricted_codes;
+}
+
+void
+compression_identification_packet::set_restricted_codes (
+    uint8_t restricted_codes)
+{
+  d_restricted_codes = restricted_codes;
+}
+
+uint8_t
+compression_identification_packet::get_sample_resolution () const
+{
+  return d_sample_resolution;
+}
+
+void
+compression_identification_packet::set_sample_resolution (
+    uint8_t sample_resolution)
+{
+  d_sample_resolution = sample_resolution;
+}

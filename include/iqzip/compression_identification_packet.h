@@ -164,7 +164,7 @@ public:
   set_source_configuration (source_configuration_t data);
 
   void
-  set_grouping_data_length (uint16_t length);
+  set_grouping_data_length (int length);
 
   void
   set_compression_technique_id (uint8_t id);
@@ -208,11 +208,11 @@ public:
   packet_primary_header_t&
   get_ccsds_primary_header ();
 
-  source_data_field_fixed_t
-  get_source_data_field_fixed () const;
+  source_data_field_fixed_t&
+  get_source_data_field_fixed ();
 
-  source_configuration_t
-  get_source_configuration () const;
+  source_configuration_t&
+  get_source_configuration ();
 
   uint16_t
   get_grouping_data_length () const;
@@ -247,6 +247,42 @@ public:
   void
   write_header_to_file (std::string path);
 
+  uint16_t
+  get_block_size () const;
+
+  void
+  set_block_size (uint16_t block_size);
+
+  uint8_t
+  get_data_sense () const;
+
+  void
+  set_data_sense (uint8_t data_sense);
+
+  uint8_t
+  get_enable_preprocessing () const;
+
+  void
+  set_enable_preprocessing (uint8_t enable_preprocessing);
+
+  uint8_t
+  get_endiannes () const;
+
+  void
+  set_endiannes (uint8_t endiannes);
+
+  uint8_t
+  get_restricted_codes () const;
+
+  void
+  set_restricted_codes (uint8_t restricted_codes);
+
+  uint8_t
+  get_sample_resolution () const;
+
+  void
+  set_sample_resolution (uint8_t sample_resolution);
+
   ccsds_packet_primary_header *d_primary_header;
   source_data_field_fixed_t d_src_data_field_fixed;
   source_configuration_t d_source_configuration;
@@ -258,7 +294,7 @@ private:
   uint8_t d_sample_resolution;
   uint8_t d_reference_sample_interval;
   uint8_t d_data_sense;
-  uint8_t d_restricted_code;
+  uint8_t d_restricted_codes;
   uint8_t d_version;
   uint8_t d_type;
   uint8_t d_sec_hdr_flag;
