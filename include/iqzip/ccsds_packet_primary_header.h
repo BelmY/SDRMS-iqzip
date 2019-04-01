@@ -23,6 +23,8 @@
 
 #include <stdint.h>
 
+#define CCSDS_PRIMARY_HEADER_SIZE               6
+
 typedef struct
 {
   uint8_t version :3;

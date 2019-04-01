@@ -104,8 +104,10 @@ main (int argc, char *argv[])
   int dflag;
   char *opt;
   int iarg;
+  size_t cip_header_size;
+
   compression_identification_packet *cip =
-      new compression_identification_packet (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      new compression_identification_packet (true, 16, 1, 0, 2, 0, 0, 3, 0, 0, 7, 0,
                                              0, 0);
 
   chunk = CHUNK;
@@ -125,9 +127,12 @@ main (int argc, char *argv[])
       case '3':
         strm.flags |= AEC_DATA_3BYTE;
         break;
+      case 'F':
+          strm.flags |= AEC_NOT_ENFORCE;
+          break;
       case 'N':
         strm.flags &= ~AEC_DATA_PREPROCESS;
-        cip->set_enable_preprocessing (1);
+        cip->set_enable_preprocessing (0);
         break;
       case 'b':
         if (get_param (&chunk, &iarg, argv))
@@ -138,28 +143,29 @@ main (int argc, char *argv[])
         break;
       case 'j':
         if (get_param (&strm.block_size, &iarg, argv)) {
-          cip->set_block_size (chunk);
+          goto FAIL;
         }
-        goto FAIL;
+        cip->set_block_size (strm.block_size);
         break;
       case 'm':
         strm.flags |= AEC_DATA_MSB;
         break;
       case 'n':
         if (get_param (&strm.bits_per_sample, &iarg, argv)) {
-          cip->set_sample_resolution (chunk);
+          goto FAIL;
         }
-        goto FAIL;
+        cip->set_sample_resolution (strm.bits_per_sample);
         break;
       case 'p':
         strm.flags |= AEC_PAD_RSI;
         break;
       case 'r':
-        if (get_param (&strm.rsi, &iarg, argv))
+        if (get_param (&strm.rsi, &iarg, argv)) {
           goto FAIL;
+        }
+        cip->encode_reference_sample_interval(strm.rsi);
         break;
       case 's':
-        printf ("Flags: %d\n", strm.flags);
         strm.flags |= AEC_DATA_SIGNED;
         cip->set_data_sense (0);
         break;
@@ -208,12 +214,28 @@ main (int argc, char *argv[])
     fprintf (stderr, "ERROR: cannot open input file %s\n", infn);
     return 1;
   }
-  if ((outfp = fopen (outfn, "wb")) == NULL) {
+  if ((outfp = fopen (outfn, "ab+")) == NULL) {
     fprintf (stderr, "ERROR: cannot open output file %s\n", infn);
     return 1;
   }
 
   if (dflag) {
+    cip_header_size = cip->parse_header_from_file (infn);
+    strm.block_size = cip->get_block_size();
+    if (!cip->get_enable_preprocessing()) {
+      strm.flags &= ~AEC_DATA_PREPROCESS;
+    }
+    if (!cip->get_data_sense()) {
+      strm.flags |= AEC_DATA_SIGNED;
+    }
+    if (cip->get_restricted_codes()) {
+      strm.flags |= AEC_RESTRICTED;
+    }
+    strm.bits_per_sample = cip->get_sample_resolution();
+    // FIXME: Libaec does not support RSI different that 2
+    strm.rsi = (size_t)cip->get_reference_sample_interval_field();
+    //FIXME: Byte to bypass according to CIP header size
+    fseek (infp , cip_header_size, SEEK_SET);
     status = aec_decode_init (&strm);
   }
   else {
@@ -249,7 +271,6 @@ main (int argc, char *argv[])
     if (strm.total_out - total_out > 0) {
       fwrite (out, strm.total_out - total_out, 1, outfp);
       total_out = strm.total_out;
-      printf ("Total out: %d\n", total_out);
       output_avail = 1;
       strm.next_out = out;
       strm.avail_out = chunk;
@@ -268,10 +289,8 @@ main (int argc, char *argv[])
       fprintf (stderr, "ERROR: while flushing output (%i)\n", status);
       return 1;
     }
-    printf ("Checkpoint\n");
     if (strm.total_out - total_out > 0) {
       fwrite (out, strm.total_out - total_out, 1, outfp);
-      printf ("Wrote: %d\n", strm.total_out - total_out);
     }
     aec_encode_end (&strm);
   }
@@ -292,6 +311,7 @@ main (int argc, char *argv[])
   fprintf (stderr, "\t-b size\n\t\tinternal buffer size in bytes\n");
   fprintf (stderr, "\t-d\n\t\tdecode SOURCE. If -d is not used: encode.\n");
   fprintf (stderr, "\t-j samples\n\t\tblock size in samples\n");
+  fprintf(stderr, "\t-F\n\t\tdo not enforce standard regarding legal block sizes\n");
   fprintf (stderr, "\t-m\n\t\tsamples are MSB first. Default is LSB\n");
   fprintf (stderr, "\t-n bits\n\t\tbits per sample\n");
   fprintf (stderr, "\t-p\n\t\tpad RSI to byte boundary\n");

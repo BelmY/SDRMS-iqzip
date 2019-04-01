@@ -25,6 +25,16 @@
 #include <string>
 #include "iqzip/ccsds_packet_primary_header.h"
 
+/*
+ * Max size of CIP header in bytes excluding Secondary header and Instrument Configuration
+ */
+#define MAX_CIP_HEADER_SIZE_BYTES               16
+#define SOURCE_DATA_FIELD_FIXED_SIZE            4
+#define PREPROCESSOR_SUBFIELD_SIZE              2
+#define ENTROPY_CODER_SUBFIELD_SIZE             2
+#define EXTENDED_PARAMETERS_SUBFIELD_SIZE       2
+#define INSTRUMENT_CONFIG_SUBFIELD_SIZE         2
+
 enum class COMPRESSION_TECHNIQUE_IDENTIFICATION
 {
   NO_COMPRESSION = 0x0, CCSDS_LOSSLESS_COMPRESSION = 0x1
@@ -164,46 +174,49 @@ public:
   set_source_configuration (source_configuration_t data);
 
   void
-  set_grouping_data_length (int length);
+  encode_grouping_data_length (int length);
 
   void
-  set_compression_technique_id (uint8_t id);
+  encode_compression_technique_id (uint8_t id);
 
   void
-  set_reference_sample_interval (uint8_t interval);
+  encode_reference_sample_interval (uint8_t interval);
 
   void
-  set_preprocessor_status (uint8_t status);
+  encode_preprocessor_status (uint8_t status);
 
   void
-  set_preprocessor_predictor_type (uint8_t type);
+  encode_preprocessor_predictor_type (uint8_t type);
 
   void
-  set_preprocessor_mapper_type (uint8_t type);
+  encode_preprocessor_mapper_type (uint8_t type);
 
   void
-  set_preprocessor_block_size (uint8_t size);
+  encode_preprocessor_block_size (uint16_t size);
 
   void
-  set_preprocessor_data_sense (uint8_t data_sense);
+  encode_preprocessor_data_sense (uint8_t data_sense);
 
   void
-  set_preprocessor_sample_resolution (uint8_t resolution);
+  encode_preprocessor_sample_resolution (uint8_t resolution);
 
   void
-  set_entropy_coder_resolution_range (uint8_t resolution);
+  encode_entropy_coder_resolution_range (uint8_t resolution);
 
   void
-  set_entropy_coder_cds_num (uint16_t num);
+  encode_entropy_coder_cds_num (uint16_t num);
 
   void
-  set_extended_parameters_block_size (uint8_t size);
+  encode_extended_parameters_block_size (uint16_t size);
+
+  uint16_t
+  decode_extended_parameters_block_size (uint8_t code);
 
   void
-  set_extended_parameters_restricted_code_option (uint8_t option);
+  encode_extended_parameters_restricted_code_option (uint8_t option);
 
   void
-  set_extended_parameters_reference_sample_interval (uint8_t interval);
+  encode_extended_parameters_reference_sample_interval (uint8_t interval);
 
   packet_primary_header_t&
   get_ccsds_primary_header ();
@@ -215,37 +228,43 @@ public:
   get_source_configuration ();
 
   uint16_t
-  get_grouping_data_length () const;
+  get_grouping_data_length_field () const;
 
   uint8_t
-  get_compression_technique_id () const;
+  get_compression_technique_id_field () const;
 
   uint8_t
-  get_reference_sample_interval () const;
+  get_reference_sample_interval_field () const;
 
   uint8_t
-  get_preprocessor_status () const;
+  get_preprocessor_status_field () const;
 
   uint8_t
-  get_preprocessor_predictor_type () const;
+  get_preprocessor_predictor_type_field () const;
 
   uint8_t
-  get_preprocessor_mapper_type () const;
+  get_preprocessor_mapper_type_field () const;
+
+  uint16_t
+  decode_preprocessor_block_size () const;
 
   uint8_t
-  get_preprocessor_block_size () const;
+  get_preprocessor_block_size_field () const;
 
   uint8_t
-  get_preprocessor_data_sense () const;
+  get_preprocessor_data_sense_field () const;
 
   uint8_t
-  get_preprocessor_sample_resolution () const;
+  get_preprocessor_sample_resolution_field () const;
 
   void
   initialize_cip_header ();
 
   void
   write_header_to_file (std::string path);
+
+  size_t
+  parse_header_from_file (std::string path);
 
   uint16_t
   get_block_size () const;
