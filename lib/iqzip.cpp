@@ -65,7 +65,7 @@
  */
 
 #include <libaec.h>
-#include <iqzip/compression_identification_packet.h>
+#include <iqzip/iqzip_compression_header.h>
 #include <iostream>
 #include <stdlib.h>
 #include <string.h>
@@ -91,7 +91,6 @@ get_param (unsigned int *param, int *iarg, char *argv[])
 int
 main (int argc, char *argv[])
 {
-
   struct aec_stream strm;
   unsigned char *in;
   unsigned char *out;
@@ -104,11 +103,9 @@ main (int argc, char *argv[])
   int dflag;
   char *opt;
   int iarg;
-  size_t cip_header_size;
+  size_t iqzip_header_size;
 
-  compression_identification_packet *cip =
-      new compression_identification_packet (true, 16, 1, 0, 2, 0, 0, 3, 0, 0, 7, 0,
-                                             0, 0);
+  iqzip_compression_header *iqzip_header;
 
   chunk = CHUNK;
   strm.bits_per_sample = 8;
@@ -118,25 +115,32 @@ main (int argc, char *argv[])
   dflag = 0;
   iarg = 1;
 
+  uint8_t enable_preprocessing = 1;
+  uint8_t endianness = 1;
+  uint8_t data_sense = 1;
+  uint8_t restricted_codes = 0;
+
   while (iarg < argc - 2) {
     opt = argv[iarg];
-    if (opt[0] != '-')
+    if (opt[0] != '-') {
       goto FAIL;
+    }
     switch (opt[1])
       {
       case '3':
         strm.flags |= AEC_DATA_3BYTE;
         break;
       case 'F':
-          strm.flags |= AEC_NOT_ENFORCE;
-          break;
+        strm.flags |= AEC_NOT_ENFORCE;
+        break;
       case 'N':
         strm.flags &= ~AEC_DATA_PREPROCESS;
-        cip->set_enable_preprocessing (0);
+        enable_preprocessing = 0;
         break;
       case 'b':
-        if (get_param (&chunk, &iarg, argv))
+        if (get_param (&chunk, &iarg, argv)) {
           goto FAIL;
+        }
         break;
       case 'd':
         dflag = 1;
@@ -145,16 +149,15 @@ main (int argc, char *argv[])
         if (get_param (&strm.block_size, &iarg, argv)) {
           goto FAIL;
         }
-        cip->set_block_size (strm.block_size);
         break;
       case 'm':
         strm.flags |= AEC_DATA_MSB;
+        endianness = 0;
         break;
       case 'n':
         if (get_param (&strm.bits_per_sample, &iarg, argv)) {
           goto FAIL;
         }
-        cip->set_sample_resolution (strm.bits_per_sample);
         break;
       case 'p':
         strm.flags |= AEC_PAD_RSI;
@@ -163,15 +166,14 @@ main (int argc, char *argv[])
         if (get_param (&strm.rsi, &iarg, argv)) {
           goto FAIL;
         }
-        cip->encode_reference_sample_interval(strm.rsi);
         break;
       case 's':
         strm.flags |= AEC_DATA_SIGNED;
-        cip->set_data_sense (0);
+        data_sense = 0;
         break;
       case 't':
         strm.flags |= AEC_RESTRICTED;
-        cip->set_restricted_codes (1);
+        restricted_codes = 1;
         break;
       default:
         goto FAIL;
@@ -179,14 +181,68 @@ main (int argc, char *argv[])
     iarg++;
   }
 
-  if (argc - iarg < 2)
+  if (argc - iarg < 2) {
     goto FAIL;
+  }
 
   infn = argv[iarg];
   outfn = argv[iarg + 1];
 
+  if ((infp = fopen (infn, "rb")) == NULL) {
+    fprintf (stderr, "ERROR: cannot open input file %s\n", infn);
+    return 1;
+  }
+
+  iqzip_header = new iqzip_compression_header (strm.block_size, strm.rsi,
+                                               enable_preprocessing, endianness,
+                                               0, 0, 0, 7, 0, 0, 0,
+                                               strm.bits_per_sample, data_sense,
+                                               restricted_codes);
+
+  if (dflag) {
+    iqzip_header_size = iqzip_header->parse_header_from_file (infn);
+    strm.block_size = iqzip_header->get_block_size ();
+    enable_preprocessing = iqzip_header->get_enable_preprocessing ();
+    if (!enable_preprocessing) {
+      strm.flags &= ~AEC_DATA_PREPROCESS;
+    }
+
+    data_sense = iqzip_header->get_data_sense ();
+    if (!data_sense) {
+      strm.flags |= AEC_DATA_SIGNED;
+    }
+    restricted_codes = iqzip_header->get_restricted_codes ();
+    if (restricted_codes) {
+      strm.flags |= AEC_RESTRICTED;
+    }
+    strm.bits_per_sample = (size_t) iqzip_header->get_sample_resolution ();
+    strm.rsi = (size_t) iqzip_header->get_reference_sample_interval ();
+
+    if ((outfp = fopen (outfn, "wb")) == NULL) {
+      fprintf (stderr, "ERROR: cannot open output file %s\n", infn);
+      return 1;
+    }
+    //FIXME: Byte to bypass according to CIP header size
+    iqzip_header = new iqzip_compression_header (strm.block_size, strm.rsi,
+                                                 enable_preprocessing,
+                                                 endianness, 0, 0, 0, 7, 0, 0,
+                                                 0, strm.bits_per_sample,
+                                                 data_sense, restricted_codes);
+
+    fseek (infp, iqzip_header_size, SEEK_SET);
+    status = aec_decode_init (&strm);
+  }
+  else {
+    if ((outfp = fopen (outfn, "ab")) == NULL) {
+      fprintf (stderr, "ERROR: cannot open output file %s\n", infn);
+      return 1;
+    }
+    iqzip_header->write_header_to_file (outfn);
+    status = aec_encode_init (&strm);
+  }
+
   if (strm.bits_per_sample > 16) {
-    if (strm.bits_per_sample <= 24 && (strm.flags & AEC_DATA_3BYTE))
+    if (strm.bits_per_sample <= 24 && strm.flags & AEC_DATA_3BYTE)
       chunk *= 3;
     else
       chunk *= 4;
@@ -210,39 +266,6 @@ main (int argc, char *argv[])
   input_avail = 1;
   output_avail = 1;
 
-  if ((infp = fopen (infn, "rb")) == NULL) {
-    fprintf (stderr, "ERROR: cannot open input file %s\n", infn);
-    return 1;
-  }
-  if ((outfp = fopen (outfn, "ab+")) == NULL) {
-    fprintf (stderr, "ERROR: cannot open output file %s\n", infn);
-    return 1;
-  }
-
-  if (dflag) {
-    cip_header_size = cip->parse_header_from_file (infn);
-    strm.block_size = cip->get_block_size();
-    if (!cip->get_enable_preprocessing()) {
-      strm.flags &= ~AEC_DATA_PREPROCESS;
-    }
-    if (!cip->get_data_sense()) {
-      strm.flags |= AEC_DATA_SIGNED;
-    }
-    if (cip->get_restricted_codes()) {
-      strm.flags |= AEC_RESTRICTED;
-    }
-    strm.bits_per_sample = cip->get_sample_resolution();
-    // FIXME: Libaec does not support RSI different that 2
-    strm.rsi = (size_t)cip->get_reference_sample_interval_field();
-    //FIXME: Byte to bypass according to CIP header size
-    fseek (infp , cip_header_size, SEEK_SET);
-    status = aec_decode_init (&strm);
-  }
-  else {
-    cip->initialize_cip_header ();
-    cip->write_header_to_file (outfn);
-    status = aec_encode_init (&strm);
-  }
   if (status != AEC_OK) {
     fprintf (stderr, "ERROR: initialization failed (%d)\n", status);
     return 1;
@@ -299,7 +322,7 @@ main (int argc, char *argv[])
   fclose (outfp);
   free (in);
   free (out);
-  delete cip;
+  delete iqzip_header;
   return 0;
 
   FAIL: fprintf (stderr, "NAME\n\taec - encode or decode files ");
@@ -311,7 +334,8 @@ main (int argc, char *argv[])
   fprintf (stderr, "\t-b size\n\t\tinternal buffer size in bytes\n");
   fprintf (stderr, "\t-d\n\t\tdecode SOURCE. If -d is not used: encode.\n");
   fprintf (stderr, "\t-j samples\n\t\tblock size in samples\n");
-  fprintf(stderr, "\t-F\n\t\tdo not enforce standard regarding legal block sizes\n");
+  fprintf (stderr,
+           "\t-F\n\t\tdo not enforce standard regarding legal block sizes\n");
   fprintf (stderr, "\t-m\n\t\tsamples are MSB first. Default is LSB\n");
   fprintf (stderr, "\t-n bits\n\t\tbits per sample\n");
   fprintf (stderr, "\t-p\n\t\tpad RSI to byte boundary\n");

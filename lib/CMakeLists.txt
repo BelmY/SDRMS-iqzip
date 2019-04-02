@@ -26,6 +26,7 @@ list(APPEND iqzip_sources
 	iqzip.cpp
 	ccsds_packet_primary_header.cpp
 	compression_identification_packet.cpp
+	iqzip_compression_header.cpp
 )
 
 #if(NOT iqzip_sources)

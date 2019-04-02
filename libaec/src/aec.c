@@ -180,8 +180,9 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    if (dflag)
+    if (dflag) {
         status = aec_decode_init(&strm);
+    }
     else
         status = aec_encode_init(&strm);
 

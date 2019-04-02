@@ -23,7 +23,6 @@
 
 #include <stdint.h>
 #include <string>
-#include "iqzip/ccsds_packet_primary_header.h"
 
 /*
  * Max size of CIP header in bytes excluding Secondary header and Instrument Configuration
@@ -105,7 +104,7 @@ typedef struct
 
 typedef struct
 {
-  uint8_t header :2 = (uint8_t) SOURCE_CONFIGURATION_SUBHEADER::PREPROCESSOR;
+  uint8_t header :2;
   uint8_t status :1;
   uint8_t predictor_type :3;
   uint8_t mapper_type :2;
@@ -116,22 +115,20 @@ typedef struct
 
 typedef struct
 {
-  uint8_t header :2 = (uint8_t) SOURCE_CONFIGURATION_SUBHEADER::ENTROPY_CODER;
+  uint8_t header :2;
   uint8_t resolution_range :2;
   uint16_t cds_num :12;
 } entropy_coder_t;
 
 typedef struct
 {
-  uint8_t header :2 =
-      (uint8_t) SOURCE_CONFIGURATION_SUBHEADER::INSTRUMENT_CONFIGURATION;
+  uint8_t header :2;
   uint16_t *params;
 } instrument_configuration_t;
 
 typedef struct
 {
-  uint8_t header :2 =
-      (uint8_t) SOURCE_CONFIGURATION_SUBHEADER::EXTENDED_PARAMETERS;
+  uint8_t header :2;
   uint8_t reserved_1 :2 = 0x0;
   uint8_t block_size :4;
   uint8_t reserved_2 :1 = 0x0;
@@ -154,15 +151,11 @@ class compression_identification_packet
 public:
 
   compression_identification_packet (uint8_t enable_preprocessing,
-                                     uint16_t block_size, uint8_t endianess,
+                                     uint16_t block_size,
                                      uint8_t sample_resolution,
                                      uint8_t reference_sample_interval,
                                      uint8_t data_sense,
-                                     uint8_t restricted_codes, uint8_t version,
-                                     uint8_t type, uint8_t sec_hdr_flag,
-                                     uint16_t apid, uint8_t sequence_flags,
-                                     uint16_t sequence_count,
-                                     uint_least16_t data_length);
+                                     uint8_t restricted_codes);
 
   virtual
   ~compression_identification_packet ();
@@ -210,16 +203,13 @@ public:
   encode_extended_parameters_block_size (uint16_t size);
 
   uint16_t
-  decode_extended_parameters_block_size (uint8_t code);
+  decode_extended_parameters_block_size (uint8_t code) const;
 
   void
   encode_extended_parameters_restricted_code_option (uint8_t option);
 
   void
   encode_extended_parameters_reference_sample_interval (uint8_t interval);
-
-  packet_primary_header_t&
-  get_ccsds_primary_header ();
 
   source_data_field_fixed_t&
   get_source_data_field_fixed ();
@@ -246,7 +236,7 @@ public:
   get_preprocessor_mapper_type_field () const;
 
   uint16_t
-  decode_preprocessor_block_size () const;
+  decode_preprocessor_block_size (uint8_t code) const;
 
   uint8_t
   get_preprocessor_block_size_field () const;
@@ -257,70 +247,19 @@ public:
   uint8_t
   get_preprocessor_sample_resolution_field () const;
 
-  void
-  initialize_cip_header ();
-
-  void
-  write_header_to_file (std::string path);
-
   size_t
   parse_header_from_file (std::string path);
 
-  uint16_t
-  get_block_size () const;
-
-  void
-  set_block_size (uint16_t block_size);
-
-  uint8_t
-  get_data_sense () const;
-
-  void
-  set_data_sense (uint8_t data_sense);
-
-  uint8_t
-  get_enable_preprocessing () const;
-
-  void
-  set_enable_preprocessing (uint8_t enable_preprocessing);
-
-  uint8_t
-  get_endiannes () const;
-
-  void
-  set_endiannes (uint8_t endiannes);
-
-  uint8_t
-  get_restricted_codes () const;
-
-  void
-  set_restricted_codes (uint8_t restricted_codes);
-
-  uint8_t
-  get_sample_resolution () const;
-
-  void
-  set_sample_resolution (uint8_t sample_resolution);
-
-  ccsds_packet_primary_header *d_primary_header;
   source_data_field_fixed_t d_src_data_field_fixed;
   source_configuration_t d_source_configuration;
 
 private:
   uint8_t d_enable_preprocessing;
   uint16_t d_block_size;
-  uint8_t d_endiannes;
   uint8_t d_sample_resolution;
   uint8_t d_reference_sample_interval;
   uint8_t d_data_sense;
   uint8_t d_restricted_codes;
-  uint8_t d_version;
-  uint8_t d_type;
-  uint8_t d_sec_hdr_flag;
-  uint16_t d_apid;
-  uint8_t d_sequence_flags;
-  uint16_t d_sequence_count;
-  uint16_t d_data_length;
 };
 
 #endif /* COMPRESSION_IDENTIFICATION_PACKET_H_ */
