@@ -25,41 +25,67 @@
 #include <iostream>
 
 iqzip_compression_header::iqzip_compression_header (
-    uint16_t block_size, uint8_t rsi, uint8_t enable_preprocessing,
-    uint8_t endianness, uint8_t version, uint8_t type, uint8_t sec_hdr_flag,
-    uint16_t apid, uint8_t sequence_flags, uint16_t sequence_count,
-    uint_least16_t data_length, uint8_t sample_resolution, uint8_t data_sense,
-    uint8_t restricted_codes) :
+    uint8_t version, uint8_t type, uint8_t sec_hdr_flag, uint16_t apid,
+    uint8_t sequence_flags, uint16_t packet_sequence_count,
+    uint16_t packet_data_length, uint16_t grouping_data_length,
+    uint8_t compression_tech_id, uint8_t reference_sample_interval,
+    uint8_t preprocessor_status, uint8_t predictor_type, uint8_t mapper_type,
+    uint16_t block_size, uint8_t data_sense, uint8_t sample_resolution,
+    uint16_t csd_per_packet, uint8_t restricted_codes, uint8_t endianness) :
         d_block_size (block_size),
-        d_rsi (rsi),
-        d_enable_preprocessing (enable_preprocessing),
+        d_rsi (reference_sample_interval),
+        d_enable_preprocessing (preprocessor_status),
         d_endianness (endianness),
         d_version (version),
         d_type (type),
         d_sec_hdr_flag (sec_hdr_flag),
         d_apid (apid),
         d_sequence_flags (sequence_flags),
-        d_sequence_count (sequence_count),
-        d_data_length (data_length),
+        d_sequence_count (packet_sequence_count),
+        d_data_length (packet_data_length),
         d_data_sense (data_sense),
         d_sample_resolution (sample_resolution),
         d_restricted_codes (restricted_codes)
 {
-  encode_iqzip_header_block_size (block_size);
-  d_iqzip_header.rsi = rsi;
-  d_iqzip_header.endianness = endianness;
+
+  encode ();
 
   d_primary_header = new ccsds_packet_primary_header (version, type,
                                                       sec_hdr_flag, apid,
                                                       sequence_flags,
-                                                      sequence_count,
-                                                      data_length);
+                                                      packet_sequence_count,
+                                                      packet_data_length);
 
-  d_cip = new compression_identification_packet (enable_preprocessing,
-                                                 block_size, sample_resolution,
-                                                 rsi, data_sense,
+  d_cip = new compression_identification_packet (grouping_data_length,
+                                                 compression_tech_id,
+                                                 reference_sample_interval,
+                                                 preprocessor_status,
+                                                 predictor_type, mapper_type,
+                                                 block_size, data_sense,
+                                                 sample_resolution,
+                                                 csd_per_packet,
                                                  restricted_codes);
 
+}
+
+iqzip_compression_header::iqzip_compression_header () :
+        d_block_size (0),
+        d_rsi (0),
+        d_enable_preprocessing (0),
+        d_endianness (0),
+        d_version (0),
+        d_type (0),
+        d_sec_hdr_flag (0),
+        d_apid (0),
+        d_sequence_flags (0),
+        d_sequence_count (0),
+        d_data_length (0),
+        d_data_sense (0),
+        d_sample_resolution (0),
+        d_restricted_codes (0)
+{
+  d_primary_header = new ccsds_packet_primary_header ();
+  d_cip = new compression_identification_packet ();
 }
 
 iqzip_compression_header::~iqzip_compression_header ()
@@ -72,17 +98,15 @@ iqzip_compression_header::write_header_to_file (std::string path)
   FILE* f = fopen (path.c_str (), "wb");
   fwrite (&(d_primary_header->get_primary_header ()),
           sizeof(packet_primary_header_t), 1, f);
-
-  //TODO: This functionality should be enclosed to compression_identification class
-  fwrite (&(d_cip->get_source_data_field_fixed ()),
-          sizeof(source_data_field_fixed_t), 1, f);
-  fwrite (&(d_cip->get_source_configuration ().preprocessor),
+  fwrite (&(d_cip->get_source_data_fixed ()), sizeof(source_data_fixed_t), 1,
+          f);
+  fwrite (&(d_cip->get_source_data_variable ().preprocessor),
           sizeof(preprocessor_t), 1, f);
-  fwrite (&(d_cip->get_source_configuration ().entropy_coder),
+  fwrite (&(d_cip->get_source_data_variable ().entropy_coder),
           sizeof(entropy_coder_t), 1, f);
   //TODO: Add a parameter that indicates the use of Instrument Configuration subfield
   if (d_block_size > 16 || d_rsi > 255 || d_restricted_codes) {
-    fwrite (&(d_cip->get_source_configuration ().extended_parameters),
+    fwrite (&(d_cip->get_source_data_variable ().extended_parameters),
             sizeof(extended_parameters_t), 1, f);
   }
   if (d_block_size > 64) {
@@ -95,15 +119,16 @@ size_t
 iqzip_compression_header::parse_header_from_file (std::string path)
 {
   size_t result;
-  size_t cip_hdr_size;
+  size_t hdr_size;
   size_t max_header_size;
   uint8_t *buffer;
   FILE* f;
-  source_configuration_t* hdr_src_cnf;
-  source_data_field_fixed_t* hdr_src_cnf_fixed;
+  packet_primary_header_t* hdr_primary;
+  source_data_variable_t* hdr_src_cnf;
+  source_data_fixed_t* hdr_src_cnf_fixed;
   iqzip_compression_header_t* iqzip_hdr;
 
-  cip_hdr_size = CCSDS_PRIMARY_HEADER_SIZE + SOURCE_DATA_FIELD_FIXED_SIZE
+  hdr_size = CCSDS_PRIMARY_HEADER_SIZE + SOURCE_DATA_FIXED_SIZE
       + PREPROCESSOR_SUBFIELD_SIZE + ENTROPY_CODER_SUBFIELD_SIZE;
   max_header_size = MAX_CIP_HEADER_SIZE_BYTES + IQZIP_COMPRESSION_HDR_SIZE;
 
@@ -116,39 +141,32 @@ iqzip_compression_header::parse_header_from_file (std::string path)
   }
   fclose (f);
 
-  hdr_src_cnf = (source_configuration_t*) (&buffer[CCSDS_PRIMARY_HEADER_SIZE
-      + SOURCE_DATA_FIELD_FIXED_SIZE]);
+  hdr_primary = (packet_primary_header_t*) (&buffer[0]);
+  hdr_src_cnf = (source_data_variable_t*) (&buffer[CCSDS_PRIMARY_HEADER_SIZE
+      + SOURCE_DATA_FIXED_SIZE]);
   hdr_src_cnf_fixed =
-      (source_data_field_fixed_t*) (&buffer[CCSDS_PRIMARY_HEADER_SIZE]);
+      (source_data_fixed_t*) (&buffer[CCSDS_PRIMARY_HEADER_SIZE]);
+  // FIXME: Offset should be changed if Instrument Configuration subfiled is used
+  iqzip_hdr = (iqzip_compression_header_t*) (&buffer[CCSDS_PRIMARY_HEADER_SIZE
+      + SOURCE_DATA_FIXED_SIZE + PREPROCESSOR_SUBFIELD_SIZE
+      + ENTROPY_CODER_SUBFIELD_SIZE + EXTENDED_PARAMETERS_SUBFIELD_SIZE]);
+  d_primary_header->set_primary_header (*hdr_primary);
+  d_cip->set_source_data_fixed (*hdr_src_cnf_fixed);
+  d_cip->set_source_data_variable (*hdr_src_cnf);
+  set_iqzip_compression_header (*iqzip_hdr);
 
-  if (!(d_block_size = d_cip->decode_preprocessor_block_size (
-      hdr_src_cnf->preprocessor.block_size))) {
-    d_block_size = d_cip->decode_extended_parameters_block_size (
-        hdr_src_cnf->extended_parameters.block_size);
+  /* Retrieve header size */
+  if (!(d_block_size = decode_preprocessor_block_size ())) {
+    d_block_size = decode_extended_parameters_block_size ();
+    hdr_size += EXTENDED_PARAMETERS_SUBFIELD_SIZE;
     if (!d_block_size) {
-      iqzip_hdr =
-          (iqzip_compression_header_t*) (&buffer[CCSDS_PRIMARY_HEADER_SIZE
-              + SOURCE_DATA_FIELD_FIXED_SIZE + 6]);
-      d_block_size = (int) decode_iqzip_header_block_size(iqzip_hdr->block_size);
-    }
-  }
-  d_data_sense = (uint8_t) hdr_src_cnf->preprocessor.data_sense;
-  d_sample_resolution = (uint8_t) hdr_src_cnf->preprocessor.sample_resolution;
-  d_enable_preprocessing = (uint8_t) hdr_src_cnf->preprocessor.status;
-  //TODO: Add decoder for RSI similar to the encoder
-  d_rsi = (uint8_t) hdr_src_cnf_fixed->reference_sample_interval + 1;
-  d_restricted_codes =
-      (uint8_t) hdr_src_cnf->extended_parameters.restricted_code_options;
-  if (d_block_size > 16 || d_rsi > 256) {
-    cip_hdr_size += EXTENDED_PARAMETERS_SUBFIELD_SIZE;
-    if (d_block_size > 64) {
-      cip_hdr_size += IQZIP_COMPRESSION_HDR_SIZE;
+      hdr_size += IQZIP_COMPRESSION_HDR_SIZE;
     }
   }
 
   /* FIXME: Take into consideration the CCSDS secondary header and the
    * Instrument Configuration subfield */
-  return cip_hdr_size;
+  return hdr_size;
 
 }
 
@@ -159,7 +177,191 @@ iqzip_compression_header::get_iqzip_compression_header ()
 }
 
 void
-iqzip_compression_header::encode_iqzip_header_block_size (uint16_t size)
+iqzip_compression_header::set_iqzip_compression_header (
+    iqzip_compression_header_t hdr)
+{
+  d_iqzip_header = hdr;
+}
+
+void
+iqzip_compression_header::encode ()
+{
+  encode_iqzip_header_block_size (d_block_size);
+  encode_iqzip_header_endianness (d_endianness);
+  encode_iqzip_header_reference_sample_interval (d_rsi);
+}
+
+uint16_t
+iqzip_compression_header::decode_block_size ()
+{
+  uint16_t block_size;
+  if (!(block_size = decode_preprocessor_block_size ())) {
+    block_size = decode_extended_parameters_block_size ();
+    if (!block_size) {
+      return decode_iqzip_header_block_size();
+    }
+  }
+  return block_size;
+}
+
+uint8_t
+iqzip_compression_header::decode_version () const
+{
+  return d_primary_header->decode_version ();
+}
+
+uint8_t
+iqzip_compression_header::decode_type () const
+{
+  return d_primary_header->decode_type ();
+}
+
+uint8_t
+iqzip_compression_header::decode_secondary_header_flag () const
+{
+  return d_primary_header->decode_secondary_header_flag ();
+}
+
+uint16_t
+iqzip_compression_header::decode_appplication_process_identifier () const
+{
+  return d_primary_header->decode_application_process_identifier ();
+}
+
+uint8_t
+iqzip_compression_header::decode_sequence_flags () const
+{
+  return d_primary_header->decode_sequence_flags ();
+}
+
+uint16_t
+iqzip_compression_header::decode_packet_sequence_count () const
+{
+  return d_primary_header->decode_packet_sequence_count ();
+}
+
+uint16_t
+iqzip_compression_header::decode_packet_data_length () const
+{
+  return d_primary_header->decode_packet_data_length ();
+}
+
+uint16_t
+iqzip_compression_header::decode_grouping_data_length () const
+{
+  return d_cip->decode_grouping_data_length ();
+}
+
+uint8_t
+iqzip_compression_header::decode_compression_technique_id () const
+{
+  return d_cip->decode_compression_technique_id ();
+}
+
+uint8_t
+iqzip_compression_header::decode_reference_sample_interval () const
+{
+  return d_cip->decode_reference_sample_interval ();
+}
+
+uint8_t
+iqzip_compression_header::decode_preprocessor_status () const
+{
+  return d_cip->decode_preprocessor_status ();
+}
+
+uint8_t
+iqzip_compression_header::decode_preprocessor_predictor_type () const
+{
+  return d_cip->decode_preprocessor_predictor_type ();
+}
+
+uint8_t
+iqzip_compression_header::decode_preprocessor_mapper_type () const
+{
+  return d_cip->decode_preprocessor_mapper_type ();
+}
+
+uint16_t
+iqzip_compression_header::decode_preprocessor_block_size () const
+{
+  return d_cip->decode_preprocessor_block_size ();
+}
+
+uint8_t
+iqzip_compression_header::decode_preprocessor_data_sense () const
+{
+  return d_cip->decode_preprocessor_data_sense ();
+}
+
+uint8_t
+iqzip_compression_header::decode_preprocessor_sample_resolution () const
+{
+  return d_cip->decode_preprocessor_sample_resolution ();
+}
+
+uint16_t
+iqzip_compression_header::decode_extended_parameters_block_size () const
+{
+  return d_cip->decode_extended_parameters_block_size ();
+}
+
+uint8_t
+iqzip_compression_header::decode_extended_parameters_restricted_code_option () const
+{
+  return d_cip->decode_extended_parameters_restricted_code_option ();
+}
+
+uint8_t
+iqzip_compression_header::decode_extended_parameters_reference_sample_interval () const
+{
+  return d_cip->decode_extended_parameters_reference_sample_interval ();
+}
+
+void
+iqzip_compression_header::encode_version (uint8_t version)
+{
+  d_version = version;
+}
+
+void
+iqzip_compression_header::encode_type (uint8_t type)
+{
+  d_type = type;
+}
+
+void
+iqzip_compression_header::encode_secondary_header_flag (uint8_t flag)
+{
+  d_sec_hdr_flag = flag;
+}
+
+void
+iqzip_compression_header::encode_appplication_process_identifier (uint16_t apid)
+{
+  d_apid = apid;
+}
+
+void
+iqzip_compression_header::encode_sequence_flags (uint8_t flags)
+{
+  d_sequence_flags = flags;
+}
+
+void
+iqzip_compression_header::encode_packet_sequence_count (uint16_t count)
+{
+  d_sequence_count = count;
+}
+
+void
+iqzip_compression_header::encode_packet_data_length (uint16_t length)
+{
+  d_data_length = length;
+}
+
+void
+iqzip_compression_header::encode_iqzip_header_block_size (size_t size)
 {
   if (size > 65535) {
     std::runtime_error ("Invalid IQzip header block size");
@@ -191,8 +393,11 @@ iqzip_compression_header::encode_iqzip_header_block_size (uint16_t size)
   else if (size == 32768) {
     d_iqzip_header.block_size = (uint8_t) (BLOCK_SIZE::SAMPLES_32768);
   }
-  else {
+  else if (size == 65536) {
     d_iqzip_header.block_size = (uint8_t) (BLOCK_SIZE::SAMPLES_65535);
+  }
+  else {
+    d_iqzip_header.block_size = 0;
   }
 }
 
@@ -212,9 +417,17 @@ iqzip_compression_header::encode_iqzip_header_endianness (uint8_t endianness)
     }
 }
 
-uint16_t
-iqzip_compression_header::decode_iqzip_header_block_size (uint8_t code) const
+void
+iqzip_compression_header::encode_iqzip_header_reference_sample_interval (
+    uint16_t interval)
 {
+  d_iqzip_header.rsi = (interval - 1) % 2048;
+}
+
+uint16_t
+iqzip_compression_header::decode_iqzip_header_block_size () const
+{
+  uint8_t code = d_iqzip_header.block_size;
   switch (code)
     {
     case (uint8_t) (BLOCK_SIZE::SAMPLES_128):
@@ -259,100 +472,8 @@ iqzip_compression_header::decode_iqzip_header_endianess () const
   return 0;
 }
 
-void
-iqzip_compression_header::encode_iqzip_header_reference_sample_interval (
-    uint16_t interval)
-{
-  d_iqzip_header.rsi = (interval - 1) % 2048;
-}
-
-uint8_t
-iqzip_compression_header::get_block_size_field () const
-{
-  return d_iqzip_header.block_size;
-}
-
-uint8_t
-iqzip_compression_header::get_reference_sample_interval_field () const
+uint16_t
+iqzip_compression_header::decode_iqzip_header_reference_sample_interval () const
 {
   return d_iqzip_header.rsi;
-}
-
-uint8_t
-iqzip_compression_header::get_endianness_field () const
-{
-  return d_iqzip_header.endianness;
-}
-
-uint16_t
-iqzip_compression_header::get_block_size () const
-{
-  return d_block_size;
-}
-
-uint16_t
-iqzip_compression_header::get_reference_sample_interval () const
-{
-  return d_rsi;
-}
-
-void
-iqzip_compression_header::set_block_size (uint16_t block_size)
-{
-  d_block_size = block_size;
-}
-
-uint8_t
-iqzip_compression_header::get_data_sense () const
-{
-  return d_data_sense;
-}
-
-void
-iqzip_compression_header::set_data_sense (uint8_t data_sense)
-{
-  d_data_sense = data_sense;
-}
-
-uint8_t
-iqzip_compression_header::get_enable_preprocessing () const
-{
-  return d_enable_preprocessing;
-}
-
-void
-iqzip_compression_header::set_enable_preprocessing (
-    uint8_t enable_preprocessing)
-{
-  d_enable_preprocessing = enable_preprocessing;
-}
-
-uint8_t
-iqzip_compression_header::get_restricted_codes () const
-{
-  return d_restricted_codes;
-}
-
-void
-iqzip_compression_header::set_restricted_codes (uint8_t restricted_codes)
-{
-  d_restricted_codes = restricted_codes;
-}
-
-uint8_t
-iqzip_compression_header::get_sample_resolution () const
-{
-  return d_sample_resolution;
-}
-
-void
-iqzip_compression_header::set_sample_resolution (uint8_t sample_resolution)
-{
-  d_sample_resolution = sample_resolution;
-}
-
-void
-iqzip_compression_header::set_reference_sample_interval (uint8_t interval)
-{
-  d_rsi = interval;
 }

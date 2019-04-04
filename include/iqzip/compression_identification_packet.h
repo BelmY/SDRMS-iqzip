@@ -28,7 +28,7 @@
  * Max size of CIP header in bytes excluding Secondary header and Instrument Configuration
  */
 #define MAX_CIP_HEADER_SIZE_BYTES               16
-#define SOURCE_DATA_FIELD_FIXED_SIZE            4
+#define SOURCE_DATA_FIXED_SIZE                  4
 #define PREPROCESSOR_SUBFIELD_SIZE              2
 #define ENTROPY_CODER_SUBFIELD_SIZE             2
 #define EXTENDED_PARAMETERS_SUBFIELD_SIZE       2
@@ -94,13 +94,13 @@ enum class EXTENDED_PARAMETERS_RESTRICTED_CODES
   BASIC = 0x0, RESTRICTED = 0x1
 };
 
-typedef struct
+enum SOURCE_CONFIGURATION_SUBFIELD_HEADER
 {
-  uint8_t grouping_data_length_reserved :4;
-  uint16_t grouping_data_length :12;
-  uint8_t compression_technique_id :8;
-  uint8_t reference_sample_interval :8;
-} source_data_field_fixed_t;
+  PREPROCESSOR = 0x0,
+  ENTROPY_CODER = 0x1,
+  INSTRUMENT_CONFIGURATION = 0x2,
+  EXTENDED_PARAMETERS = 0x3
+};
 
 typedef struct
 {
@@ -139,41 +139,77 @@ typedef struct
 
 typedef struct
 {
+  uint8_t grouping_data_length_reserved :4;
+  uint16_t grouping_data_length :12;
+  uint8_t compression_technique_id :8;
+  uint8_t reference_sample_interval :8;
+} source_data_fixed_t;
+
+typedef struct
+{
   preprocessor_t preprocessor;
   entropy_coder_t entropy_coder;
   extended_parameters_t extended_parameters;
   instrument_configuration_t instrument_config;
-} source_configuration_t;
+} source_data_variable_t;
 
 class compression_identification_packet
 {
 
 public:
 
-  compression_identification_packet (uint8_t enable_preprocessing,
-                                     uint16_t block_size,
-                                     uint8_t sample_resolution,
+  compression_identification_packet (uint16_t grouping_data_length,
+                                     uint8_t compression_tech_id,
                                      uint8_t reference_sample_interval,
+                                     uint8_t preprocessor_status,
+                                     uint8_t predictor_type,
+                                     uint8_t mapper_type,
+                                     uint16_t block_size,
                                      uint8_t data_sense,
+                                     uint8_t sample_resolution,
+                                     uint16_t csd_per_packet,
                                      uint8_t restricted_codes);
+
+  compression_identification_packet ();
 
   virtual
   ~compression_identification_packet ();
 
   void
-  set_source_data_field_fixed (source_data_field_fixed_t data);
+  encode ();
+
+  source_data_fixed_t&
+  get_source_data_fixed ();
+
+  source_data_variable_t&
+  get_source_data_variable ();
 
   void
-  set_source_configuration (source_configuration_t data);
+  set_source_data_fixed (source_data_fixed_t hdr);
 
   void
-  encode_grouping_data_length (int length);
+  set_source_data_variable (source_data_variable_t hdr);
+
+  void
+  encode_grouping_data_length (uint16_t length);
 
   void
   encode_compression_technique_id (uint8_t id);
 
   void
   encode_reference_sample_interval (uint8_t interval);
+
+  void
+  encode_preprocessor_header ();
+
+  void
+  encode_entropy_coder_header ();
+
+  void
+  encode_instrument_configuration_header ();
+
+  void
+  encode_extended_parameters_header ();
 
   void
   encode_preprocessor_status (uint8_t status);
@@ -202,64 +238,76 @@ public:
   void
   encode_extended_parameters_block_size (uint16_t size);
 
-  uint16_t
-  decode_extended_parameters_block_size (uint8_t code) const;
-
   void
   encode_extended_parameters_restricted_code_option (uint8_t option);
 
   void
   encode_extended_parameters_reference_sample_interval (uint8_t interval);
 
-  source_data_field_fixed_t&
-  get_source_data_field_fixed ();
+  uint16_t
+  decode_grouping_data_length () const;
 
-  source_configuration_t&
-  get_source_configuration ();
+  uint8_t
+  decode_compression_technique_id () const;
+
+  uint8_t
+  decode_reference_sample_interval () const;
+
+  uint8_t
+  decode_preprocessor_status () const;
+
+  uint8_t
+  decode_preprocessor_predictor_type () const;
+
+  uint8_t
+  decode_preprocessor_mapper_type () const;
 
   uint16_t
-  get_grouping_data_length_field () const;
+  decode_preprocessor_block_size () const;
 
   uint8_t
-  get_compression_technique_id_field () const;
+  decode_preprocessor_data_sense () const;
 
   uint8_t
-  get_reference_sample_interval_field () const;
-
-  uint8_t
-  get_preprocessor_status_field () const;
-
-  uint8_t
-  get_preprocessor_predictor_type_field () const;
-
-  uint8_t
-  get_preprocessor_mapper_type_field () const;
+  decode_preprocessor_sample_resolution () const;
 
   uint16_t
-  decode_preprocessor_block_size (uint8_t code) const;
+  decode_extended_parameters_block_size () const;
 
   uint8_t
-  get_preprocessor_block_size_field () const;
+  decode_extended_parameters_restricted_code_option () const;
 
   uint8_t
-  get_preprocessor_data_sense_field () const;
-
-  uint8_t
-  get_preprocessor_sample_resolution_field () const;
-
-  size_t
-  parse_header_from_file (std::string path);
-
-  source_data_field_fixed_t d_src_data_field_fixed;
-  source_configuration_t d_source_configuration;
+  decode_extended_parameters_reference_sample_interval () const;
 
 private:
-  uint8_t d_enable_preprocessing;
-  uint16_t d_block_size;
-  uint8_t d_sample_resolution;
+  uint16_t d_grouping_data_length;
+  uint8_t d_compression_tech_id;
   uint8_t d_reference_sample_interval;
+  uint8_t d_preprocessor_status;
+  uint8_t d_predictor_type;
+  uint8_t d_mapper_type;
+  uint8_t d_sample_resolution;
   uint8_t d_data_sense;
   uint8_t d_restricted_codes;
+  uint16_t d_block_size;
+  uint16_t d_cds_per_packet;
+
+  source_data_fixed_t d_source_data_fixed;
+  source_data_variable_t d_source_data_variable;
+
+  void
+  encode_preprocessor ();
+
+  void
+  encode_entropy_coder ();
+
+  void
+  encode_instrument_configuration ();
+
+  void
+  encode_extended_parameters ();
+
 };
 
 #endif /* COMPRESSION_IDENTIFICATION_PACKET_H_ */

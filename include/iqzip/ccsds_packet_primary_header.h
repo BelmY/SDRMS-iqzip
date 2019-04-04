@@ -71,58 +71,74 @@ public:
 
   ccsds_packet_primary_header (uint8_t version, uint8_t type,
                                uint8_t sec_hdr_flag, uint16_t apid,
-                               uint8_t sequence_flags, uint16_t sequence_count,
-                               uint16_t data_length);
+                               uint8_t sequence_flags,
+                               uint16_t packet_sequence_count,
+                               uint16_t packet_data_length);
+
+  ccsds_packet_primary_header ();
 
   virtual
   ~ccsds_packet_primary_header ();
 
-  uint8_t
-  get_version () const;
-
-  uint8_t
-  get_type () const;
-
-  uint8_t
-  get_secondary_header_flag () const;
-
-  uint16_t
-  get_apid () const;
-
-  uint8_t
-  get_sequence_flags () const;
-
-  uint16_t
-  get_sequence_count () const;
-
-  uint16_t
-  get_data_length () const;
-
   void
-  set_apid (uint16_t apid);
-
-  void
-  set_data_length (uint16_t data_length);
-
-  void
-  set_sec_hdr_flag (uint8_t flag);
-
-  void
-  set_sequence_count (uint16_t sequence_count);
-
-  void
-  set_sequence_flags (uint8_t sequence_flags);
-
-  void
-  set_type (uint8_t type);
-
-  void
-  set_version (uint8_t version);
+  encode ();
 
   packet_primary_header_t&
   get_primary_header ();
 
+  void
+  set_primary_header (packet_primary_header_t hdr);
+
+  uint8_t
+  decode_version () const;
+
+  uint8_t
+  decode_type () const;
+
+  uint8_t
+  decode_secondary_header_flag () const;
+
+  uint16_t
+  decode_application_process_identifier () const;
+
+  uint8_t
+  decode_sequence_flags () const;
+
+  uint16_t
+  decode_packet_sequence_count () const;
+
+  uint16_t
+  decode_packet_data_length () const;
+
+  void
+  encode_application_process_identifier (uint16_t apid);
+
+  void
+  encode_packet_data_length (uint16_t data_length);
+
+  void
+  encode_secondary_header_flag (uint8_t flag);
+
+  void
+  encode_packet_sequence_count (uint16_t sequence_count);
+
+  void
+  encode_sequence_flags (uint8_t sequence_flags);
+
+  void
+  encode_type (uint8_t type);
+
+  void
+  encode_version (uint8_t version);
+
 private:
+  uint8_t d_version;
+  uint8_t d_type;
+  uint8_t d_sec_hdr_flag;
+  uint8_t d_sequence_flags;
+  uint16_t d_apid;
+  uint16_t d_packet_sequence_count;
+  uint16_t d_packet_data_length;
   packet_primary_header_t d_primary_header;
 
 };

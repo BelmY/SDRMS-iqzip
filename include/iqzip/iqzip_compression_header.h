@@ -27,7 +27,7 @@
 
 #define IQZIP_COMPRESSION_HDR_SIZE      2
 
-typedef struct
+typedef struct iqzip_compression_header_t
 {
   uint8_t block_size :4;
   uint16_t rsi :11;
@@ -38,6 +38,11 @@ class iqzip_compression_header
 {
 
 public:
+
+  enum class ERROR_CODES
+  {
+    INIT_ERROR = -1
+  };
 
   enum class BLOCK_SIZE
   {
@@ -58,43 +63,23 @@ public:
     BIG = 0x0, LITTLE
   };
 
-  iqzip_compression_header (uint16_t block_size, uint8_t rsi,
-                            uint8_t enable_preprocessing, uint8_t endianness,
-                            uint8_t version, uint8_t type, uint8_t sec_hdr_flag,
+  iqzip_compression_header (uint8_t version, uint8_t type, uint8_t sec_hdr_flag,
                             uint16_t apid, uint8_t sequence_flags,
-                            uint16_t sequence_count, uint_least16_t data_length,
-                            uint8_t sample_resolution, uint8_t data_sense,
-                            uint8_t restricted_codes);
+                            uint16_t packet_sequence_count,
+                            uint16_t packet_data_length,
+                            uint16_t grouping_data_length,
+                            uint8_t compression_tech_id,
+                            uint8_t reference_sample_interval,
+                            uint8_t preprocessor_status, uint8_t predictor_type,
+                            uint8_t mapper_type, uint16_t block_size,
+                            uint8_t data_sense, uint8_t sample_resolution,
+                            uint16_t csd_per_packet, uint8_t restricted_codes,
+                            uint8_t endianness);
+
+  iqzip_compression_header ();
 
   virtual
   ~iqzip_compression_header ();
-
-  void
-  encode_iqzip_header_block_size (uint16_t size);
-
-  void
-  encode_iqzip_header_endianness (uint8_t endianness);
-
-  void
-  encode_iqzip_header_reference_sample_interval (uint16_t interval);
-
-  uint16_t
-  decode_iqzip_header_block_size (uint8_t code) const;
-
-  uint16_t
-  decode_iqzip_header_endianess () const;
-
-  uint8_t
-  get_block_size_field () const;
-
-  uint8_t
-  get_reference_sample_interval_field () const;
-
-  uint8_t
-  get_endianness_field () const;
-
-  iqzip_compression_header_t&
-  get_iqzip_compression_header ();
 
   void
   write_header_to_file (std::string path);
@@ -103,46 +88,157 @@ public:
   parse_header_from_file (std::string path);
 
   uint16_t
-  get_reference_sample_interval () const;
+  decode_block_size ();
+
+  uint8_t
+  decode_version () const;
+
+  uint8_t
+  decode_type () const;
+
+  uint8_t
+  decode_secondary_header_flag () const;
 
   uint16_t
-  get_block_size () const;
-
-  void
-  set_block_size (uint16_t block_size);
+  decode_appplication_process_identifier () const;
 
   uint8_t
-  get_data_sense () const;
+  decode_sequence_flags () const;
 
-  void
-  set_data_sense (uint8_t data_sense);
+  uint16_t
+  decode_packet_sequence_count () const;
 
-  uint8_t
-  get_enable_preprocessing () const;
+  uint16_t
+  decode_packet_data_length () const;
 
-  void
-  set_enable_preprocessing (uint8_t enable_preprocessing);
-
-  uint8_t
-  get_endiannes () const;
-
-  void
-  set_endiannes (uint8_t endiannes);
+  uint16_t
+  decode_grouping_data_length () const;
 
   uint8_t
-  get_restricted_codes () const;
-
-  void
-  set_restricted_codes (uint8_t restricted_codes);
+  decode_compression_technique_id () const;
 
   uint8_t
-  get_sample_resolution () const;
+  decode_reference_sample_interval () const;
+
+  uint8_t
+  decode_preprocessor_status () const;
+
+  uint8_t
+  decode_preprocessor_predictor_type () const;
+
+  uint8_t
+  decode_preprocessor_mapper_type () const;
+
+  uint16_t
+  decode_preprocessor_block_size () const;
+
+  uint8_t
+  decode_preprocessor_data_sense () const;
+
+  uint8_t
+  decode_preprocessor_sample_resolution () const;
+
+  uint16_t
+  decode_extended_parameters_block_size () const;
+
+  uint8_t
+  decode_extended_parameters_restricted_code_option () const;
+
+  uint8_t
+  decode_extended_parameters_reference_sample_interval () const;
 
   void
-  set_sample_resolution (uint8_t sample_resolution);
+  encode_version (uint8_t version);
 
   void
-  set_reference_sample_interval (uint8_t interval);
+  encode_type (uint8_t type);
+
+  void
+  encode_secondary_header_flag (uint8_t flag);
+
+  void
+  encode_appplication_process_identifier (uint16_t size);
+
+  void
+  encode_sequence_flags (uint8_t flags);
+
+  void
+  encode_packet_sequence_count (uint16_t count);
+
+  void
+  encode_packet_data_length (uint16_t length);
+
+  void
+  encode_grouping_data_length (uint16_t length);
+
+  void
+  encode_compression_technique_id (uint8_t id);
+
+  void
+  encode_reference_sample_interval (uint8_t interval);
+
+  void
+  encode_preprocessor_header ();
+
+  void
+  encode_entropy_coder_header ();
+
+  void
+  encode_instrument_configuration_header ();
+
+  void
+  encode_extended_parameters_header ();
+
+  void
+  encode_preprocessor_status (uint8_t status);
+
+  void
+  encode_preprocessor_predictor_type (uint8_t type);
+
+  void
+  encode_preprocessor_mapper_type (uint8_t type);
+
+  void
+  encode_preprocessor_block_size (uint16_t size);
+
+  void
+  encode_preprocessor_data_sense (uint8_t data_sense);
+
+  void
+  encode_preprocessor_sample_resolution (uint8_t resolution);
+
+  void
+  encode_entropy_coder_resolution_range (uint8_t resolution);
+
+  void
+  encode_entropy_coder_cds_num (uint16_t num);
+
+  void
+  encode_extended_parameters_block_size (uint16_t size);
+
+  void
+  encode_extended_parameters_restricted_code_option (uint8_t option);
+
+  void
+  encode_extended_parameters_reference_sample_interval (uint8_t interval);
+
+  void
+  encode_iqzip_header_block_size (size_t size);
+
+  void
+  encode_iqzip_header_endianness (uint8_t endianness);
+
+  void
+  encode_iqzip_header_reference_sample_interval (uint16_t interval);
+
+  uint16_t
+  decode_iqzip_header_block_size () const;
+
+  uint16_t
+  decode_iqzip_header_endianess () const;
+
+  uint16_t
+  decode_iqzip_header_reference_sample_interval () const;
 
 private:
   iqzip_compression_header_t d_iqzip_header;
@@ -153,17 +249,26 @@ private:
   uint8_t d_rsi;
   uint8_t d_enable_preprocessing;
   uint8_t d_endianness;
-  uint8_t d_version;
-  uint8_t d_type;
-  uint8_t d_sec_hdr_flag;
-  uint8_t d_sequence_flags;
+  int8_t d_version;
+  int8_t d_type;
+  int8_t d_sec_hdr_flag;
+  int8_t d_sequence_flags;
   uint8_t d_data_sense;
   uint8_t d_sample_resolution;
   uint8_t d_restricted_codes;
 
-  uint16_t d_apid;
-  uint16_t d_sequence_count;
-  uint16_t d_data_length;
+  int16_t d_apid;
+  int16_t d_sequence_count;
+  int16_t d_data_length;
+
+  iqzip_compression_header_t&
+  get_iqzip_compression_header ();
+
+  void
+  set_iqzip_compression_header (iqzip_compression_header_t hdr);
+
+  void
+  encode ();
 };
 
 #endif /* IQZIP_COMPRESSION_HEADER_H_ */

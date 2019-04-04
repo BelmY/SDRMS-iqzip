@@ -193,41 +193,41 @@ main (int argc, char *argv[])
     return 1;
   }
 
-  iqzip_header = new iqzip_compression_header (strm.block_size, strm.rsi,
-                                               enable_preprocessing, endianness,
-                                               0, 0, 0, 7, 0, 0, 0,
-                                               strm.bits_per_sample, data_sense,
-                                               restricted_codes);
+  iqzip_header = new iqzip_compression_header (0, 0, 0, 7, 0, 0, 0, 0, 1, strm.rsi, enable_preprocessing, 1, 3,
+                                               strm.block_size, data_sense, strm.bits_per_sample, 1, restricted_codes, endianness);
 
   if (dflag) {
+    //FIXME: Byte to bypass according to CIP header size
+    iqzip_header = new iqzip_compression_header ();
     iqzip_header_size = iqzip_header->parse_header_from_file (infn);
-    strm.block_size = iqzip_header->get_block_size ();
-    enable_preprocessing = iqzip_header->get_enable_preprocessing ();
+    strm.block_size = iqzip_header->decode_block_size();
+    enable_preprocessing = iqzip_header->decode_preprocessor_status ();
     if (!enable_preprocessing) {
       strm.flags &= ~AEC_DATA_PREPROCESS;
     }
 
-    data_sense = iqzip_header->get_data_sense ();
+    data_sense = iqzip_header->decode_preprocessor_data_sense ();
     if (!data_sense) {
       strm.flags |= AEC_DATA_SIGNED;
     }
-    restricted_codes = iqzip_header->get_restricted_codes ();
+    restricted_codes = iqzip_header->decode_extended_parameters_restricted_code_option();
     if (restricted_codes) {
       strm.flags |= AEC_RESTRICTED;
     }
-    strm.bits_per_sample = (size_t) iqzip_header->get_sample_resolution ();
-    strm.rsi = (size_t) iqzip_header->get_reference_sample_interval ();
+    strm.bits_per_sample = (size_t) iqzip_header->decode_preprocessor_sample_resolution ();
+    strm.rsi = (size_t) iqzip_header->decode_reference_sample_interval();
 
     if ((outfp = fopen (outfn, "wb")) == NULL) {
       fprintf (stderr, "ERROR: cannot open output file %s\n", infn);
       return 1;
     }
-    //FIXME: Byte to bypass according to CIP header size
-    iqzip_header = new iqzip_compression_header (strm.block_size, strm.rsi,
-                                                 enable_preprocessing,
-                                                 endianness, 0, 0, 0, 7, 0, 0,
-                                                 0, strm.bits_per_sample,
-                                                 data_sense, restricted_codes);
+    std::cout << "Header size: " << (int)iqzip_header_size << std::endl;
+    std::cout << "Block size: " << (int)strm.block_size << std::endl;
+    std::cout << "Data sense: " << (int)data_sense << std::endl;
+    std::cout << "Preprocessing: " <<(int) enable_preprocessing << std::endl;
+    std::cout << "Restricted: " << (int)restricted_codes << std::endl;
+    std::cout << "Resolution: " << (int)strm.bits_per_sample << std::endl;
+    std::cout << "reference samples: " << (int)strm.rsi << std::endl;
 
     fseek (infp, iqzip_header_size, SEEK_SET);
     status = aec_decode_init (&strm);
