@@ -25,9 +25,9 @@ cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 project(iqzip CXX C)
 enable_testing()
 
-# Enable C++11 support
-set (CMAKE_CXX_STANDARD 11)
-add_definitions(-std=c++11)
+# Enable C++14 support
+set (CMAKE_CXX_STANDARD 14)
+add_definitions(-std=c++14)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra")
 
 #select the release build type by default to get optimization flags
@@ -117,12 +117,29 @@ else(DOXYGEN_FOUND)
 endif(DOXYGEN_FOUND)
 
 ########################################################################
+# Search FlatBuffers
+########################################################################
+find_package(FlatBuffers REQUIRED)
+
+########################################################################
+# Check updates on libsigmf
+########################################################################
+#TODO: Automatically check libsigmf repo for changes. If exist, rebuild.
+
+########################################################################
+# Search nlohmann_json
+########################################################################
+find_package(nlohmann_json 3.2.0 REQUIRED)
+
+########################################################################
 # Setup the include and linker paths
 ########################################################################
 include_directories(
 	${CMAKE_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/lib
     ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}/include/sigmf
+    ${CMAKE_SOURCE_DIR}/include/sigmf/sigmf_protocols
     ${CMAKE_BINARY_DIR}/lib
     ${CMAKE_BINARY_DIR}/include
     ${CMAKE_SOURCE_DIR}/libaec/include
@@ -154,11 +171,14 @@ message( \"${CMAKE_INSTALL_PREFIX}/${IQZIP_PKG_DATA_DIR}\" )
 # Add subdirectories
 ########################################################################
 add_subdirectory(include/iqzip)
+add_subdirectory(include/sigmf)
+add_subdirectory(include/sigmf/sigmf_protocols)
 add_subdirectory(lib)
 add_subdirectory(scripts)
 add_subdirectory(apps)
 add_subdirectory(docs)
 add_subdirectory(data)
+#add_subdirectory(libsigmf)
 
 ########################################################################
 # Install cmake search helper for this library
