@@ -24,28 +24,25 @@
 
 list(APPEND iqzip_sources
 	ccsds_packet_primary_header.cpp
-#	compression_identification_packet.cpp
-#	iqzip_compression_header.cpp
+	compression_identification_packet.cpp
+	iqzip_compression_header.cpp
 )
 
-#if(NOT iqzip_sources)
-#	MESSAGE(STATUS "No C++ sources... skipping lib/")
-#	return()
-#endif(NOT iqzip_sources)
+if(NOT iqzip_sources)
+	MESSAGE(STATUS "No C++ sources... skipping lib/")
+	return()
+endif(NOT iqzip_sources)
 
-#add_library(iqzip SHARED ${iqzip_sources})
-
-#set_target_properties(iqzip PROPERTIES DEFINE_SYMBOL "iqzip_EXPORTS")
-
-#if(APPLE)
-#    set_target_properties(iqzip PROPERTIES
-#        INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib"
-#    )
-#endif(APPLE)
+if(APPLE)
+    set_target_properties(iqzip PROPERTIES
+        INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib"
+    )
+endif(APPLE)
 
 add_library(iqzip SHARED ${iqzip_sources})
 target_link_libraries (iqzip aec)
 set_target_properties(iqzip PROPERTIES VERSION 0.0.10 SOVERSION 0)
+set_target_properties(iqzip PROPERTIES DEFINE_SYMBOL "iqzip_EXPORTS")
 
 ########################################################################
 # Print summary

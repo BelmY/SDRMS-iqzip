@@ -50,10 +50,10 @@ set(VERSION_INFO_MAINT_VERSION git)
 ########################################################################
 # Compiler specific setup
 ########################################################################
-if(CMAKE_COMPILER_IS_GNUCXX AND NOT WIN32)
-    #http://gcc.gnu.org/wiki/Visibility
-    add_definitions(-fvisibility=hidden)
-endif()
+#if(CMAKE_COMPILER_IS_GNUCXX AND NOT WIN32)
+#    #http://gcc.gnu.org/wiki/Visibility
+#    add_definitions(-fvisibility=hidden)
+#endif()
 
 ########################################################################
 # Install directories
@@ -175,7 +175,7 @@ message( \"${CMAKE_INSTALL_PREFIX}/${IQZIP_PKG_DATA_DIR}\" )
 add_subdirectory(include/iqzip)
 add_subdirectory(lib)
 add_subdirectory(scripts)
-#add_subdirectory(apps)
+add_subdirectory(apps)
 add_subdirectory(docs)
 add_subdirectory(data)
 
