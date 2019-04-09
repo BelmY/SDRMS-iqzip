@@ -23,10 +23,9 @@
 ########################################################################
 
 list(APPEND iqzip_sources
-	iqzip.cpp
 	ccsds_packet_primary_header.cpp
-	compression_identification_packet.cpp
-	iqzip_compression_header.cpp
+#	compression_identification_packet.cpp
+#	iqzip_compression_header.cpp
 )
 
 #if(NOT iqzip_sources)
@@ -44,13 +43,9 @@ list(APPEND iqzip_sources
 #    )
 #endif(APPLE)
 
-add_library(iqzip ${LIB_TYPE} ${iqzip_sources})
+add_library(iqzip SHARED ${iqzip_sources})
+target_link_libraries (iqzip aec)
 set_target_properties(iqzip PROPERTIES VERSION 0.0.10 SOVERSION 0)
-
-add_executable(iqzip-compress ${iqzip_sources})
-set_target_properties(iqzip-compress PROPERTIES OUTPUT_NAME "iqzip")
-target_link_libraries(iqzip-compress iqzip aec)
-
 
 ########################################################################
 # Print summary

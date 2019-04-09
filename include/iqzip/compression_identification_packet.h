@@ -129,11 +129,11 @@ typedef struct
 typedef struct
 {
   uint8_t header :2;
-  uint8_t reserved_1 :2 = 0x0;
+  uint8_t reserved_1 :2;
   uint8_t block_size :4;
-  uint8_t reserved_2 :1 = 0x0;
+  uint8_t reserved_2 :1;
   uint8_t restricted_code_options :1;
-  uint8_t reserved_3 :2 = 0x0;
+  uint8_t reserved_3 :2;
   uint8_t reference_sample_interval :4;
 } extended_parameters_t;
 

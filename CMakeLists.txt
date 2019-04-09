@@ -27,8 +27,9 @@ enable_testing()
 
 # Enable C++14 support
 set (CMAKE_CXX_STANDARD 14)
-add_definitions(-std=c++14)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra")
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+#add_definitions(-std=c++14)
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra")
 
 #select the release build type by default to get optimization flags
 if(NOT CMAKE_BUILD_TYPE)
@@ -130,38 +131,7 @@ find_package(nlohmann_json NAMES nlohmann_json nlohmann-json REQUIRED)
 # Check updates on libsigmf
 ########################################################################
 #TODO: Automatically check libsigmf repo for changes. If exist, rebuild.
-find_package(Git QUIET)
-include(ExternalProject)	
-ExternalProject_Add(LIBSIGMF_EXTERNAL
-		PREFIX ${CMAKE_CURRENT_BINARY_DIR}/libsigmf
-        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libsigmf
-        BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/libsigmf
-        GIT_SUBMODULES
-#        GIT_REPOSITORY "https://github.com/deepsig/libsigmf.git"
-        CMAKE_ARGS "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
-                   "-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}"
-        INSTALL_COMMAND ${CMAKE_COMMAND} -E echo Skipping installation of libsigmf
-)
-    
-#ExternalProject_Get_Property(SGP4_EXTERNAL binary_dir)
-    
-#if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
-## Update submodules as needed
-#    option(GIT_SUBMODULE "Check submodules during build" ON)
-#    if(GIT_SUBMODULE)
-#        message(STATUS "Submodule update")
-#        execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
-#                        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-#                        RESULT_VARIABLE GIT_SUBMOD_RESULT)
-#        if(NOT GIT_SUBMOD_RESULT EQUAL "0")
-#            message(FATAL_ERROR "git submodule update --init failed with ${GIT_SUBMOD_RESULT}, please checkout submodules")
-#        endif()
-#    endif()
-#endif()
-#
-#if(NOT EXISTS "${PROJECT_SOURCE_DIR}/libsigmf/CMakeLists.txt")
-#    message(FATAL_ERROR "The submodules were not downloaded! GIT_SUBMODULE was turned off or failed. Please update submodules and try again.")
-#endif()
+
 
 ########################################################################
 # Setup the include and linker paths
