@@ -1,0 +1,38 @@
+stages:
+  - ubuntu_1604_build
+  - ubuntu_1804_build
+  - opensuse_build  
+
+opensuse_build:
+  image: opensuse/tumbleweed
+
+  before_script:
+      - zypper in -y cmake gcc-c++ gcc flatbuffers-devel nlohmann_json-devel
+
+  stage: ubuntu_1604_build
+  script:
+        - mkdir -p build
+        - cd build
+        - cmake -DCMAKE_INSTALL_PREFIX=/usr -DLIB_SUFFIX=64 -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
+        - make
+        - make install
+
+ubuntu_1804_build:
+  image: ubuntu:18.04
+  
+  variables:
+        DEBIAN_FRONTEND: "noninteractive"
+
+  before_script: 
+        - apt-get update -qq -y
+        - apt-get install -qq -y software-properties-common
+        - add-apt-repository ppa:team-xbmc/ppa 
+        - apt-get update -qq -y && apt-get install -q -y cmake g++ gcc git flatbuffers-dev nlohmann-json-dev 
+  stage: ubuntu_1604_build
+  script:
+        - mkdir -p build
+        - cd build
+        - cmake  ..
+        - make
+        - make install
+        - ldconfig

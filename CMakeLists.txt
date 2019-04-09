@@ -119,7 +119,7 @@ endif(DOXYGEN_FOUND)
 ########################################################################
 # Search FlatBuffers
 ########################################################################
-find_package(FlatBuffers REQUIRED)
+find_package(Flatbuffers REQUIRED)
 
 ########################################################################
 # Check updates on libsigmf
