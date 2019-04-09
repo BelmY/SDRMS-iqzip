@@ -22,8 +22,8 @@
 #define IQZIP_META_H_
 
 #include <stdint.h>
-#include "sigmf_protocols/sigmf_core_generated.h"
-#include "sigmf_protocols/sigmf_antenna_generated.h"
+#include "sigmf_core_generated.h"
+#include "sigmf_antenna_generated.h"
 #include "sigmf.h"
 
 namespace iqzip

@@ -143,8 +143,8 @@ include_directories(
     ${CMAKE_BINARY_DIR}/lib
     ${CMAKE_BINARY_DIR}/include
     ${CMAKE_SOURCE_DIR}/libaec/include
-    ${CMAKE_SOURCE_DIR}/libsigmf/src/sigmf
-    ${CMAKE_SOURCE_DIR}/include/src/sigmf_protocols
+    ${CMAKE_SOURCE_DIR}/libsigmf/src
+    ${CMAKE_SOURCE_DIR}/libsigmf/sigmf_protocols
 )
 
 # Set component parameters
