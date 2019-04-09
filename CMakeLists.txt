@@ -119,17 +119,49 @@ endif(DOXYGEN_FOUND)
 ########################################################################
 # Search FlatBuffers
 ########################################################################
-find_package(Flatbuffers REQUIRED)
+find_package(Flatbuffers NAMES FlatBuffers Flatbuffers REQUIRED)
+
+########################################################################
+# Search nlohmann_json
+########################################################################
+find_package(nlohmann_json NAMES nlohmann_json nlohmann-json REQUIRED)
 
 ########################################################################
 # Check updates on libsigmf
 ########################################################################
 #TODO: Automatically check libsigmf repo for changes. If exist, rebuild.
-
-########################################################################
-# Search nlohmann_json
-########################################################################
-find_package(nlohmann_json 3.2.0 REQUIRED)
+find_package(Git QUIET)
+include(ExternalProject)	
+ExternalProject_Add(LIBSIGMF_EXTERNAL
+		PREFIX ${CMAKE_CURRENT_BINARY_DIR}/libsigmf
+        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libsigmf
+        BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/libsigmf
+        GIT_SUBMODULES
+#        GIT_REPOSITORY "https://github.com/deepsig/libsigmf.git"
+        CMAKE_ARGS "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
+                   "-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}"
+        INSTALL_COMMAND ${CMAKE_COMMAND} -E echo Skipping installation of libsigmf
+)
+    
+#ExternalProject_Get_Property(SGP4_EXTERNAL binary_dir)
+    
+#if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
+## Update submodules as needed
+#    option(GIT_SUBMODULE "Check submodules during build" ON)
+#    if(GIT_SUBMODULE)
+#        message(STATUS "Submodule update")
+#        execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
+#                        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+#                        RESULT_VARIABLE GIT_SUBMOD_RESULT)
+#        if(NOT GIT_SUBMOD_RESULT EQUAL "0")
+#            message(FATAL_ERROR "git submodule update --init failed with ${GIT_SUBMOD_RESULT}, please checkout submodules")
+#        endif()
+#    endif()
+#endif()
+#
+#if(NOT EXISTS "${PROJECT_SOURCE_DIR}/libsigmf/CMakeLists.txt")
+#    message(FATAL_ERROR "The submodules were not downloaded! GIT_SUBMODULE was turned off or failed. Please update submodules and try again.")
+#endif()
 
 ########################################################################
 # Setup the include and linker paths
@@ -138,11 +170,11 @@ include_directories(
 	${CMAKE_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/lib
     ${CMAKE_SOURCE_DIR}/include
-    ${CMAKE_SOURCE_DIR}/include/sigmf
-    ${CMAKE_SOURCE_DIR}/include/sigmf/sigmf_protocols
     ${CMAKE_BINARY_DIR}/lib
     ${CMAKE_BINARY_DIR}/include
     ${CMAKE_SOURCE_DIR}/libaec/include
+    ${CMAKE_SOURCE_DIR}/libsigmf/src/sigmf
+    ${CMAKE_SOURCE_DIR}/include/src/sigmf_protocols
 )
 
 # Set component parameters
@@ -171,14 +203,11 @@ message( \"${CMAKE_INSTALL_PREFIX}/${IQZIP_PKG_DATA_DIR}\" )
 # Add subdirectories
 ########################################################################
 add_subdirectory(include/iqzip)
-add_subdirectory(include/sigmf)
-add_subdirectory(include/sigmf/sigmf_protocols)
 add_subdirectory(lib)
 add_subdirectory(scripts)
-add_subdirectory(apps)
+#add_subdirectory(apps)
 add_subdirectory(docs)
 add_subdirectory(data)
-#add_subdirectory(libsigmf)
 
 ########################################################################
 # Install cmake search helper for this library
