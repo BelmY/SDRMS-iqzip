@@ -131,7 +131,24 @@ find_package(nlohmann_json NAMES nlohmann_json nlohmann-json REQUIRED)
 # Check updates on libsigmf
 ########################################################################
 #TODO: Automatically check libsigmf repo for changes. If exist, rebuild.
+find_package(Git REQUIRED)
+if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
+# Update submodules as needed
+    option(GIT_SUBMODULE "Check submodules during build" ON)
+    if(GIT_SUBMODULE)
+        message(STATUS "Submodule libsigmf update")
+        execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
+                        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                        RESULT_VARIABLE GIT_SUBMOD_RESULT)
+        if(NOT GIT_SUBMOD_RESULT EQUAL "0")
+            message(FATAL_ERROR "git submodule update --init failed with ${GIT_SUBMOD_RESULT}, please checkout submodules")
+        endif()
+    endif()
+endif()
 
+if(NOT EXISTS "${PROJECT_SOURCE_DIR}/libsigmf/CMakeLists.txt")
+    message(FATAL_ERROR "The submodules were not downloaded! GIT_SUBMODULE was turned off or failed. Please update submodules and try again.")
+endif()
 
 ########################################################################
 # Setup the include and linker paths
@@ -140,11 +157,10 @@ include_directories(
 	${CMAKE_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/lib
     ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}/include/sigmf/sigmf_protocols
     ${CMAKE_BINARY_DIR}/lib
     ${CMAKE_BINARY_DIR}/include
     ${CMAKE_SOURCE_DIR}/libaec/include
-    ${CMAKE_SOURCE_DIR}/libsigmf/src
-    ${CMAKE_SOURCE_DIR}/libsigmf/sigmf_protocols
 )
 
 # Set component parameters

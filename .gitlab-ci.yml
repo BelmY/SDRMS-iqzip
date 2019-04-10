@@ -1,15 +1,15 @@
 stages:
-  - ubuntu_1604_build
-  - ubuntu_1804_build
+  - building
+  - ubuntu_1810_build
   - opensuse_build  
 
 opensuse_build:
   image: opensuse/tumbleweed
 
   before_script:
-      - zypper in -y cmake gcc-c++ gcc flatbuffers-devel nlohmann_json-devel
+      - zypper in -y cmake gcc-c++ gcc git flatbuffers-devel nlohmann_json-devel
 
-  stage: ubuntu_1604_build
+  stage: building
   script:
         - mkdir -p build
         - cd build
@@ -17,8 +17,8 @@ opensuse_build:
         - make
         - make install
 
-ubuntu_1804_build:
-  image: ubuntu:18.04
+ubuntu_1810_build:
+  image: ubuntu:18.10
   
   variables:
         DEBIAN_FRONTEND: "noninteractive"
@@ -28,7 +28,7 @@ ubuntu_1804_build:
         - apt-get install -qq -y software-properties-common
         - add-apt-repository ppa:team-xbmc/ppa 
         - apt-get update -qq -y && apt-get install -q -y cmake g++ gcc git flatbuffers-dev nlohmann-json-dev 
-  stage: ubuntu_1604_build
+  stage: building
   script:
         - mkdir -p build
         - cd build
