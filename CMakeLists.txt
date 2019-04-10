@@ -28,8 +28,8 @@ enable_testing()
 # Enable C++14 support
 set (CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-#add_definitions(-std=c++14)
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra")
+add_definitions(-std=c++14)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra")
 
 #select the release build type by default to get optimization flags
 if(NOT CMAKE_BUILD_TYPE)
