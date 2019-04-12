@@ -79,5 +79,7 @@ int main() {
     std::stringstream json_output;
     json_output << json(meta.get_sigmf()).dump(2) << std::flush;
     std::cout << json(meta.get_sigmf()).dump(2) << std::endl;
+    meta.write_json("/home/ctriant/meta.sigmf-meta");
+    meta.parse_json("/home/ctriant/meta.sigmf-meta");
     return 0; // assert passed, we're good :+1:
 }

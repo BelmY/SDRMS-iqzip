@@ -158,6 +158,12 @@ namespace iqzip
                                  double freq_lower_edge,
                                  double freq_upper_edge);
 
+      void
+      write_json(std::string filename);
+
+      void
+      parse_json(std::string filename);
+
       sigmf::VariadicDataClass<core::GlobalT>&
       get_sigmf_global_segment ();
 

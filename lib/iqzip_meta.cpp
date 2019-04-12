@@ -23,6 +23,7 @@
 #include <stdexcept>
 #include <cstring>
 #include <iostream>
+#include <fstream>
 
 namespace iqzip
 {
@@ -313,6 +314,25 @@ namespace iqzip
       new_annotation.access<core::AnnotationT> ().freq_upper_edge =
           freq_upper_edge;
       d_sigmf.annotations.emplace_back (new_annotation);
+    }
+
+    void
+    iqzip_meta::write_json (std::string filename)
+    {
+      std::ofstream f(filename);
+      std::stringstream json_output;
+      json_output << json(d_sigmf).dump(2) << std::flush;
+      f << json_output.rdbuf();
+      f.close();
+    }
+
+    void
+    iqzip_meta::parse_json(std::string filename) {
+      std::ifstream f(filename);
+      std::stringstream json_output;
+      json_output << f.rdbuf();
+      auto as_json = json::parse(json_output);
+      d_sigmf = as_json;
     }
 
     sigmf::VariadicDataClass<core::GlobalT>&
