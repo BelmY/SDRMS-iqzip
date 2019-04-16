@@ -1,5 +1,6 @@
-#include "iqzip/iqzip.h"
 #include <iostream>
+
+#include "../include/iqzip/iqzip.h"
 
 Iqzip::Iqzip () :
 	d_version (0),
@@ -91,3 +92,234 @@ Iqzip::init_aec_stream (void) {
         d_strm.total_in = 0;
         d_strm.total_out = 0;
     }
+
+uint32_t
+Iqzip::getChunk() const {
+	return CHUNK;
+}
+
+void
+Iqzip::setChunk(uint32_t chunk = 10485760) {
+	CHUNK = chunk;
+}
+
+uint16_t
+Iqzip::getApid() const {
+	return d_apid;
+}
+
+void
+Iqzip::setApid(uint16_t apid) {
+	d_apid = apid;
+}
+
+uint16_t
+Iqzip::getBlockSize() const {
+	return d_block_size;
+}
+
+void
+Iqzip::setBlockSize(uint16_t blockSize) {
+	d_block_size = blockSize;
+}
+
+uint16_t
+Iqzip::getCdsPerPacket() const {
+	return d_cds_per_packet;
+}
+
+void
+Iqzip::setCdsPerPacket(uint16_t cdsPerPacket) {
+	d_cds_per_packet = cdsPerPacket;
+}
+
+uint8_t
+Iqzip::getCompressionTechId() const {
+	return d_compression_tech_id;
+}
+
+void
+Iqzip::setCompressionTechId(uint8_t compressionTechId) {
+	d_compression_tech_id = compressionTechId;
+}
+
+uint8_t
+Iqzip::getDataSense() const {
+	return d_data_sense;
+}
+
+void
+Iqzip::setDataSense(uint8_t dataSense) {
+	d_data_sense = dataSense;
+}
+
+uint8_t
+Iqzip::getEndianness() const {
+	return d_endianness;
+}
+
+void
+Iqzip::setEndianness(uint8_t endianness) {
+	d_endianness = endianness;
+}
+
+uint16_t
+Iqzip::getGroupingDataLength() const {
+	return d_grouping_data_length;
+}
+
+void
+Iqzip::setGroupingDataLength(uint16_t groupingDataLength) {
+	d_grouping_data_length = groupingDataLength;
+}
+
+const iqzip_compression_header&
+Iqzip::getIqHeader() const {
+	return d_iq_header;
+}
+
+void
+Iqzip::setIqHeader(const iqzip_compression_header& iqHeader) {
+	d_iq_header = iqHeader;
+}
+
+uint8_t
+Iqzip::getMapperType() const {
+	return d_mapper_type;
+}
+
+void
+Iqzip::setMapperType(uint8_t mapperType) {
+	d_mapper_type = mapperType;
+}
+
+uint16_t
+Iqzip::getPacketDataLength() const {
+	return d_packet_data_length;
+}
+
+void
+Iqzip::setPacketDataLength(uint16_t packetDataLength) {
+	d_packet_data_length = packetDataLength;
+}
+
+uint16_t
+Iqzip::getPacketSequenceCount() const {
+	return d_packet_sequence_count;
+}
+
+void
+Iqzip::setPacketSequenceCount(uint16_t packetSequenceCount) {
+	d_packet_sequence_count = packetSequenceCount;
+}
+
+uint8_t
+Iqzip::getPredictorType() const {
+	return d_predictor_type;
+}
+
+void
+Iqzip::setPredictorType(uint8_t predictorType) {
+	d_predictor_type = predictorType;
+}
+
+uint8_t
+Iqzip::getPreprocessorStatus() const {
+	return d_preprocessor_status;
+}
+
+void
+Iqzip::setPreprocessorStatus(uint8_t preprocessorStatus) {
+	d_preprocessor_status = preprocessorStatus;
+}
+
+uint8_t
+Iqzip::getReferenceSampleInterval() const {
+	return d_reference_sample_interval;
+}
+
+void
+Iqzip::setReferenceSampleInterval(uint8_t referenceSampleInterval) {
+	d_reference_sample_interval = referenceSampleInterval;
+}
+
+uint8_t
+Iqzip::getRestrictedCodes() const {
+	return d_restricted_codes;
+}
+
+void
+Iqzip::setRestrictedCodes(uint8_t restrictedCodes) {
+	d_restricted_codes = restrictedCodes;
+}
+
+uint8_t
+Iqzip::getSampleResolution() const {
+	return d_sample_resolution;
+}
+
+void
+Iqzip::setSampleResolution(uint8_t sampleResolution) {
+	d_sample_resolution = sampleResolution;
+}
+
+uint8_t
+Iqzip::getSecHdrFlag() const {
+	return d_sec_hdr_flag;
+}
+
+void
+Iqzip::setSecHdrFlag(uint8_t secHdrFlag) {
+	d_sec_hdr_flag = secHdrFlag;
+}
+
+uint8_t
+Iqzip::getSequenceFlags() const {
+	return d_sequence_flags;
+}
+
+void
+Iqzip::setSequenceFlags(uint8_t sequenceFlags) {
+	d_sequence_flags = sequenceFlags;
+}
+
+const aec_stream&
+Iqzip::getStrm() const {
+	return d_strm;
+}
+
+void
+Iqzip::setStrm(const aec_stream& strm) {
+	d_strm = strm;
+}
+
+uint8_t
+Iqzip::getType() const {
+	return d_type;
+}
+
+void
+Iqzip::setType(uint8_t type) {
+	d_type = type;
+}
+
+uint8_t
+Iqzip::getVersion() const {
+	return d_version;
+}
+
+void
+Iqzip::setVersion(uint8_t version) {
+	d_version = version;
+}
+
+const std::ifstream&
+Iqzip::getInputStream() const {
+	return input_stream;
+}
+
+const std::ofstream&
+Iqzip::getOutputStream() const {
+	return output_stream;
+}
+

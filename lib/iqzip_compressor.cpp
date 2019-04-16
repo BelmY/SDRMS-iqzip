@@ -143,3 +143,234 @@ Iqzip_compressor::print_error(int status) {
         std::cout << "Compressor: Unknown Error" << std::endl;
     }
 }
+
+uint32_t
+Iqzip_compressor::getChunk() const {
+	return Iqzip::getChunk();
+}
+
+void
+Iqzip_compressor::setChunk(uint32_t chunk = 10485760) {
+	Iqzip::setChunk(chunk);
+}
+
+uint16_t
+Iqzip_compressor::getApid() const {
+	return Iqzip::getApid();
+}
+
+void
+Iqzip_compressor::setApid(uint16_t apid) {
+	Iqzip::setApid(apid);
+}
+
+uint16_t
+Iqzip_compressor::getBlockSize() const {
+	return Iqzip::getBlockSize();
+}
+
+void
+Iqzip_compressor::setBlockSize(uint16_t blockSize) {
+	Iqzip::setBlockSize(blockSize);
+}
+
+uint16_t
+Iqzip_compressor::getCdsPerPacket() const {
+	return Iqzip::getCdsPerPacket();
+}
+
+void
+Iqzip_compressor::setCdsPerPacket(uint16_t cdsPerPacket) {
+	Iqzip::setCdsPerPacket(cdsPerPacket);
+}
+
+uint8_t
+Iqzip_compressor::getCompressionTechId() const {
+	return Iqzip::getCompressionTechId();
+}
+
+void
+Iqzip_compressor::setCompressionTechId(uint8_t compressionTechId) {
+	Iqzip::setCompressionTechId(compressionTechId);
+}
+
+uint8_t
+Iqzip_compressor::getDataSense() const {
+	return Iqzip::getDataSense();
+}
+
+void
+Iqzip_compressor::setDataSense(uint8_t dataSense) {
+	Iqzip::setDataSense(dataSense);
+}
+
+uint8_t
+Iqzip_compressor::getEndianness() const {
+	return Iqzip::getEndianness();
+}
+
+void
+Iqzip_compressor::setEndianness(uint8_t endianness) {
+	Iqzip::setEndianness(endianness);
+}
+
+uint16_t
+Iqzip_compressor::getGroupingDataLength() const {
+	return Iqzip::getGroupingDataLength();
+}
+
+void
+Iqzip_compressor::setGroupingDataLength(uint16_t groupingDataLength) {
+	Iqzip::setGroupingDataLength(groupingDataLength);
+}
+
+const iqzip_compression_header&
+Iqzip_compressor::getIqHeader() const {
+	return Iqzip::getIqHeader();
+}
+
+void
+Iqzip_compressor::setIqHeader(const iqzip_compression_header& iqHeader) {
+	Iqzip::setIqHeader(iqHeader);
+}
+
+uint8_t
+Iqzip_compressor::getMapperType() const {
+	return Iqzip::getMapperType();
+}
+
+void
+Iqzip_compressor::setMapperType(uint8_t mapperType) {
+	Iqzip::setMapperType(mapperType);
+}
+
+uint16_t
+Iqzip_compressor::getPacketDataLength() const {
+	return Iqzip::getPacketDataLength();
+}
+
+void
+Iqzip_compressor::setPacketDataLength(uint16_t packetDataLength) {
+	Iqzip::setPacketDataLength(packetDataLength);
+}
+
+uint16_t
+Iqzip_compressor::getPacketSequenceCount() const {
+	return Iqzip::getPacketSequenceCount();
+}
+
+void
+Iqzip_compressor::setPacketSequenceCount(uint16_t packetSequenceCount) {
+	Iqzip::setPacketSequenceCount(packetSequenceCount);
+}
+
+uint8_t
+Iqzip_compressor::getPredictorType() const {
+	return Iqzip::getPredictorType();
+}
+
+void
+Iqzip_compressor::setPredictorType(uint8_t predictorType) {
+	Iqzip::setPredictorType(predictorType);
+}
+
+uint8_t
+Iqzip_compressor::getPreprocessorStatus() const {
+	return Iqzip::getPreprocessorStatus();
+}
+
+void
+Iqzip_compressor::setPreprocessorStatus(uint8_t preprocessorStatus) {
+	Iqzip::setPreprocessorStatus(preprocessorStatus);
+}
+
+uint8_t
+Iqzip_compressor::getReferenceSampleInterval() const {
+	return Iqzip::getReferenceSampleInterval();
+}
+
+void
+Iqzip_compressor::setReferenceSampleInterval(uint8_t referenceSampleInterval) {
+	Iqzip::setReferenceSampleInterval(referenceSampleInterval);
+}
+
+uint8_t
+Iqzip_compressor::getRestrictedCodes() const {
+	return Iqzip::getRestrictedCodes();
+}
+
+void
+Iqzip_compressor::setRestrictedCodes(uint8_t restrictedCodes) {
+	Iqzip::setRestrictedCodes(restrictedCodes);
+}
+
+uint8_t
+Iqzip_compressor::getSampleResolution() const {
+	return Iqzip::getSampleResolution();
+}
+
+void
+Iqzip_compressor::setSampleResolution(uint8_t sampleResolution) {
+	Iqzip::setSampleResolution(sampleResolution);
+}
+
+uint8_t
+Iqzip_compressor::getSecHdrFlag() const {
+	return Iqzip::getSecHdrFlag();
+}
+
+void
+Iqzip_compressor::setSecHdrFlag(uint8_t secHdrFlag) {
+	Iqzip::setSecHdrFlag(secHdrFlag);
+}
+
+uint8_t
+Iqzip_compressor::getSequenceFlags() const {
+	return Iqzip::getSequenceFlags();
+}
+
+void
+Iqzip_compressor::setSequenceFlags(uint8_t sequenceFlags) {
+	Iqzip::setSequenceFlags(sequenceFlags);
+}
+
+const aec_stream&
+Iqzip_compressor::getStrm() const {
+	return Iqzip::getStrm();
+}
+
+void
+Iqzip_compressor::setStrm(const aec_stream& strm) {
+	Iqzip::setStrm(strm);
+}
+
+uint8_t
+Iqzip_compressor::getType() const {
+	return Iqzip::getType();
+}
+
+void
+Iqzip_compressor::setType(uint8_t type) {
+	Iqzip::setType(type);
+}
+
+uint8_t
+Iqzip_compressor::getVersion() const {
+	return Iqzip::getVersion();
+}
+
+void
+Iqzip_compressor::setVersion(uint8_t version) {
+	Iqzip::setVersion(version);
+}
+
+const std::ifstream&
+Iqzip_compressor::getInputStream() const {
+	return Iqzip::getInputStream();
+}
+
+const std::ofstream&
+Iqzip_compressor::getOutputStream() const {
+	return Iqzip::getOutputStream();
+}
+

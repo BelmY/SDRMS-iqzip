@@ -141,3 +141,123 @@ Iqzip_decompressor::print_error(int status) {
         std::cout << "Decompressor: Unknown Error" << std::endl;
     }
 }
+
+uint32_t
+Iqzip_decompressor::getChunk() const {
+	return Iqzip::getChunk();
+}
+
+uint16_t
+Iqzip_decompressor::getApid() const {
+	return Iqzip::getApid();
+}
+
+uint16_t
+Iqzip_decompressor::getBlockSize() const {
+	return Iqzip::getBlockSize();
+}
+
+uint16_t
+Iqzip_decompressor::getCdsPerPacket() const {
+	return Iqzip::getCdsPerPacket();
+}
+
+uint8_t
+Iqzip_decompressor::getCompressionTechId() const {
+	return Iqzip::getCompressionTechId();
+}
+
+uint8_t
+Iqzip_decompressor::getDataSense() const {
+	return Iqzip::getDataSense();
+}
+
+uint8_t
+Iqzip_decompressor::getEndianness() const {
+	return Iqzip::getEndianness();
+}
+
+uint16_t
+Iqzip_decompressor::getGroupingDataLength() const {
+	return Iqzip::getGroupingDataLength();
+}
+
+const iqzip_compression_header&
+Iqzip_decompressor::getIqHeader() const {
+	return Iqzip::getIqHeader();
+}
+
+uint8_t
+Iqzip_decompressor::getMapperType() const {
+	return Iqzip::getMapperType();
+}
+
+uint16_t
+Iqzip_decompressor::getPacketDataLength() const {
+	return Iqzip::getPacketDataLength();
+}
+
+uint16_t
+Iqzip_decompressor::getPacketSequenceCount() const {
+	return Iqzip::getPacketSequenceCount();
+}
+
+uint8_t
+Iqzip_decompressor::getPredictorType() const {
+	return Iqzip::getPredictorType();
+}
+
+uint8_t
+Iqzip_decompressor::getPreprocessorStatus() const {
+	return Iqzip::getPreprocessorStatus();
+}
+
+uint8_t
+Iqzip_decompressor::getReferenceSampleInterval() const {
+	return Iqzip::getReferenceSampleInterval();
+}
+
+uint8_t
+Iqzip_decompressor::getRestrictedCodes() const {
+	return Iqzip::getRestrictedCodes();
+}
+
+uint8_t
+Iqzip_decompressor::getSampleResolution() const {
+	return Iqzip::getSampleResolution();
+}
+
+uint8_t
+Iqzip_decompressor::getSecHdrFlag() const {
+	return Iqzip::getSecHdrFlag();
+}
+
+uint8_t
+Iqzip_decompressor::getSequenceFlags() const {
+	return Iqzip::getSequenceFlags();
+}
+
+const aec_stream&
+Iqzip_decompressor::getStrm() const {
+	return Iqzip::getStrm();
+}
+
+uint8_t
+Iqzip_decompressor::getType() const {
+	return Iqzip::getType();
+}
+
+uint8_t
+Iqzip_decompressor::getVersion() const {
+	return Iqzip::getVersion();
+}
+
+const std::ifstream&
+Iqzip_decompressor::getInputStream() const {
+	return Iqzip::getInputStream();
+}
+
+const std::ofstream&
+Iqzip_decompressor::getOutputStream() const {
+	return Iqzip::getOutputStream();
+}

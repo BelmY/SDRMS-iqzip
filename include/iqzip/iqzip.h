@@ -1,5 +1,5 @@
-#ifndef IQZIP_H
-#define IQZIP_H
+#ifndef IQZIP_COMPRESSION_H
+#define IQZIP_COMPRESSION_H
 
 #include <cmath>
 #include <fstream>
@@ -54,5 +54,97 @@ protected:
 
     void init_aec_stream (void);
 
+    uint32_t getChunk() const;
+
+	void setChunk(uint32_t);
+
+	uint16_t getApid() const;
+
+	void setApid(uint16_t);
+
+	uint16_t getBlockSize() const;
+
+	void setBlockSize(uint16_t);
+
+	uint16_t getCdsPerPacket() const;
+
+	void setCdsPerPacket(uint16_t);
+
+	uint8_t getCompressionTechId() const;
+
+	void setCompressionTechId(uint8_t);
+
+	uint8_t getDataSense() const;
+
+	void setDataSense(uint8_t);
+
+	uint8_t getEndianness() const;
+
+	void setEndianness(uint8_t endianness);
+
+	uint16_t getGroupingDataLength() const;
+
+	void setGroupingDataLength(uint16_t);
+
+	const iqzip_compression_header& getIqHeader() const;
+
+	void setIqHeader(const iqzip_compression_header&);
+
+	uint8_t getMapperType() const;
+
+	void setMapperType(uint8_t);
+
+	uint16_t getPacketDataLength() const;
+
+	void setPacketDataLength(uint16_t);
+
+	uint16_t getPacketSequenceCount() const;
+
+	void setPacketSequenceCount(uint16_t);
+
+	uint8_t getPredictorType() const;
+
+	void setPredictorType(uint8_t);
+
+	uint8_t getPreprocessorStatus() const;
+
+	void setPreprocessorStatus(uint8_t);
+
+	uint8_t getReferenceSampleInterval() const;
+
+	void setReferenceSampleInterval(uint8_t);
+
+	uint8_t getRestrictedCodes() const;
+
+	void setRestrictedCodes(uint8_t);
+
+	uint8_t getSampleResolution() const;
+
+	void setSampleResolution(uint8_t);
+
+	uint8_t getSecHdrFlag() const;
+
+	void setSecHdrFlag(uint8_t);
+
+	uint8_t getSequenceFlags() const;
+
+	void setSequenceFlags(uint8_t);
+
+	const aec_stream& getStrm() const;
+
+	void setStrm(const aec_stream&);
+
+	uint8_t getType() const;
+
+	void setType(uint8_t type);
+
+	uint8_t getVersion() const;
+
+	void setVersion(uint8_t version);
+
+	const std::ifstream& getInputStream() const;
+
+	const std::ofstream& getOutputStream() const;
+
 };
-#endif /* IQZIP_H */
+#endif /* IQZIP_COMPRESSION_H */
