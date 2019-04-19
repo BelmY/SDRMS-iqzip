@@ -34,6 +34,20 @@ namespace iqzip
   namespace meta
   {
 
+    /*!
+     *
+     * \ingroup sigmf_meta
+     *
+     * The iqzip_meta class works as a wrapper for the libsigmf library, that provides an
+     * API to parse or generate JSON metafiles that conform to the Signal Metafile
+     * Format.
+     *
+     * This class incorporates an abstraction to the libsigmf API, and provides
+     * the appropriate setters and getters to access the internal fields of
+     * a SigMF object, alongside with methods to parse or write into SigMF JSON files.
+     * In addition, thanks to the mindful implementation of libsigmf, multiple
+     * SigMF namespaces can be supported.
+     */
     class iqzip_meta
     {
 
@@ -159,10 +173,10 @@ namespace iqzip
                                  double freq_upper_edge);
 
       void
-      write_json(std::string filename);
+      write_json (std::string filename);
 
       void
-      parse_json(std::string filename);
+      parse_json (std::string filename);
 
       sigmf::VariadicDataClass<core::GlobalT>&
       get_sigmf_global_segment ();

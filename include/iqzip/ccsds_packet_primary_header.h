@@ -179,42 +179,42 @@ namespace iqzip
 
       /*!
        * Encode the application process identifier into the appropriate header subfield.
-       * \param type The application process identifier
+       * \param apid The application process identifier
        */
       void
       encode_application_process_identifier (uint16_t apid);
 
       /*!
        * Encode the packet data length into the appropriate header subfield.
-       * \param apid The packet data length
+       * \param data_length The packet data length
        */
       void
       encode_packet_data_length (uint16_t data_length);
 
       /*!
        * Encode the secondary header flag into the appropriate header subfield.
-       * \param data_length The secondary header flag
+       * \param flag The secondary header flag
        */
       void
       encode_secondary_header_flag (uint8_t flag);
 
       /*!
        * Encode the packet sequence count into the appropriate header subfield.
-       * \param flag The packet sequence count
+       * \param sequence_count The packet sequence count
        */
       void
       encode_packet_sequence_count (uint16_t sequence_count);
 
       /*!
        * Encode the sequence flags into the appropriate header subfield.
-       * \param sequence_count The sequence flags
+       * \param sequence_flags The sequence flags
        */
       void
       encode_sequence_flags (uint8_t sequence_flags);
 
       /*!
        * Encode the type into the appropriate header subfield.
-       * \param sequence_flags The type of the packet
+       * \param type The type of the packet
        */
       void
       encode_type (uint8_t type);

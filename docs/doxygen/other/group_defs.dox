@@ -1,0 +1,13 @@
+/*! \defgroup compression Compression */
+
+/*! 
+ * \ingroup compression
+ * \defgroup compression_header Compression Header 
+ */
+
+/*! \defgroup sigmf_meta Sigmf Metafile */
+
+/*! 
+ * \ingroup sigmf_meta
+ * \defgroup sigmf_core The SigMF Core Namespace 
+ */

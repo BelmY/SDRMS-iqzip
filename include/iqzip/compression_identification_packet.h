@@ -335,7 +335,7 @@ namespace iqzip
 
       /*!
        * Encode the preprocessor predictor type into the appropriate header subfield.
-       * \param status The preprocessor predictor type
+       * \param type The preprocessor predictor type
        */
       void
       encode_preprocessor_predictor_type (uint8_t type);
@@ -349,21 +349,21 @@ namespace iqzip
 
       /*!
        * Encode the preprocessor block size into the appropriate header subfield.
-       * \param type The preprocessor block size
+       * \param size The preprocessor block size
        */
       void
       encode_preprocessor_block_size (uint16_t size);
 
       /*!
        * Encode the preprocessor data sense into the appropriate header subfield.
-       * \param size The preprocessor data sense
+       * \param data_sense The preprocessor data sense
        */
       void
       encode_preprocessor_data_sense (uint8_t data_sense);
 
       /*!
        * Encode the preprocessor sample resolution into the appropriate header subfield.
-       * \param data_sense The preprocessor sample resolution
+       * \param resolution The preprocessor sample resolution
        */
       void
       encode_preprocessor_sample_resolution (uint8_t resolution);

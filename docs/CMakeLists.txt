@@ -17,3 +17,19 @@
 # along with GNU Radio; see the file COPYING.  If not, write to
 # the Free Software Foundation, Inc., 51 Franklin Street,
 # Boston, MA 02110-1301, USA.
+
+########################################################################
+# Setup dependencies
+########################################################################
+find_package(Doxygen)
+
+########################################################################
+# Begin conditional configuration
+########################################################################
+if(ENABLE_DOXYGEN)
+
+########################################################################
+# Add subdirectories
+########################################################################
+add_subdirectory(doxygen)
+endif(ENABLE_DOXYGEN)
