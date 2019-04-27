@@ -25,7 +25,9 @@ Iqzip_decompressor::Iqzip_decompressor () :
 	d_iqzip_header_size (0) {
 }
 
-Iqzip_decompressor::~Iqzip_decompressor() {}
+Iqzip_decompressor::~Iqzip_decompressor() {
+	d_iq_header.~iqzip_compression_header();
+}
 
 int
 Iqzip_decompressor::iqzip_decompress_init (const std::string fin,
