@@ -18,7 +18,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "iqzip/iqzip_compressor.h"
+#include <iqzip/iqzip_compressor.h>
 
 namespace iqzip
 {

@@ -18,7 +18,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "iqzip/compression_identification_packet.h"
+#include <iqzip/compression_identification_packet.h>
 #include <math.h>
 #include <stdexcept>
 #include <cstring>

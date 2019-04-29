@@ -20,7 +20,7 @@
 
 #include <iostream>
 
-#include "../include/iqzip/iqzip.h"
+#include <iqzip/iqzip.h>
 
 Iqzip::Iqzip () :
         d_version (0),

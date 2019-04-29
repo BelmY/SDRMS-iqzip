@@ -26,10 +26,16 @@ list(APPEND iqzip_sources
 	ccsds_packet_primary_header.cpp
 	compression_identification_packet.cpp
 	iqzip_compression_header.cpp
-	iqzip_meta.cpp
 	iqzip.cpp
 	iqzip_decompressor.cpp
 	iqzip_compressor.cpp
+	iqzip_meta.cpp
+)
+
+list(APPEND IQZIP_INCLUDE_DIRS
+	${PROJECT_BINARY_DIR}/sigmf-build/include
+	${PROJECT_SOURCE_DIR}/include
+	${PROJECT_SOURCE_DIR}/libaec/include
 )
 
 if(NOT iqzip_sources)
@@ -38,15 +44,24 @@ if(NOT iqzip_sources)
 endif(NOT iqzip_sources)
 
 if(APPLE)
-    set_target_properties(iqzip PROPERTIES
+	set_target_properties(Iqzip PROPERTIES
         INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib"
     )
 endif(APPLE)
 
 add_library(iqzip SHARED ${iqzip_sources})
-target_link_libraries (iqzip aec)
+target_link_libraries (iqzip aec flatbuffers libsigmf)
+target_include_directories(iqzip PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(iqzip BEFORE PUBLIC "$<BUILD_INTERFACE:${IQZIP_INCLUDE_DIRS}>" $<INSTALL_INTERFACE:${IQZIP_INCLUDE_DIRS}>)
 set_target_properties(iqzip PROPERTIES VERSION 0.0.10 SOVERSION 0)
 set_target_properties(iqzip PROPERTIES DEFINE_SYMBOL "iqzip_EXPORTS")
+
+########################################################################
+# Install lib
+########################################################################
+install(TARGETS iqzip
+	LIBRARY DESTINATION lib${LIB_SUFFIX})
+
 
 ########################################################################
 # Print summary

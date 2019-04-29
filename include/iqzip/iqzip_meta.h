@@ -24,9 +24,9 @@
 #include <stdint.h>
 #include <string>
 
-#include "sigmf/sigmf_protocols/sigmf_core_generated.h"
-#include "sigmf/sigmf_protocols/sigmf_antenna_generated.h"
-#include "sigmf/sigmf.h"
+#include <sigmf_core_generated.h>
+#include <sigmf_antenna_generated.h>
+#include <sigmf.h>
 
 namespace iqzip
 {

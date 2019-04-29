@@ -18,7 +18,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "iqzip/ccsds_packet_primary_header.h"
+#include <iqzip/ccsds_packet_primary_header.h>
 #include <stdexcept>
 #include <cstring>
 

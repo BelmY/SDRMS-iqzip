@@ -33,7 +33,7 @@
 #include <iostream>
 #include <string>
 
-#include "iqzip.h"
+#include <iqzip/iqzip.h>
 
 namespace iqzip
 {

@@ -22,8 +22,8 @@
 #define IQZIP_COMPRESSION_HEADER_H_
 
 #include <stdint.h>
-#include "iqzip/ccsds_packet_primary_header.h"
-#include "iqzip/compression_identification_packet.h"
+#include <iqzip/ccsds_packet_primary_header.h>
+#include <iqzip/compression_identification_packet.h>
 
 #define IQZIP_COMPRESSION_HDR_SIZE      2
 

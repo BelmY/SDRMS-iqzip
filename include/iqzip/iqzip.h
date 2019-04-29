@@ -24,8 +24,8 @@
 #include <cmath>
 #include <fstream>
 
-#include "libaec.h"
-#include "iqzip/iqzip_compression_header.h"
+#include <libaec.h>
+#include <iqzip/iqzip_compression_header.h>
 
 class Iqzip {
 protected:
