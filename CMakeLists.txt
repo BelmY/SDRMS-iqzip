@@ -111,6 +111,7 @@ endif()
 ########################################################################
 # Setup doxygen option
 ########################################################################
+find_package(Doxygen)
 if(DOXYGEN_FOUND)
 	option(ENABLE_DOXYGEN "Build docs using Doxygen" ON)
 else(DOXYGEN_FOUND)
