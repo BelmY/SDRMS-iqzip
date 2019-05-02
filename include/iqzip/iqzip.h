@@ -30,7 +30,7 @@
 class Iqzip {
 protected:
 	uint32_t CHUNK = 10485760;
-	iqzip_compression_header d_iq_header;
+	iqzip::compression::iqzip_compression_header d_iq_header;
 	aec_stream d_strm;
 
 	std::ofstream output_stream;
@@ -210,13 +210,13 @@ protected:
 	 * Get the pointer of CCSDS header object.
 	 * @return the pointer of a CCSDS header object.
 	 */
-	const iqzip_compression_header& getIqHeader() const;
+	const iqzip::compression::iqzip_compression_header& getIqHeader() const;
 
 	/*!
 	 * Set the pointer to CCSDS header pointer.
 	 * @param the pointer of a CCSDS header object
 	 */
-	void setIqHeader(const iqzip_compression_header&);
+	void setIqHeader(const iqzip::compression::iqzip_compression_header&);
 
 	/*!
 	 * Get the mapper type value.

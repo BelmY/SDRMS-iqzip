@@ -27,6 +27,12 @@
 
 #include "iqzip.h"
 
+namespace iqzip
+{
+
+namespace compression
+{
+
 class Iqzip_decompressor : Iqzip {
 private:
 	size_t d_iqzip_header_size;
@@ -352,4 +358,9 @@ public:
 	 */
 	const std::ofstream& getOutputStream() const;
 };
+
+}
+
+}
+
 #endif /* IQZIP_DECOMPRESSOR_H */

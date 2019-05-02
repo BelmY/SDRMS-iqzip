@@ -20,6 +20,12 @@
 
 #include <iqzip/iqzip_decompressor.h>
 
+namespace iqzip
+{
+
+namespace compression
+{
+
 Iqzip_decompressor::Iqzip_decompressor () :
 	Iqzip(),
 	d_iqzip_header_size (0) {
@@ -37,7 +43,7 @@ Iqzip_decompressor::iqzip_decompress_init (const std::string fin,
 	d_version = d_iq_header.decode_version();
 	d_type = d_iq_header.decode_type();
 	d_sec_hdr_flag = d_iq_header.decode_secondary_header_flag();
-	d_apid = d_iq_header.decode_appplication_process_identifier();
+	d_apid = d_iq_header.decode_application_process_identifier();
 	d_sequence_flags = d_iq_header.decode_sequence_flags();
 	d_packet_sequence_count = d_iq_header.decode_packet_sequence_count();
 	d_packet_data_length = d_iq_header.decode_packet_data_length();
@@ -204,7 +210,7 @@ Iqzip_decompressor::getGroupingDataLength() const {
 	return Iqzip::getGroupingDataLength();
 }
 
-const iqzip_compression_header&
+const iqzip::compression::iqzip_compression_header&
 Iqzip_decompressor::getIqHeader() const {
 	return Iqzip::getIqHeader();
 }
@@ -282,4 +288,8 @@ Iqzip_decompressor::getInputStream() const {
 const std::ofstream&
 Iqzip_decompressor::getOutputStream() const {
 	return Iqzip::getOutputStream();
+}
+
+}
+
 }

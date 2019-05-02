@@ -35,6 +35,12 @@
 
 #include "iqzip.h"
 
+namespace iqzip
+{
+
+namespace compression
+{
+
 class Iqzip_compressor : Iqzip{
 private:
 	/*!
@@ -389,4 +395,8 @@ public:
 	const std::ofstream& getOutputStream() const;
 
 };
+
+}
+
+}
 #endif /* IQZIP_COMPRESSOR_H */

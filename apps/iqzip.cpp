@@ -73,21 +73,22 @@
 
 #define CHUNK 10485760
 
-template <class T>
-int get_param (T *param, int *iarg, char *argv[])
-{
-  if (strlen (argv[*iarg]) == 2) {
-    (*iarg)++;
-    if (argv[*iarg][0] == '-')
-      return 1;
-    else
-      *param = atoi(argv[*iarg]);
+template<class T>
+  int
+  get_param (T *param, int *iarg, char *argv[])
+  {
+    if (strlen (argv[*iarg]) == 2) {
+      (*iarg)++;
+      if (argv[*iarg][0] == '-')
+        return 1;
+      else
+        *param = atoi (argv[*iarg]);
+    }
+    else {
+      *param = atoi (&argv[*iarg][2]);
+    }
+    return 0;
   }
-  else {
-    *param = atoi (&argv[*iarg][2]);
-  }
-  return 0;
-}
 
 int
 main (int argc, char *argv[])
@@ -159,25 +160,28 @@ main (int argc, char *argv[])
   outfn = argv[iarg + 1];
 
   if (dflag) {
-	  Iqzip_decompressor decompressor;
-	  /* Initialize decompressor */
-	  decompressor.iqzip_decompress_init(infn, outfn);
-	  /* Decompress file */
-	  decompressor.iqzip_decompress();
-	  /* Finalize decompression */
-	  decompressor.iqzip_decompress_fin();
+    iqzip::compression::Iqzip_decompressor decompressor;
+    /* Initialize decompressor */
+    decompressor.iqzip_decompress_init (infn, outfn);
+    /* Decompress file */
+    decompressor.iqzip_decompress ();
+    /* Finalize decompression */
+    decompressor.iqzip_decompress_fin ();
   }
   else {
-		Iqzip_compressor compressor(0, 0, 0, 7, 0, 0, 0, 0, 1,
-				reference_sample_interval, enable_preprocessing, 1, 3,
-				block_size, data_sense, sample_resolution, 1, restricted_codes,
-				endianness);
-		/* Initialize compressor */
-		compressor.iqzip_compress_init(infn, outfn);
-		/* Compress file */
-		compressor.iqzip_compress();
-		/* Finalize compression */
-		compressor.iqzip_compress_fin();
+    iqzip::compression::Iqzip_compressor compressor (0, 0, 0, 7, 0, 0, 0, 0, 1,
+                                                     reference_sample_interval,
+                                                     enable_preprocessing, 1, 3,
+                                                     block_size, data_sense,
+                                                     sample_resolution, 1,
+                                                     restricted_codes,
+                                                     endianness);
+    /* Initialize compressor */
+    compressor.iqzip_compress_init (infn, outfn);
+    /* Compress file */
+    compressor.iqzip_compress ();
+    /* Finalize compression */
+    compressor.iqzip_compress_fin ();
   }
   return 0;
 
