@@ -62,14 +62,11 @@ install(FILES
 	${PROJECT_SOURCE_DIR}/cmake/IqzipConfig.cmake
 	DESTINATION ${CMAKE_LIB_DEST})
 
-
 ########################################################################
 # Add subdirectories
 ########################################################################
 add_subdirectory(lib)
 add_subdirectory(apps)
-add_subdirectory(docs)
-
 
 ########################################################################
 # Compiler specific setup
@@ -133,8 +130,10 @@ endif()
 ########################################################################
 # Setup doxygen option
 ########################################################################
+find_package(Doxygen)
 if(DOXYGEN_FOUND)
 	option(ENABLE_DOXYGEN "Build docs using Doxygen" ON)
+	add_subdirectory(docs)
 else(DOXYGEN_FOUND)
 	option(ENABLE_DOXYGEN "Build docs using Doxygen" OFF)
 endif(DOXYGEN_FOUND)
@@ -196,7 +195,6 @@ configure_file(
 add_custom_target(uninstall
     ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake
 )
-
 
 ########################################################################
 # Install cmake search helper for this library

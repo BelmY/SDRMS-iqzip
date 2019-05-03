@@ -43,6 +43,13 @@ namespace compression
 
 class Iqzip_compressor : Iqzip{
 private:
+	uint32_t STREAM_CHUNK = 32768;
+	char *d_tmp_stream;
+	const uint32_t d_reference_samples_bytes;
+	size_t d_stream_avail_in;
+	char *d_out;
+	size_t d_total_out;
+
 	/*!
 	 * Prints compression related error messages.
 	 * @param status the value returned from compression functions calls.
@@ -105,11 +112,30 @@ public:
     int	iqzip_compress_init(const std::string fin, const std::string fout);
 
     /*!
-     * Reads the input file given in iqzip_compress_init, compresses it, and
-     * writes the results to fout given in iqzip_compress_init.
+     * Initializes necessary variables for stream compression. Should always be called
+     * before stream compressing. It opens the fout file and the CCSDS header is written.
+     * The aec_stream parameter used by libaec is also initialized.
+     * @param fout Name of output file.
      * @return 0 on succes, != 0 otherwise.
      */
+    int iqzip_stream_compress_init(const std::string fout);
+
+    /*!
+     * Reads the input file given in iqzip_compress_init, compresses it, and
+     * writes the results to fout given in iqzip_compress_init.
+     * @return 0 on success, != 0 otherwise.
+     */
     int iqzip_compress();
+
+    /*!
+     * Reads the buffer inbuf and when block size samples are read, compresses
+     * and writes them to fout file given in iqzip_stream_compress_init.
+     * The bytes passed to iqzip_stream compress must be a multiple of sample size.
+     * @param inbuf buffer to read samples from.
+     * @param nbytes number of bytes to read from buffer.
+     * @return 0 on success, !=0 otherwise.
+     */
+    int iqzip_stream_compress(const char* inbuf, size_t nbytes);
 
     /*!
      * Finalizes the compression and clears aec_stream. Should always be called
@@ -119,6 +145,12 @@ public:
     int iqzip_compress_fin();
 
     /*!
+     * Finalizes the compression and clears aec_stream. Should always be called
+     * after iqzip_stream_compress otherwise output file may not be written correctly.
+     * @return 0 on success, != 0 otherwise.
+     */
+    int iqzip_stream_compress_fin();
+    /*!
      * Get the value of CHUNK.
      * @return the value of CHUNK.
      */
@@ -126,9 +158,9 @@ public:
 
     /*!
      * Set value to CHUNK.
-     * @param unsigned value to be passed.
+     * @param chunk unsigned value to be passed.
      */
-	void setChunk(uint32_t);
+	void setChunk(uint32_t chunk);
 
 	/*!
 	 * Get application ID.
@@ -138,9 +170,9 @@ public:
 
 	/*!
 	 * Set application ID.
-	 * @param the value of application ID.
+	 * @param apid the value of application ID.
 	 */
-	void setApid(uint16_t);
+	void setApid(uint16_t apid);
 
 	/*!
 	 * Get block size
@@ -150,9 +182,9 @@ public:
 
 	/*!
 	 * Set block size.
-	 * @param the value of block size (samples).
+	 * @param block_size the value of block size (samples).
 	 */
-	void setBlockSize(uint16_t);
+	void setBlockSize(uint16_t block_size);
 
 	/*!
 	 * Get CDSes per packet.
@@ -162,9 +194,9 @@ public:
 
 	/*!
 	 * Set CDSes per packet value.
-	 * @param the value of CDSes per packet.
+	 * @param cds_per_packet the value of CDSes per packet.
 	 */
-	void setCdsPerPacket(uint16_t);
+	void setCdsPerPacket(uint16_t cds_per_packet);
 
 	/*!
 	 * Get compression technique ID.
@@ -174,9 +206,9 @@ public:
 
 	/*!
 	 * Set compression technique ID.
-	 * @param the value of compression technique ID.
+	 * @param teq_id the value of compression technique ID.
 	 */
-	void setCompressionTechId(uint8_t);
+	void setCompressionTechId(uint8_t teq_id);
 
 	/*!
 	 * Get data sense value.
@@ -186,9 +218,9 @@ public:
 
 	/*!
 	 * Set data sense value.
-	 * @param the value of data sense.
+	 * @param data_sense the value of data sense.
 	 */
-	void setDataSense(uint8_t);
+	void setDataSense(uint8_t data_sense);
 
 	/*!
 	 * Get endianness value (0 LSB, 1 MSB).
@@ -198,9 +230,9 @@ public:
 
 	/*!
 	 * Set endianness value (0 LSB, 1 MSB);
-	 * @param the value of endianness.
+	 * @param endianness the value of endianness.
 	 */
-	void setEndianness(uint8_t);
+	void setEndianness(uint8_t endianness);
 
 	/*!
 	 * Get grouping data length value.
@@ -210,9 +242,9 @@ public:
 
 	/*!
 	 * Set grouping data length value.
-	 * @param the value of grouping data length.
+	 * @param grouping_data_length the value of grouping data length.
 	 */
-	void setGroupingDataLength(uint16_t);
+	void setGroupingDataLength(uint16_t grouping_data_length);
 
 	/*!
 	 * Get the pointer of CCSDS header object.
@@ -222,9 +254,9 @@ public:
 
 	/*!
 	 * Set the pointer to CCSDS header pointer.
-	 * @param the pointer of a CCSDS header object
+	 * @param header the pointer of a CCSDS header object
 	 */
-	void setIqHeader(const iqzip_compression_header&);
+	void setIqHeader(const iqzip_compression_header& header);
 
 	/*!
 	 * Get the mapper type value.
@@ -234,9 +266,9 @@ public:
 
 	/*!
 	 * Set the mapper type value.
-	 * @param the value of mapper type.
+	 * @param mapper the value of mapper type.
 	 */
-	void setMapperType(uint8_t);
+	void setMapperType(uint8_t mapper);
 
 	/*!
 	 * Get packet data length.
@@ -246,9 +278,9 @@ public:
 
 	/*!
 	 * Set packet data length.
-	 * @param the value of packet data length.
+	 * @param packet_data_length the value of packet data length.
 	 */
-	void setPacketDataLength(uint16_t);
+	void setPacketDataLength(uint16_t packet_data_length);
 
 	/*!
 	 * Get packet sequence count value.
@@ -258,9 +290,9 @@ public:
 
 	/*!
 	 * Set packet sequence count.
-	 * @param the value of packetsequence count
+	 * @param packet_sequence_count the value of packetsequence count
 	 */
-	void setPacketSequenceCount(uint16_t);
+	void setPacketSequenceCount(uint16_t packet_sequence_count);
 
 	/*!
 	 * Get predictor type.
@@ -270,9 +302,9 @@ public:
 
 	/*!
 	 * Set predictor type value.
-	 * @param the value of predictor type.
+	 * @param predictor_type the value of predictor type.
 	 */
-	void setPredictorType(uint8_t);
+	void setPredictorType(uint8_t predictor_type);
 
 	/*!
 	 * Get preprocessor status value.
@@ -282,9 +314,9 @@ public:
 
 	/*!
 	 * Set preprocessor status value.
-	 * @param the value of preprocessor status.
+	 * @param preprocessor_status the value of preprocessor status.
 	 */
-	void setPreprocessorStatus(uint8_t);
+	void setPreprocessorStatus(uint8_t preprocessor_status);
 
 	/*!
 	 * Get the reference sample interval value.
@@ -294,9 +326,9 @@ public:
 
 	/*!
 	 * Set the reference sample interval value.
-	 * @param the value of reference sample interval.
+	 * @param rsi the value of reference sample interval.
 	 */
-	void setReferenceSampleInterval(uint8_t);
+	void setReferenceSampleInterval(uint8_t rsi);
 
 	/*!
 	 * Get restricted codes value.
@@ -306,9 +338,9 @@ public:
 
 	/*!
 	 * Set restricted codes value.
-	 * @param the value of restricted codes.
+	 * @param restricted_codes the value of restricted codes.
 	 */
-	void setRestrictedCodes(uint8_t);
+	void setRestrictedCodes(uint8_t restricted_codes);
 
 	/*!
 	 * Get sample resolution value.
@@ -318,9 +350,9 @@ public:
 
 	/*!
 	 * Set sample resolution value.
-	 * @param the value of sample resolution.
+	 * @param sample_resolution the value of sample resolution.
 	 */
-	void setSampleResolution(uint8_t);
+	void setSampleResolution(uint8_t sample_resolution);
 
 	/*!
 	 * Get secondary header flag value.
@@ -330,9 +362,9 @@ public:
 
 	/*!
 	 * Set secondary header flag value.
-	 * @param the value of secondary header flag.
+	 * @param sec_header_flag the value of secondary header flag.
 	 */
-	void setSecHdrFlag(uint8_t);
+	void setSecHdrFlag(uint8_t sec_header_flag);
 
 	/*!
 	 * Get sequence flags value.
@@ -342,9 +374,9 @@ public:
 
 	/*!
 	 * Set sequence flags value.
-	 * @param the value of sequence flags.
+	 * @param sequence_flags the value of sequence flags.
 	 */
-	void setSequenceFlags(uint8_t);
+	void setSequenceFlags(uint8_t sequence_flags);
 
 	/*!
 	 * Get the pointer of aec stream object.
@@ -354,9 +386,9 @@ public:
 
 	/*!
 	 * Set the pointer of aec stream object
-	 * @param pointer to an aec stream object.
+	 * @param stream pointer to an aec stream object.
 	 */
-	void setStrm(const aec_stream&);
+	void setStrm(const aec_stream& stream);
 
 	/*!
 	 * Get CIP type value.

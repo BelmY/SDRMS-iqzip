@@ -21,9 +21,9 @@
 ########################################################################
 # Create the doxygen configuration file
 ########################################################################
-file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR} top_srcdir)
+file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/include/iqzip top_srcdir)
 file(TO_NATIVE_PATH ${CMAKE_BINARY_DIR} top_builddir)
-file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR} abs_top_srcdir)
+file(TO_NATIVE_PATH ${CMAKE_SOURCE_DIR}/include/iqzip abs_top_srcdir)
 file(TO_NATIVE_PATH ${CMAKE_BINARY_DIR} abs_top_builddir)
 
 set(HAVE_DOT ${DOXYGEN_DOT_FOUND})
