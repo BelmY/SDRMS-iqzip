@@ -19,6 +19,7 @@
  */
 
 #include <iqzip/iqzip_compressor.h>
+#include <cstring>
 
 namespace iqzip
 {
@@ -49,13 +50,21 @@ namespace iqzip
                    d_reference_sample_interval, d_preprocessor_status,
                    predictor_type, mapper_type, d_block_size, d_data_sense,
                    d_sample_resolution, d_cds_per_packet, d_restricted_codes,
-                   d_endianness)
+                   d_endianness),
+	    d_tmp_stream(new char[STREAM_CHUNK]),
+	    d_reference_samples_bytes((d_reference_sample_interval + 1) *
+				       d_sample_resolution / 8 * d_block_size),
+	    d_stream_avail_in(0),
+	    d_out(new char[CHUNK]),
+	    d_total_out(0)
+
     {
     }
-
+    
     Iqzip_compressor::~Iqzip_compressor ()
     {
       d_iq_header.~iqzip_compression_header ();
+      delete[] d_tmp_stream;
     }
 
     int
@@ -145,21 +154,132 @@ namespace iqzip
     }
 
     int
-    Iqzip_compressor::iqzip_compress_fin ()
+    Iqzip_compressor::iqzip_stream_compress_init(const std::string fout) {
+      /* Initialize libaec stream */
+      init_aec_stream();
+      /* Initialize libaec stream for compression */
+      int status = aec_encode_init(&d_strm);
+      if (status != AEC_OK) {
+      	std::cout << "Error in initializing stream" << std::endl;
+      	print_error(status);
+      }
+      
+      /* Write header to compressed file */
+      d_iq_header.write_header_to_file(fout);
+      
+      /* Open output file */
+      output_stream.open(fout, std::ios::out | std::ios::app | std::ios::binary);
+      if (!output_stream.is_open()) {
+	std::cout << "Error opening output file" << std::endl;
+	return -1;
+      }
+
+      return status;
+    }
+
+    int
+    Iqzip_compressor::iqzip_stream_compress(const char* inbuf, size_t nbytes)
     {
       int status;
-      status = aec_encode_end (&d_strm);
+      /* Save input buffer to internal buffer */
+      if (d_stream_avail_in + nbytes < STREAM_CHUNK){
+	std::memcpy(&d_tmp_stream[d_stream_avail_in], inbuf, nbytes);
+	d_stream_avail_in += nbytes;
+	d_strm.avail_in = d_stream_avail_in;
+	return AEC_OK;
+      }
+      /* d_stream_avail_in + nbytes >= STREAM_CHUNK */
+      long int remainder = d_stream_avail_in + nbytes - STREAM_CHUNK;
+      while (remainder >= 0) {
+	std::memcpy(&d_tmp_stream[d_stream_avail_in], inbuf,
+			STREAM_CHUNK - d_stream_avail_in);
+	d_stream_avail_in = STREAM_CHUNK;
+	/* Ready aec_stream */
+	d_strm.avail_in = d_stream_avail_in;
+	d_strm.next_out = reinterpret_cast<unsigned char*>(d_out);
+	d_strm.next_in = reinterpret_cast<unsigned char*>(d_tmp_stream);
+
+	status = aec_encode(&d_strm, AEC_NO_FLUSH);
+	if (status != AEC_OK) {
+	  std::cout << "Error in encoding" << std::endl;
+	  print_error(status);
+	  return status;
+	}
+	if (d_strm.total_out - d_total_out > 0) {
+	  /* Write encoded output to file */
+	  output_stream.write(d_out, d_strm.total_out - d_total_out);
+	  d_strm.avail_out = CHUNK;
+	  d_total_out = d_strm.total_out;
+	}
+	inbuf += nbytes - remainder;
+	nbytes -= nbytes - remainder;
+	d_stream_avail_in = 0;
+	d_strm.avail_in = d_stream_avail_in;
+	remainder = d_stream_avail_in + nbytes - STREAM_CHUNK;
+      }
+	/* If we have leftover samples copy them to stream */
+      if (nbytes) {
+	std::memcpy(&d_tmp_stream[d_stream_avail_in], inbuf, nbytes);
+	d_stream_avail_in = nbytes;
+	return AEC_OK;
+      }  
+
+      return AEC_OK;
+    }
+
+    int
+    Iqzip_compressor::iqzip_compress_fin() 
+    {
+      int status;
+
+      status = aec_encode_end(&d_strm);
       if (status != AEC_OK) {
-        std::cout << "Error finishing stream" << std::endl;
-        print_error (status);
-        return status;
+	std::cout << "Error finishing stream" << std::endl;
+	print_error(status);
+	return status;
       }
       d_strm.next_in = nullptr;
       d_strm.next_out = nullptr;
       d_strm.state = nullptr;
 
-      input_stream.close ();
-      output_stream.close ();
+      input_stream.close();
+      output_stream.close();
+
+      return 0;
+}
+
+    int
+    Iqzip_compressor::iqzip_stream_compress_fin() 
+    {
+      int status;
+
+      d_strm.next_out = reinterpret_cast<unsigned char*>(d_out);
+      d_strm.next_in = reinterpret_cast<unsigned char*>(d_tmp_stream);
+      d_strm.avail_in = d_stream_avail_in;
+
+      status = aec_encode(&d_strm, AEC_FLUSH);
+      if (status != AEC_OK) {
+	std::cout << "ERROR: while flushing output" << std::endl;
+	print_error(status);
+	return -1;
+      }
+      if (d_strm.total_out - d_total_out > 0) {
+	output_stream.write(d_out, d_strm.total_out - d_total_out);
+      }
+
+      status = aec_encode_end(&d_strm);
+      if (status != AEC_OK) {
+	std::cout << "Error finishing stream" << std::endl;
+	print_error(status);
+	return status;
+      }
+
+      d_strm.next_in = nullptr;
+      d_strm.next_out = nullptr;
+      d_strm.state = nullptr;
+
+      input_stream.close();
+      output_stream.close();
 
       return 0;
     }

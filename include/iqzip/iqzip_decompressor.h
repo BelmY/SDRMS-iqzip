@@ -25,7 +25,7 @@
 #include <iostream>
 #include <string>
 
-#include "iqzip.h"
+#include <iqzip/iqzip.h>
 
 namespace iqzip
 {
@@ -36,6 +36,11 @@ namespace compression
 class Iqzip_decompressor : Iqzip {
 private:
 	size_t d_iqzip_header_size;
+	uint32_t STREAM_CHUNK = 32768;
+	char *d_tmp_stream;
+	size_t d_stream_avail_in;
+	char *d_out;
+	size_t d_total_out;
 
 	/*!
 	 * Prints decompression related error messages.
@@ -75,11 +80,27 @@ public:
     int iqzip_decompress();
 
     /*!
+     * Reads the input file given in iqzip_decompress_init, decompresses it,
+     * and writes the results to fout given in iqzip_decompress_init.
+     * @param inbuf buffer to read samples from.
+     * @param nbytes number of bytes to read from buffer.
+     * @return 0 on success, !=0 otherwise.
+     */
+    int iqzip_stream_decompress(const char* inbuf, size_t nbytes);
+
+    /*!
      * Finalizes the decompression and clears aec_stream. Should always be called
      * after iqzip_decompress otherwise output file may not be written correctly.
      * @return 0 on success, != 0 otherwise.
      */
     int iqzip_decompress_fin();
+
+    /*!
+     * Finalizes the decompression and clears aec_stream. Should always be called
+     * after iqzip_stream_decompress otherwise output file may not be written correctly.
+     * @return
+     */
+    int iqzip_stream_decompress_fin();
 
     /*!
      * Get the value of CHUNK.
@@ -357,6 +378,12 @@ public:
 	 * @return the pointer of output stream.
 	 */
 	const std::ofstream& getOutputStream() const;
+
+	/*!
+	 * Get the size of the CCSDS header of the file passed to iqzip_decompress_init.
+	 * @return the size of CCSDS header
+	 */
+	size_t getHeaderSize() const;
 };
 
 }

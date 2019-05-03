@@ -19,6 +19,7 @@
  */
 
 #include <iqzip/iqzip_decompressor.h>
+#include <cstring>
 
 namespace iqzip
 {
@@ -28,7 +29,11 @@ namespace compression
 
 Iqzip_decompressor::Iqzip_decompressor () :
 	Iqzip(),
-	d_iqzip_header_size (0) {
+	d_iqzip_header_size (0),
+	d_tmp_stream(new char[STREAM_CHUNK]),
+	d_stream_avail_in(0),
+	d_out(new char[CHUNK]),
+	d_total_out(0){
 }
 
 Iqzip_decompressor::~Iqzip_decompressor() {
@@ -111,7 +116,7 @@ Iqzip_decompressor::iqzip_decompress() {
 
 		status = aec_decode(&d_strm, AEC_NO_FLUSH);
 		if (status != AEC_OK) {
-			std::cout << "Error in encoding" << std::endl;
+			std::cout << "Error in decoding" << std::endl;
 			print_error(status);
 			return status;
 		}
@@ -131,8 +136,94 @@ Iqzip_decompressor::iqzip_decompress() {
 }
 
 int
+Iqzip_decompressor::iqzip_stream_decompress(const char* inbuf,
+		size_t nbytes) {
+	int status;
+	/* Save input buffer to internal buffer */
+	if (d_stream_avail_in + nbytes < STREAM_CHUNK) {
+		std::memcpy(&d_tmp_stream[d_stream_avail_in], inbuf, nbytes);
+		d_stream_avail_in += nbytes;
+		d_strm.avail_in = d_stream_avail_in;
+		return AEC_OK;
+	}
+	/* d_stream_avail_in + nbytes >= STREAM_CHUNK */
+	long int remainder = d_stream_avail_in + nbytes - STREAM_CHUNK;
+	while (remainder >= 0) {
+		std::memcpy(&d_tmp_stream[d_stream_avail_in], inbuf,
+				STREAM_CHUNK - d_stream_avail_in);
+		d_stream_avail_in = STREAM_CHUNK;
+		/* Ready aec_stream */
+		d_strm.avail_in = d_stream_avail_in;
+		d_strm.next_out = reinterpret_cast<unsigned char*>(d_out);
+		d_strm.next_in = reinterpret_cast<unsigned char*>(d_tmp_stream);
+
+		status = aec_decode(&d_strm, AEC_NO_FLUSH);
+		if (status != AEC_OK) {
+			std::cout << "Error in decoding" << std::endl;
+			print_error(status);
+			return status;
+		}
+		if (d_strm.total_out - d_total_out > 0) {
+			/* Write encoded output to file */
+			output_stream.write(d_out, d_strm.total_out - d_total_out);
+			d_strm.avail_out = CHUNK;
+			d_total_out = d_strm.total_out;
+		}
+		inbuf += nbytes - remainder;
+		nbytes -= nbytes - remainder;
+		d_stream_avail_in = 0;
+		d_strm.avail_in = d_stream_avail_in;
+		//d_stream_avail_in = d_strm.avail_in;
+		remainder = d_stream_avail_in + nbytes - STREAM_CHUNK;
+	}
+
+	/* If we have leftover samples copy them to stream */
+	if (nbytes) {
+		std::memcpy(&d_tmp_stream[d_stream_avail_in], inbuf, nbytes);
+		d_stream_avail_in = nbytes;
+		return AEC_OK;
+	}
+
+	return AEC_OK;
+}
+
+int
 Iqzip_decompressor::iqzip_decompress_fin() {
 	int status;
+	status = aec_decode_end(&d_strm);
+	if (status != AEC_OK) {
+		std::cout << "Error finishing stream" << std::endl;
+		print_error(status);
+		return status;
+	}
+	d_strm.next_in = nullptr;
+	d_strm.next_out = nullptr;
+	d_strm.state = nullptr;
+
+	input_stream.close();
+	output_stream.close();
+
+	return 0;
+}
+
+int
+Iqzip_decompressor::iqzip_stream_decompress_fin() {
+	int status;
+
+	d_strm.next_out = reinterpret_cast<unsigned char*>(d_out);
+	d_strm.next_in = reinterpret_cast<unsigned char*>(d_tmp_stream);
+	d_strm.avail_in = d_stream_avail_in;
+
+	status = aec_decode(&d_strm, AEC_NO_FLUSH);
+	if (status != AEC_OK) {
+		std::cout << "ERROR: while flushing output" << std::endl;
+		print_error(status);
+		return -1;
+	}
+	if (d_strm.total_out - d_total_out > 0) {
+		output_stream.write(d_out, d_strm.total_out - d_total_out);
+	}
+
 	status = aec_decode_end(&d_strm);
 	if (status != AEC_OK) {
 		std::cout << "Error finishing stream" << std::endl;
@@ -289,7 +380,11 @@ const std::ofstream&
 Iqzip_decompressor::getOutputStream() const {
 	return Iqzip::getOutputStream();
 }
-
+size_t
+Iqzip_decompressor::getHeaderSize() const {
+	return d_iqzip_header_size;
 }
 
 }
+}
+

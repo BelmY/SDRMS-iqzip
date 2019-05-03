@@ -118,9 +118,9 @@ protected:
 
 	/*!
 	 * Set value to CHUNK.
-	 * @param unsigned value to be passed.
+	 * @param chunk unsigned value to be passed.
 	 */
-	void setChunk(uint32_t);
+	void setChunk(uint32_t chunk);
 
 	/*!
 	 * Get application ID.
@@ -130,9 +130,9 @@ protected:
 
 	/*!
 	 * Set application ID.
-	 * @param the value of application ID.
+	 * @param apid the value of application ID.
 	 */
-	void setApid(uint16_t);
+	void setApid(uint16_t apid);
 
 	/*!
 	 * Get block size
@@ -142,9 +142,9 @@ protected:
 
 	/*!
 	 * Set block size.
-	 * @param the value of block size (samples).
+	 * @param block_size the value of block size (samples).
 	 */
-	void setBlockSize(uint16_t);
+	void setBlockSize(uint16_t block_size);
 
 	/*!
 	 * Get CDSes per packet.
@@ -154,9 +154,9 @@ protected:
 
 	/*!
 	 * Set CDSes per packet value.
-	 * @param the value of CDSes per packet.
+	 * @param cds_per_packet the value of CDSes per packet.
 	 */
-	void setCdsPerPacket(uint16_t);
+	void setCdsPerPacket(uint16_t cds_per_packet);
 
 	/*!
 	 * Get compression technique ID.
@@ -166,9 +166,9 @@ protected:
 
 	/*!
 	 * Set compression technique ID.
-	 * @param the value of compression technique ID.
+	 * @param tech_id the value of compression technique ID.
 	 */
-	void setCompressionTechId(uint8_t);
+	void setCompressionTechId(uint8_t tech_id);
 
 	/*!
 	 * Get data sense value.
@@ -178,9 +178,9 @@ protected:
 
 	/*!
 	 * Set data sense value.
-	 * @param the value of data sense.
+	 * @param data_sense the value of data sense.
 	 */
-	void setDataSense(uint8_t);
+	void setDataSense(uint8_t data_sense);
 
 	/*!
 	 * Get endianness value (0 LSB, 1 MSB).
@@ -190,9 +190,9 @@ protected:
 
 	/*!
 	 * Set endianness value (0 LSB, 1 MSB);
-	 * @param the value of endianness.
+	 * @param endianness the value of endianness.
 	 */
-	void setEndianness(uint8_t);
+	void setEndianness(uint8_t endianness);
 
 	/*!
 	 * Get grouping data length value.
@@ -202,9 +202,9 @@ protected:
 
 	/*!
 	 * Set grouping data length value.
-	 * @param the value of grouping data length.
+	 * @param grouping_data_length the value of grouping data length.
 	 */
-	void setGroupingDataLength(uint16_t);
+	void setGroupingDataLength(uint16_t grouping_data_length);
 
 	/*!
 	 * Get the pointer of CCSDS header object.
@@ -214,9 +214,9 @@ protected:
 
 	/*!
 	 * Set the pointer to CCSDS header pointer.
-	 * @param the pointer of a CCSDS header object
+	 * @param header the pointer of a CCSDS header object
 	 */
-	void setIqHeader(const iqzip::compression::iqzip_compression_header&);
+	void setIqHeader(const iqzip::compression::iqzip_compression_header& header);
 
 	/*!
 	 * Get the mapper type value.
@@ -226,9 +226,9 @@ protected:
 
 	/*!
 	 * Set the mapper type value.
-	 * @param the value of mapper type.
+	 * @param mapper the value of mapper type.
 	 */
-	void setMapperType(uint8_t);
+	void setMapperType(uint8_t mapper);
 
 	/*!
 	 * Get packet data length.
@@ -238,9 +238,9 @@ protected:
 
 	/*!
 	 * Set packet data length.
-	 * @param the value of packet data length.
+	 * @param data_length the value of packet data length.
 	 */
-	void setPacketDataLength(uint16_t);
+	void setPacketDataLength(uint16_t data_length);
 
 	/*!
 	 * Get packet sequence count value.
@@ -250,9 +250,9 @@ protected:
 
 	/*!
 	 * Set packet sequence count.
-	 * @param the value of packetsequence count
+	 * @param packet_sequence the value of packetsequence count
 	 */
-	void setPacketSequenceCount(uint16_t);
+	void setPacketSequenceCount(uint16_t packet_sequence);
 
 	/*!
 	 * Get predictor type.
@@ -262,9 +262,9 @@ protected:
 
 	/*!
 	 * Set predictor type value.
-	 * @param the value of predictor type.
+	 * @param predictor_type the value of predictor type.
 	 */
-	void setPredictorType(uint8_t);
+	void setPredictorType(uint8_t predictor_type);
 
 	/*!
 	 * Get preprocessor status value.
@@ -274,9 +274,9 @@ protected:
 
 	/*!
 	 * Set preprocessor status value.
-	 * @param the value of preprocessor status.
+	 * @param preprocessor_status the value of preprocessor status.
 	 */
-	void setPreprocessorStatus(uint8_t);
+	void setPreprocessorStatus(uint8_t preprocessor_status);
 
 	/*!
 	 * Get the reference sample interval value.
@@ -286,9 +286,9 @@ protected:
 
 	/*!
 	 * Set the reference sample interval value.
-	 * @param the value of reference sample interval.
+	 * @param rsi the value of reference sample interval.
 	 */
-	void setReferenceSampleInterval(uint8_t);
+	void setReferenceSampleInterval(uint8_t rsi);
 
 	/*!
 	 * Get restricted codes value.
@@ -298,9 +298,9 @@ protected:
 
 	/*!
 	 * Set restricted codes value.
-	 * @param the value of restricted codes.
+	 * @param restricted_codes the value of restricted codes.
 	 */
-	void setRestrictedCodes(uint8_t);
+	void setRestrictedCodes(uint8_t restricted_codes);
 
 	/*!
 	 * Get sample resolution value.
@@ -310,9 +310,9 @@ protected:
 
 	/*!
 	 * Set sample resolution value.
-	 * @param the value of sample resolution.
+	 * @param sample_resolution the value of sample resolution.
 	 */
-	void setSampleResolution(uint8_t);
+	void setSampleResolution(uint8_t sample_resolution);
 
 	/*!
 	 * Get secondary header flag value.
@@ -322,9 +322,9 @@ protected:
 
 	/*!
 	 * Set secondary header flag value.
-	 * @param the value of secondary header flag.
+	 * @param secondary_header_flag the value of secondary header flag.
 	 */
-	void setSecHdrFlag(uint8_t);
+	void setSecHdrFlag(uint8_t secondary_header_flag);
 
 	/*!
 	 * Get sequence flags value.
@@ -334,9 +334,9 @@ protected:
 
 	/*!
 	 * Set sequence flags value.
-	 * @param the value of sequence flags.
+	 * @param sequence_flags the value of sequence flags.
 	 */
-	void setSequenceFlags(uint8_t);
+	void setSequenceFlags(uint8_t sequence_flags);
 
 	/*!
 	 * Get the pointer of aec stream object.
@@ -346,9 +346,9 @@ protected:
 
 	/*!
 	 * Set the pointer of aec stream object
-	 * @param pointer to an aec stream object.
+	 * @param stream pointer to an aec stream object.
 	 */
-	void setStrm(const aec_stream&);
+	void setStrm(const aec_stream& stream);
 
 	/*!
 	 * Get CIP type value.
