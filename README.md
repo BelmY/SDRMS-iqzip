@@ -91,7 +91,7 @@ Please mind the tools that exist under the /apps directory.
 
 ## Documentation
 
-For more information about the iqzip library implementation, visit the Doxygen HTML pages [here](https://librespacefoundation.gitlab.io/iqzip).
+For more information about the iqzip library implementation, visit the Doxygen HTML pages [here](https://librespacefoundation.gitlab.io/sdrmakerspace/iqzip).
 
 ## License
 The **iqzip** library is implemented in the scope of [SDR Makerspace](https://sdrmaker.space/), an initiative of the [European Space Agency](https://esa.int) and [Libre Space Foundation](https://libre.space). 
