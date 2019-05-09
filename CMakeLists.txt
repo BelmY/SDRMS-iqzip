@@ -20,7 +20,7 @@
 # Project setup
 ########################################################################
 cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
-project(Iqzip CXX C)
+project(iqzip CXX C)
 enable_testing()
 
 # Enable C++14 support
@@ -161,29 +161,6 @@ file(GLOB SIGMF_GEN_HEADERS ${SIGMF_GEN_HEADERS_DIR}/*.h)
 
 set(JSON_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libsigmf/external/json/include)
 
-#########################################################################
-## Check updates on libsigmf
-#########################################################################
-##TODO: Automatically check libsigmf repo for changes. If exist, rebuild.
-#find_package(Git REQUIRED)
-#if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
-## Update submodules as needed
-#    option(GIT_SUBMODULE "Check submodules during build" ON)
-#    if(GIT_SUBMODULE)
-#        message(STATUS "Submodule libsigmf update")
-#        execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
-#                        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-#                        RESULT_VARIABLE GIT_SUBMOD_RESULT)
-#        if(NOT GIT_SUBMOD_RESULT EQUAL "0")
-#            message(FATAL_ERROR "git submodule update --init failed with ${GIT_SUBMOD_RESULT}, please checkout submodules")
-#        endif()
-#    endif()
-#endif()
-#
-#if(NOT EXISTS "${PROJECT_SOURCE_DIR}/libsigmf/CMakeLists.txt")
-#    message(FATAL_ERROR "The submodules were not downloaded! GIT_SUBMODULE was turned off or failed. Please update submodules and try again.")
-#endif()
-
 ########################################################################
 # Create uninstall target
 ########################################################################
@@ -216,9 +193,9 @@ install(DIRECTORY include/iqzip DESTINATION include)
 # Install sigmf headers
 ########################################################################
 install(FILES ${SIGMF_HEADER}
-	DESTINATION include)
+	DESTINATION include/libsigmf)
 install(FILES ${SIGMF_GEN_HEADERS} 
-	DESTINATION include)
+	DESTINATION include/iqzip/libsigmf)
 
 ########################################################################
 # Install flatbuffers headers
