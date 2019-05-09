@@ -266,6 +266,28 @@ Iqzip_decompressor::getChunk() const {
 	return Iqzip::getChunk();
 }
 
+void
+Iqzip_decompressor::setChunk (uint32_t chunk = 10485760)
+{
+  delete[] d_out;
+  d_out = new char[chunk];
+  Iqzip::setChunk (chunk);
+}
+
+uint32_t
+Iqzip_decompressor::getStreamChunk () const
+{
+	return STREAM_CHUNK;
+}
+
+void
+Iqzip_decompressor::setStreamChunk (uint32_t stream_chunk)
+{
+	delete[] d_tmp_stream;
+	d_tmp_stream = new char[stream_chunk];
+	STREAM_CHUNK = stream_chunk;
+}
+
 uint16_t
 Iqzip_decompressor::getApid() const {
 	return Iqzip::getApid();

@@ -112,7 +112,19 @@ public:
      * Disabling setting chunk. All variables must be set from header of the
      * input file.
      */
-	void setChunk(uint32_t) = delete;
+	void setChunk(uint32_t);
+
+	/*!
+	 * Get the value of CHUNK used in streams.
+	 * @return the value of STREAM_CHUNK.
+	 */
+	uint32_t getStreamChunk() const;
+
+	/*!
+	 * Set value to STREAM_CHUNK. Should not be used between compress funtion calls.
+	 * @param stream_chunk unsigned value to be passed.
+	 */
+	void setStreamChunk(uint32_t stream_chunk);
 
 	/*!
 	 * Get application ID.

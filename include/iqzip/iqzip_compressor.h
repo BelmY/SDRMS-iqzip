@@ -157,10 +157,22 @@ public:
     uint32_t getChunk() const;
 
     /*!
-     * Set value to CHUNK.
+     * Set value to CHUNK. Should not be used between compress function calls.
      * @param chunk unsigned value to be passed.
      */
 	void setChunk(uint32_t chunk);
+
+	/*!
+	 * Get the value of CHUNK used in streams.
+	 * @return the value of STREAM_CHUNK.
+	 */
+	uint32_t getStreamChunk() const;
+
+	/*!
+	 * Set value to STREAM_CHUNK. Should not be used between compress funtion calls.
+	 * @param stream_chunk unsigned value to be passed.
+	 */
+	void setStreamChunk(uint32_t stream_chunk);
 
 	/*!
 	 * Get application ID.

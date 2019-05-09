@@ -51,7 +51,7 @@ namespace iqzip
                    predictor_type, mapper_type, d_block_size, d_data_sense,
                    d_sample_resolution, d_cds_per_packet, d_restricted_codes,
                    d_endianness),
-	    d_tmp_stream(new char[STREAM_CHUNK]),
+	    d_tmp_stream(new char[d_sample_resolution * STREAM_CHUNK]),
 	    d_reference_samples_bytes((d_reference_sample_interval + 1) *
 				       d_sample_resolution / 8 * d_block_size),
 	    d_stream_avail_in(0),
@@ -315,7 +315,23 @@ namespace iqzip
     void
     Iqzip_compressor::setChunk (uint32_t chunk = 10485760)
     {
+      delete[] d_out;
+      d_out = new char[chunk];
       Iqzip::setChunk (chunk);
+    }
+
+    uint32_t
+	Iqzip_compressor::getStreamChunk () const
+    {
+    	return STREAM_CHUNK;
+    }
+
+    void
+	Iqzip_compressor::setStreamChunk (uint32_t stream_chunk)
+    {
+    	delete[] d_tmp_stream;
+    	d_tmp_stream = new char[stream_chunk];
+    	STREAM_CHUNK = stream_chunk;
     }
 
     uint16_t
