@@ -1,13 +1,12 @@
 stages:
   - building
-  - ubuntu_1810_build
-  - opensuse_build  
+  - documentation
 
 opensuse_build:
   image: opensuse/tumbleweed
 
   before_script:
-      - zypper in -y cmake gcc-c++ gcc git doxygen flatbuffers-devel nlohmann_json-devel
+      - zypper in -y cmake gcc-c++ gcc git flatbuffers-devel nlohmann_json-devel
 
   stage: building
   script:
@@ -27,8 +26,9 @@ ubuntu_1810_build:
         - apt-get update -qq -y
         - apt-get install -qq -y software-properties-common
         - add-apt-repository ppa:team-xbmc/ppa 
-        - apt-get update -qq -y && apt-get install -q -y cmake g++ gcc git doxygen flatbuffers flatbuffers-dev nlohmann-json-dev 
+        - apt-get update -qq -y && apt-get install -q -y cmake g++ gcc git flatbuffers flatbuffers-dev nlohmann-json-dev 
   stage: building
+  allow_failure: true
   script:
         - mkdir -p build
         - cd build
@@ -36,3 +36,26 @@ ubuntu_1810_build:
         - make
         - make install
         - ldconfig
+
+pages:
+  image: opensuse/tumbleweed
+
+  before_script:
+      - zypper in -y cmake gcc-c++ gcc git flatbuffers-devel nlohmann_json-devel doxygen
+
+  stage: documentation
+  script:
+      - mkdir -p build
+      - cd build
+      - rm -rf *
+      - cmake  .. 
+      - make doxygen_target
+      - cd ..
+      - rm -rf public/*
+      - mv build/docs/doxygen/html public/  
+  artifacts:
+      paths:
+      - public
+  only:
+  - master
+
