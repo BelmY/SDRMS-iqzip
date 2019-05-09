@@ -64,25 +64,25 @@ protected:
     /*!
      * Constructor with arguments. All necessary variables for compression are
      *  initialized. Called from super classes.
-     * @param d_version CIP packet version.
-     * @param d_type CIP type version.
-     * @param d_sec_hdr_flag CIP secondary header flag.
-     * @param d_apid CIP application ID.
-     * @param d_sequence_flags CIP sequence flags.
-     * @param d_sequence_count CIP sequence count.
-     * @param d_packet_data_length CIP packet data length.
-     * @param d_grouping_data_length CIP grouping data length.
-     * @param d_compression_tech_id CIP compression technique ID.
-     * @param d_reference_sample_interval CIP reference sample interval.
-     * @param d_preprocessor_status Secondary header preprocessor status. 0 if preprocessor absent.
+     * @param version CIP packet version.
+     * @param type CIP type version.
+     * @param sec_hdr_flag CIP secondary header flag.
+     * @param apid CIP application ID.
+     * @param sequence_flags CIP sequence flags.
+     * @param packet_sequence_count CIP sequence count.
+     * @param packet_data_length CIP packet data length.
+     * @param grouping_data_length CIP grouping data length.
+     * @param compression_tech_id CIP compression technique ID.
+     * @param reference_sample_interval CIP reference sample interval.
+     * @param preprocessor_status Secondary header preprocessor status. 0 if preprocessor absent.
      * @param predictor_type Secondary header predictor type.
      * @param mapper_type Secondary header mapper type.
-     * @param d_block_size Secondary header block size (samples).
-     * @param d_data_sense Secondary header data sense.
-     * @param d_sample_resolution Secondary header sample resolution (bits).
-     * @param d_cds_per_packet Secondary header number of CDSes per packet.
-     * @param d_restricted_codes Secondary header restricted codes.
-     * @param d_endianness Endianness of samples.
+     * @param block_size Secondary header block size (samples).
+     * @param data_sense Secondary header data sense.
+     * @param sample_resolution Secondary header sample resolution (bits).
+     * @param cds_per_packet Secondary header number of CDSes per packet.
+     * @param restricted_codes Secondary header restricted codes.
+     * @param endianness Endianness of samples.
      */
 	Iqzip(uint8_t version, uint8_t type, uint8_t sec_hdr_flag, uint16_t apid,
 			uint8_t sequence_flags, uint16_t packet_sequence_count,
