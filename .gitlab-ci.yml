@@ -7,7 +7,7 @@ opensuse_build:
   image: opensuse/tumbleweed
 
   before_script:
-      - zypper in -y cmake gcc-c++ gcc git flatbuffers-devel nlohmann_json-devel
+      - zypper in -y cmake gcc-c++ gcc git doxygen flatbuffers-devel nlohmann_json-devel
 
   stage: building
   script:
@@ -27,7 +27,7 @@ ubuntu_1810_build:
         - apt-get update -qq -y
         - apt-get install -qq -y software-properties-common
         - add-apt-repository ppa:team-xbmc/ppa 
-        - apt-get update -qq -y && apt-get install -q -y cmake g++ gcc git flatbuffers-dev nlohmann-json-dev 
+        - apt-get update -qq -y && apt-get install -q -y cmake g++ gcc git doxygen flatbuffers flatbuffers-dev nlohmann-json-dev 
   stage: building
   script:
         - mkdir -p build

@@ -147,7 +147,7 @@ set(LIBSIGMF_INCLUDE_DIR
 
 if (NOT IS_DIRECTORY ${LIBSIGMF_INCLUDE_DIR})
     message("Libsigmf not found! Downloading...")
-    execute_process(COMMAND git submodule update --init -- libsigmf
+    execute_process(COMMAND git submodule update --init --recursive -- libsigmf
 	    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 endif(NOT IS_DIRECTORY ${LIBSIGMF_INCLUDE_DIR})
 
