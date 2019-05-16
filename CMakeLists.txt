@@ -37,7 +37,7 @@ endif(NOT CMAKE_BUILD_TYPE)
 #IGNORE set(CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE} CACHE STRING "")
 
 #make sure our local CMake Modules path comes first
-list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake)
+list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake/Modules)
 
 # Set the version information here
 set(VERSION_INFO_MAJOR_VERSION 1)
@@ -49,23 +49,12 @@ if(APPLE)
     set(CMAKE_MACOSX_RPATH ON)
 endif()
 
-########################################################################
-# Install cmake helper modules
-########################################################################
-if (UNIX)
-	set(CMAKE_LIB_DEST share/cmake/${PROJECT_NAME})
-elseif (WIN32)
-	set(CMAKE_LIB_DEST cmake)
-endif()
-
-install(FILES
-	${PROJECT_SOURCE_DIR}/cmake/IqzipConfig.cmake
-	DESTINATION ${CMAKE_LIB_DEST})
 
 ########################################################################
 # Add subdirectories
 ########################################################################
 add_subdirectory(lib)
+add_subdirectory(include/iqzip)
 add_subdirectory(apps)
 
 ########################################################################
@@ -98,7 +87,7 @@ if(NOT AEC_FOUND)
     message(WARNING "libaec is not installed. The internal libaec will be automatically build and install.")
     include(ExternalProject)
 	
-    ExternalProject_Add(AEC_EXTERNAL
+    ExternalProject_Add(aec_external
     	PREFIX ${CMAKE_CURRENT_BINARY_DIR}/libaec
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libaec
         BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/libaec
@@ -106,11 +95,11 @@ if(NOT AEC_FOUND)
                    "-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}"
         INSTALL_COMMAND ${CMAKE_COMMAND} -E echo Skipping installation of libaec
     )
-    ExternalProject_Get_Property(AEC_EXTERNAL binary_dir)
+    ExternalProject_Get_Property(aec_external binary_dir)
     add_library(aec SHARED IMPORTED GLOBAL)
     set_property(TARGET aec PROPERTY IMPORTED_LOCATION "${binary_dir}/src/libaec.so")
     
-    add_dependencies(aec AEC_EXTERNAL)
+    add_dependencies(aec aec_external)
  
     set(AEC_LIBRARIES ${binary_dir}/src/libaec.so
 	    	      ${binary_dir}/src/libaec.so.0
@@ -119,7 +108,6 @@ if(NOT AEC_FOUND)
     set(AEC_INCLUDE_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/libaec/src/libaec.h)
 
     install(FILES ${AEC_LIBRARIES} DESTINATION lib${LIB_SUFFIX})
-		    message(${binary_dir})
     install(FILES ${AEC_INCLUDE_HEADERS}	      
  	    DESTINATION include)
 
@@ -141,25 +129,42 @@ endif(DOXYGEN_FOUND)
 ########################################################################
 # Search for libsigmf
 ########################################################################
-set(LIBSIGMF_INCLUDE_DIR
-	${CMAKE_CURRENT_SOURCE_DIR}/libsigmf/src
-	CACHE PATH "libsigmf include directory")
+find_package(SigMF REQUIRED)
+if(NOT SIGMF_FOUND)
+    message(WARNING "Libsigmf is not installed. The internal libsigmf will be automatically build and install.")
+    include(ExternalProject)
+	
+    ExternalProject_Add(sigmf_external
+    	GIT_REPOSITORY https://github.com/deepsig/libsigmf.git
+    	PREFIX ${CMAKE_CURRENT_BINARY_DIR}/libsigmf
+        SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libsigmf
+        BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/libsigmf
+        CMAKE_ARGS "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
+                   "-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}"
+        INSTALL_COMMAND ${CMAKE_COMMAND} -E echo Skipping installation of libsigmf
+    )
+    add_library(sigmf INTERFACE)
+    ExternalProject_Get_Property(sigmf_external BINARY_DIR)
+    ExternalProject_Get_Property(sigmf_external SOURCE_DIR)
+ 
+	install(DIRECTORY ${SOURCE_DIR}/src/
+		DESTINATION include/sigmf)
+		
+	install(DIRECTORY ${SOURCE_DIR}/sigmf_protocols/
+		DESTINATION include/sigmf)
+	
+endif()
 
-if (NOT IS_DIRECTORY ${LIBSIGMF_INCLUDE_DIR})
-    message("Libsigmf not found! Downloading...")
-    execute_process(COMMAND git submodule update --init --recursive -- libsigmf
-	    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
-endif(NOT IS_DIRECTORY ${LIBSIGMF_INCLUDE_DIR})
+########################################################################
+# Install cmake search helper for this library
+########################################################################
+if(NOT CMAKE_MODULES_DIR)
+  set(CMAKE_MODULES_DIR lib${LIB_SUFFIX}/cmake)
+endif(NOT CMAKE_MODULES_DIR)
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libsigmf 
-	${CMAKE_BINARY_DIR}/sigmf-build
-	EXCLUDE_FROM_ALL)
-
-file(GLOB SIGMF_HEADER ${LIBSIGMF_INCLUDE_DIR}/*.h)
-set(SIGMF_GEN_HEADERS_DIR ${CMAKE_BINARY_DIR}/sigmf-build/include) 
-file(GLOB SIGMF_GEN_HEADERS ${SIGMF_GEN_HEADERS_DIR}/*.h)
-
-set(JSON_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libsigmf/external/json/include)
+install(FILES cmake/Modules/iqzipConfig.cmake
+    DESTINATION ${CMAKE_MODULES_DIR}/iqzip
+)
 
 ########################################################################
 # Create uninstall target
@@ -173,40 +178,3 @@ add_custom_target(uninstall
     ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake
 )
 
-########################################################################
-# Install cmake search helper for this library
-########################################################################
-if(NOT CMAKE_MODULES_DIR)
-  set(CMAKE_MODULES_DIR lib${LIB_SUFFIX}/cmake)
-endif(NOT CMAKE_MODULES_DIR)
-
-#install(FILES cmake/iqzipConfig.cmake
-#    DESTINATION ${CMAKE_MODULES_DIR}/iqzip
-#)
-
-########################################################################
-# Install Iqzip headers
-########################################################################
-install(DIRECTORY include/iqzip DESTINATION include)
-
-########################################################################
-# Install sigmf headers
-########################################################################
-install(FILES ${SIGMF_HEADER}
-	DESTINATION include/libsigmf)
-install(FILES ${SIGMF_GEN_HEADERS} 
-	DESTINATION include/iqzip/libsigmf)
-
-########################################################################
-# Install flatbuffers headers
-########################################################################
-install(DIRECTORY ${FLATBUFFERS_INCLUDE_DIR}/flatbuffers
-	DESTINATION include
-	FILES_MATCHING PATTERN "*.h")
-
-########################################################################
-# Install json headers
-########################################################################
-install(DIRECTORY ${JSON_INCLUDE_DIR}/nlohmann
-	DESTINATION include
-	FILES_MATCHING PATTERN "*.hpp*")

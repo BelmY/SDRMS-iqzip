@@ -26,7 +26,7 @@ ubuntu_1810_build:
         - apt-get update -qq -y
         - apt-get install -qq -y software-properties-common
         - add-apt-repository ppa:team-xbmc/ppa 
-        - apt-get update -qq -y && apt-get install -q -y cmake g++ gcc git flatbuffers flatbuffers-dev nlohmann-json-dev 
+        - apt-get update -qq -y && apt-get install -q -y cmake g++ gcc git 
   stage: building
   allow_failure: true
   script:

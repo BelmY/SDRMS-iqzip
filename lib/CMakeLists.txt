@@ -31,12 +31,24 @@ list(APPEND iqzip_sources
 	iqzip_compressor.cpp
 	iqzip_meta.cpp
 )
-
+    
 list(APPEND IQZIP_INCLUDE_DIRS
-	${PROJECT_BINARY_DIR}/sigmf-build/include
 	${PROJECT_SOURCE_DIR}/include
 	${PROJECT_SOURCE_DIR}/libaec/include
+	${PROJECT_SOURCE_DIR}/libsigmf
+	${PROJECT_SOURCE_DIR}/libsigmf/sigmf_protocols
+	${PROJECT_SOURCE_DIR}/libsigmf/external/flatbuffers/include
+	${PROJECT_SOURCE_DIR}/libsigmf/src
+	${PROJECT_SOURCE_DIR}/libsigmf/external/json/include
 )
+
+set_source_files_properties( 
+	${PROJECT_SOURCE_DIR}/libsigmf
+	${PROJECT_SOURCE_DIR}/libsigmf/sigmf_protocols
+	${PROJECT_SOURCE_DIR}/libsigmf/external/flatbuffers/include
+	${PROJECT_SOURCE_DIR}/libsigmf/src
+	${PROJECT_SOURCE_DIR}/libsigmf/external/json/include 
+	PROPERTIES GENERATED TRUE)
 
 if(NOT iqzip_sources)
 	MESSAGE(STATUS "No C++ sources... skipping lib/")
@@ -50,7 +62,8 @@ if(APPLE)
 endif(APPLE)
 
 add_library(iqzip SHARED ${iqzip_sources})
-target_link_libraries (iqzip aec flatbuffers libsigmf)
+add_dependencies(iqzip aec sigmf_external)
+target_link_libraries (iqzip aec)
 target_include_directories(iqzip PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(iqzip BEFORE PUBLIC "$<BUILD_INTERFACE:${IQZIP_INCLUDE_DIRS}>" $<INSTALL_INTERFACE:${IQZIP_INCLUDE_DIRS}>)
 set_target_properties(iqzip PROPERTIES VERSION 0.0.10 SOVERSION 0)

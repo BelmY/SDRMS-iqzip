@@ -1,3 +1,6 @@
+INCLUDE(FindPkgConfig)
+PKG_CHECK_MODULES(PC_IQZIP iqzip)
+
 if(DEFINED INCLUDED_IQZIP_CONFIG_CMAKE)
     return()
 endif()
@@ -32,11 +35,33 @@ endif()
 set(LIB_SUFFIX ${LIB_SUFFIX} CACHE STRING "lib directory suffix")
 
 ########################################################################
-# In-tree settings
+# Search for iqzip
 ########################################################################
-if (IQZIP_IN_TREE_SOURCE_DIR)
-    set(IQZIP_ROOT ${CMAKE_INSTALL_PREFIX})
-    set(Iqzip_INCLUDE_DIRS ${IQZIP_IN_TREE_SOURCE_DIR}/include)
-    set(Iqzip_LIBRARIES Iqzip)
-    return()
-endif (IQZIP_IN_TREE_SOURCE_DIR)
+
+FIND_PATH(
+    IQZIP_INCLUDE_DIRS
+    NAMES iqzip/iqzip.h
+    HINTS $ENV{IQZIP_DIR}/include
+        ${PC_IQZIP_INCLUDEDIR}
+    PATHS ${CMAKE_INSTALL_PREFIX}/include
+          /usr/local/include
+          /usr/include
+)
+
+FIND_LIBRARY(
+    IQZIP_LIBRARIES
+    NAMES iqzip
+    HINTS $ENV{IQZIP_DIR}/lib
+        ${PC_IQZIP_LIBDIR}
+    PATHS ${CMAKE_INSTALL_PREFIX}/lib
+          ${CMAKE_INSTALL_PREFIX}/lib64
+          /usr/local/lib
+          /usr/local/lib64
+          /usr/lib
+          /usr/lib64
+)
+
+INCLUDE(FindPackageHandleStandardArgs)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(IQZIP DEFAULT_MSG IQZIP_LIBRARIES IQZIP_INCLUDE_DIRS)
+MARK_AS_ADVANCED(IQZIP_LIBRARIES IQZIP_INCLUDE_DIRS)
+
