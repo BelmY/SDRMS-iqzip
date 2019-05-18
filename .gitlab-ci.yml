@@ -6,7 +6,7 @@ opensuse_build:
   image: opensuse/tumbleweed
 
   before_script:
-      - zypper in -y cmake gcc-c++ gcc git flatbuffers-devel nlohmann_json-devel
+      - zypper in -y cmake gcc-c++ gcc git flatbuffers-devel nlohmann_json-devel libtar-devel
 
   stage: building
   script:
@@ -26,7 +26,7 @@ ubuntu_1810_build:
         - apt-get update -qq -y
         - apt-get install -qq -y software-properties-common
         - add-apt-repository ppa:team-xbmc/ppa 
-        - apt-get update -qq -y && apt-get install -q -y cmake g++ gcc git 
+        - apt-get update -qq -y && apt-get install -q -y cmake g++ gcc git libtar-dev
   stage: building
   allow_failure: true
   script:
@@ -41,7 +41,7 @@ pages:
   image: opensuse/tumbleweed
 
   before_script:
-      - zypper in -y cmake gcc-c++ gcc git flatbuffers-devel nlohmann_json-devel doxygen
+      - zypper in -y cmake gcc-c++ gcc git flatbuffers-devel nlohmann_json-devel doxygen libtar-dev
 
   stage: documentation
   script:

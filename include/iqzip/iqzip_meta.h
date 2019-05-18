@@ -21,6 +21,10 @@
 #ifndef IQZIP_META_H_
 #define IQZIP_META_H_
 
+extern "C" {
+	#include <libtar.h>
+}
+
 #include <stdint.h>
 #include <string>
 
@@ -177,6 +181,9 @@ namespace iqzip
 
       void
       parse_json (std::string filename);
+
+      void
+	  create_tar(const std::string tar_filename, const std::string src_file);
 
       sigmf::VariadicDataClass<core::GlobalT>&
       get_sigmf_global_segment ();

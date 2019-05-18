@@ -53,6 +53,7 @@ for the creation or parsing of SigMF metafiles. Currently, the iqzip metafile AP
 * G++ (with C++14 support)
 * libaec (will be dowloaded automatically during building)
 * libsigmf (will be dowloaded automatically during building)
+* libtar
 
 ## Installation
 

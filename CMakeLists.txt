@@ -156,6 +156,14 @@ if(NOT SIGMF_FOUND)
 endif()
 
 ########################################################################
+# Find libtar
+########################################################################
+find_package(Libtar REQUIRED)
+if(NOT LIBTAR_FOUND)
+	message("Libtar is required to build iqzip, but not found.")
+endif()
+
+########################################################################
 # Install cmake search helper for this library
 ########################################################################
 if(NOT CMAKE_MODULES_DIR)

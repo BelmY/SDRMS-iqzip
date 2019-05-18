@@ -63,7 +63,7 @@ endif(APPLE)
 
 add_library(iqzip SHARED ${iqzip_sources})
 add_dependencies(iqzip aec sigmf_external)
-target_link_libraries (iqzip aec)
+target_link_libraries (iqzip aec tar)
 target_include_directories(iqzip PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(iqzip BEFORE PUBLIC "$<BUILD_INTERFACE:${IQZIP_INCLUDE_DIRS}>" $<INSTALL_INTERFACE:${IQZIP_INCLUDE_DIRS}>)
 set_target_properties(iqzip PROPERTIES VERSION 0.0.10 SOVERSION 0)

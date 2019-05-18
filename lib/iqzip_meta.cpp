@@ -335,6 +335,24 @@ namespace iqzip
       d_sigmf = as_json;
     }
 
+    void
+	iqzip_meta::create_tar(const std::string tar_filename,
+						   const std::string src_file) {
+    	TAR *pTar;
+    	std::string filename_t = src_file;
+
+    	const size_t last_slash_idx = filename_t.find_last_of("//");
+    	if (std::string::npos != last_slash_idx)
+    	{
+    		filename_t.erase(0, last_slash_idx + 1);
+    	}
+
+		tar_open(&pTar, tar_filename.c_str(), NULL, 01 | 0100, 0644, TAR_GNU);
+		tar_append_file(pTar, src_file.c_str(), filename_t.c_str());
+		tar_append_eof(pTar);
+		tar_close(pTar);
+    }
+
     sigmf::VariadicDataClass<core::GlobalT>&
     iqzip_meta::get_sigmf_global_segment ()
     {
