@@ -129,6 +129,8 @@ endif(DOXYGEN_FOUND)
 ########################################################################
 # Search for libsigmf
 ########################################################################
+find_package(FlatBuffers REQUIRED)
+find_package(nlohmann_json REQUIRED)
 find_package(SigMF REQUIRED)
 if(NOT SIGMF_FOUND)
     message(WARNING "Libsigmf is not installed. The internal libsigmf will be automatically build and install.")
@@ -150,7 +152,7 @@ if(NOT SIGMF_FOUND)
 	install(DIRECTORY ${SOURCE_DIR}/src/
 		DESTINATION include/sigmf)
 		
-	install(DIRECTORY ${SOURCE_DIR}/sigmf_protocols/
+	install(DIRECTORY ${SOURCE_DIR}/sigmf_protocols
 		DESTINATION include/sigmf)
 	
 endif()
