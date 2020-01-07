@@ -19,15 +19,16 @@
 # Boston, MA 02110-1301, USA.
 
 list(APPEND iqzip_sources
-	iqzip.cpp
+    iqzip.cpp
 )
+
 
 add_executable(iqzip-compress ${iqzip_sources})
 set_target_properties(iqzip-compress PROPERTIES OUTPUT_NAME "iqzip")
 target_link_libraries(iqzip-compress iqzip)
 
 list(APPEND iqzip_sigmf_sources
-	iqzip_sigmf.cpp
+    iqzip_sigmf.cpp
 )
 
 add_executable(iqzip-sigmf ${iqzip_sigmf_sources})

@@ -28,9 +28,9 @@ extern "C" {
 #include <stdint.h>
 #include <string>
 
-#include <sigmf_protocols/sigmf_core_generated.h>
-#include <sigmf_protocols/sigmf_antenna_generated.h>
-#include <sigmf.h>
+#include <sigmf/sigmf_core_generated.h>
+#include <sigmf/sigmf_antenna_generated.h>
+#include <sigmf/sigmf.h>
 
 namespace iqzip
 {

@@ -19,6 +19,7 @@
  */
 
 #include <iqzip/iqzip_meta.h>
+#include <sigmf/annotation.h>
 
 #include <stdexcept>
 #include <cstring>
@@ -291,7 +292,7 @@ namespace iqzip
                                            uint64_t sample_count)
     {
       auto new_annotation = sigmf::VariadicDataClass<core::AnnotationT> ();
-      new_annotation.access<core::AnnotationT> ().start_sample = sample_start;
+      new_annotation.access<core::AnnotationT> ().sample_start = sample_start;
       new_annotation.access<core::AnnotationT> ().sample_count = sample_count;
       d_sigmf.annotations.emplace_back (new_annotation);
     }
@@ -305,7 +306,7 @@ namespace iqzip
                                            double freq_upper_edge)
     {
       auto new_annotation = sigmf::VariadicDataClass<core::AnnotationT> ();
-      new_annotation.access<core::AnnotationT> ().start_sample = sample_start;
+      new_annotation.access<core::AnnotationT> ().sample_start = sample_start;
       new_annotation.access<core::AnnotationT> ().sample_count = sample_count;
       new_annotation.access<core::AnnotationT> ().generator = generator;
       new_annotation.access<core::AnnotationT> ().comment = comment;

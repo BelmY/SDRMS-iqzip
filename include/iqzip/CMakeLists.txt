@@ -18,21 +18,15 @@
 # the Free Software Foundation, Inc., 51 Franklin Street,
 # Boston, MA 02110-1301, USA.
 
-
-########################################################################
-# Install public header files
-########################################################################
-list(APPEND HEADER_FILES
-    ccsds_packet_primary_header.h
-    compression_identification_packet.h
-    iqzip_compression_header.h
-    iqzip_compressor.h
-    iqzip_decompressor.h
-    iqzip_meta.h
-    iqzip.h
-)
-
-install(FILES
-    ${HEADER_FILES}
-    DESTINATION include/iqzip
-)
+# ##############################################################################
+# Install Iqzip headers
+# ##############################################################################
+install(FILES 
+        ccsds_packet_primary_header.h
+        compression_identification_packet.h
+        iqzip_compression_header.h
+        iqzip_compressor.h
+        iqzip_decompressor.h
+        iqzip.h
+        iqzip_meta.h
+        DESTINATION include/iqzip)

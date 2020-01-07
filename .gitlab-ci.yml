@@ -1,61 +1,84 @@
 stages:
-  - building
+  - build
   - documentation
 
-opensuse_build:
+openSUSE:
+  stage: build
   image: opensuse/tumbleweed
 
   before_script:
-      - zypper in -y cmake gcc-c++ gcc git flatbuffers-devel nlohmann_json-devel libtar-devel
+    - zypper in -y cmake gcc-c++ gcc git libaec-devel libtar-devel
+    - git clone --recurse-submodules https://github.com/deepsig/libsigmf.git
+    - cd libsigmf
+    - mkdir build
+    - cd build
+    - cmake -DCMAKE_INSTALL_PREFIX=/usr ..
+    - make -j $(nproc --all)
+    - make install
+    - cd ../..
 
-  stage: building
   script:
-        - mkdir -p build
-        - cd build
-        - cmake -DCMAKE_INSTALL_PREFIX=/usr -DLIB_SUFFIX=64 -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
-        - make
-        - make install
+    - mkdir -p build
+    - cd build
+    - cmake -DCMAKE_INSTALL_PREFIX=/usr -DLIB_SUFFIX=64 -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
+    - make
+    - make install
 
-ubuntu_1810_build:
-  image: ubuntu:18.10
-  
+debian:
+  stage: build
+  image: debian:buster
   variables:
         DEBIAN_FRONTEND: "noninteractive"
 
   before_script: 
-        - apt-get update -qq -y
-        - apt-get install -qq -y software-properties-common
-        - add-apt-repository ppa:team-xbmc/ppa 
-        - apt-get update -qq -y && apt-get install -q -y cmake g++ gcc git libtar-dev
-  stage: building
-  allow_failure: true
+    - apt-get update -qq -y
+    - apt-get install -q -y cmake g++ gcc git libaec-dev libtar-dev
+    - git clone --recurse-submodules https://github.com/deepsig/libsigmf.git
+    - cd libsigmf
+    - mkdir build
+    - cd build
+    - cmake -DCMAKE_INSTALL_PREFIX=/usr ..
+    - make -j $(nproc --all)
+    - make install
+    - cd ../..
+
   script:
-        - mkdir -p build
-        - cd build
-        - cmake  ..
-        - make
-        - make install
-        - ldconfig
+    - mkdir -p build
+    - cd build
+    - cmake  ..
+    - make
+    - make install
+    - ldconfig
 
 pages:
-  image: opensuse/tumbleweed
+  stage: documentation
+  image: debian:buster
 
   before_script:
-      - zypper in -y cmake gcc-c++ gcc git flatbuffers-devel nlohmann_json-devel doxygen libtar-dev
+    - apt-get update -qq -y
+    - apt-get install -q -y cmake g++ gcc git libaec-dev libtar-dev
+    - git clone --recurse-submodules https://github.com/deepsig/libsigmf.git
+    - cd libsigmf
+    - mkdir build
+    - cd build
+    - cmake -DCMAKE_INSTALL_PREFIX=/usr ..
+    - make -j $(nproc --all)
+    - make install
+    - cd ../..
 
-  stage: documentation
   script:
-      - mkdir -p build
-      - cd build
-      - rm -rf *
-      - cmake  .. 
-      - make doxygen_target
-      - cd ..
-      - rm -rf public/*
-      - mv build/docs/doxygen/html public/  
+    - mkdir -p build
+    - cd build
+    - rm -rf *
+    - cmake  .. 
+    - make doxygen_target
+    - cd ..
+    - rm -rf public/*
+    - mv build/docs/doxygen/html public/
+
   artifacts:
-      paths:
+    paths:
       - public
   only:
-  - master
+    - master
 

@@ -1,3 +1,0 @@
-[submodule "libsigmf"]
-	path = libsigmf
-	url = https://github.com/deepsig/libsigmf.git
