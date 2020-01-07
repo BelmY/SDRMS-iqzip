@@ -22,374 +22,374 @@
 
 #include <iqzip/iqzip.h>
 
-Iqzip::Iqzip () :
-        d_version (0),
-        d_type (0),
-        d_sec_hdr_flag (0),
-        d_apid (0),
-        d_sequence_flags (0),
-        d_packet_sequence_count (0),
-        d_packet_data_length (0),
-        d_grouping_data_length (0),
-        d_compression_tech_id (0),
-        d_reference_sample_interval (0),
-        d_preprocessor_status (0),
-        d_predictor_type (0),
-        d_mapper_type (0),
-        d_block_size (0),
-        d_data_sense (0),
-        d_sample_resolution (0),
-        d_cds_per_packet (0),
-        d_restricted_codes (0),
-        d_endianness (0)
+Iqzip::Iqzip() :
+    d_version(0),
+    d_type(0),
+    d_sec_hdr_flag(0),
+    d_apid(0),
+    d_sequence_flags(0),
+    d_packet_sequence_count(0),
+    d_packet_data_length(0),
+    d_grouping_data_length(0),
+    d_compression_tech_id(0),
+    d_reference_sample_interval(0),
+    d_preprocessor_status(0),
+    d_predictor_type(0),
+    d_mapper_type(0),
+    d_block_size(0),
+    d_data_sense(0),
+    d_sample_resolution(0),
+    d_cds_per_packet(0),
+    d_restricted_codes(0),
+    d_endianness(0)
 {
-  d_iq_header = iqzip::compression::iqzip_compression_header ();
+    d_iq_header = iqzip::compression::iqzip_compression_header();
 }
 ;
 
-Iqzip::Iqzip (uint8_t version, uint8_t type, uint8_t sec_hdr_flag,
-              uint16_t apid, uint8_t sequence_flags,
-              uint16_t packet_sequence_count, uint16_t packet_data_length,
-              uint16_t grouping_data_length, uint8_t compression_tech_id,
-              uint8_t reference_sample_interval, uint8_t preprocessor_status,
-              uint8_t predictor_type, uint8_t mapper_type, uint16_t block_size,
-              uint8_t data_sense, uint8_t sample_resolution,
-              uint16_t cds_per_packet, uint8_t restricted_codes,
-              uint8_t endianness) :
-        d_version (version),
-        d_type (type),
-        d_sec_hdr_flag (sec_hdr_flag),
-        d_apid (apid),
-        d_sequence_flags (sequence_flags),
-        d_packet_sequence_count (packet_sequence_count),
-        d_packet_data_length (packet_data_length),
-        d_grouping_data_length (grouping_data_length),
-        d_compression_tech_id (compression_tech_id),
-        d_reference_sample_interval (reference_sample_interval),
-        d_preprocessor_status (preprocessor_status),
-        d_predictor_type (predictor_type),
-        d_mapper_type (mapper_type),
-        d_block_size (block_size),
-        d_data_sense (data_sense),
-        d_sample_resolution (sample_resolution),
-        d_cds_per_packet (cds_per_packet),
-        d_restricted_codes (restricted_codes),
-        d_endianness (endianness)
+Iqzip::Iqzip(uint8_t version, uint8_t type, uint8_t sec_hdr_flag,
+             uint16_t apid, uint8_t sequence_flags,
+             uint16_t packet_sequence_count, uint16_t packet_data_length,
+             uint16_t grouping_data_length, uint8_t compression_tech_id,
+             uint8_t reference_sample_interval, uint8_t preprocessor_status,
+             uint8_t predictor_type, uint8_t mapper_type, uint16_t block_size,
+             uint8_t data_sense, uint8_t sample_resolution,
+             uint16_t cds_per_packet, uint8_t restricted_codes,
+             uint8_t endianness) :
+    d_version(version),
+    d_type(type),
+    d_sec_hdr_flag(sec_hdr_flag),
+    d_apid(apid),
+    d_sequence_flags(sequence_flags),
+    d_packet_sequence_count(packet_sequence_count),
+    d_packet_data_length(packet_data_length),
+    d_grouping_data_length(grouping_data_length),
+    d_compression_tech_id(compression_tech_id),
+    d_reference_sample_interval(reference_sample_interval),
+    d_preprocessor_status(preprocessor_status),
+    d_predictor_type(predictor_type),
+    d_mapper_type(mapper_type),
+    d_block_size(block_size),
+    d_data_sense(data_sense),
+    d_sample_resolution(sample_resolution),
+    d_cds_per_packet(cds_per_packet),
+    d_restricted_codes(restricted_codes),
+    d_endianness(endianness)
 {
-  /* Initialize IQ CCSDS header */
-  d_iq_header = iqzip::compression::iqzip_compression_header (
-      d_version, d_type, d_sec_hdr_flag, d_apid, d_sequence_flags,
-      d_packet_sequence_count, d_packet_data_length, d_grouping_data_length,
-      d_compression_tech_id, d_reference_sample_interval, d_preprocessor_status,
-      d_predictor_type, d_mapper_type, d_block_size, d_data_sense,
-      d_sample_resolution, d_cds_per_packet, d_restricted_codes, d_endianness);
+    /* Initialize IQ CCSDS header */
+    d_iq_header = iqzip::compression::iqzip_compression_header(
+                      d_version, d_type, d_sec_hdr_flag, d_apid, d_sequence_flags,
+                      d_packet_sequence_count, d_packet_data_length, d_grouping_data_length,
+                      d_compression_tech_id, d_reference_sample_interval, d_preprocessor_status,
+                      d_predictor_type, d_mapper_type, d_block_size, d_data_sense,
+                      d_sample_resolution, d_cds_per_packet, d_restricted_codes, d_endianness);
 }
 
-Iqzip::~Iqzip ()
+Iqzip::~Iqzip()
 {
 }
 
 void
-Iqzip::init_aec_stream (void)
+Iqzip::init_aec_stream(void)
 {
-  d_strm.avail_in = 0;
-  d_strm.avail_out = CHUNK;
-  d_strm.bits_per_sample = d_sample_resolution;
-  d_strm.block_size = d_block_size;
-  d_strm.flags = 0;
-  /* Always use 3 bytes for 24bits samples and don't enforce */
-  d_strm.flags |= AEC_DATA_3BYTE;
-  d_strm.flags |= AEC_NOT_ENFORCE;
-  /* Shift option bit to corresponding bit in flag to initialize flags */
-  d_strm.flags |= (~(d_data_sense << (uint8_t) log2 (AEC_DATA_SIGNED)))
-      & AEC_DATA_SIGNED;
-  d_strm.flags |= (~(d_endianness << (uint8_t) log2 (AEC_DATA_MSB)))
-      & AEC_DATA_MSB;
-  d_strm.flags |= d_preprocessor_status << (uint8_t) log2 (AEC_DATA_PREPROCESS);
-  d_strm.flags |= d_restricted_codes << (uint8_t) log2 (AEC_RESTRICTED);
-  //d_strm.flags |= AEC_PAD_RSI;
-  d_strm.next_in = nullptr;
-  d_strm.next_out = nullptr;
-  d_strm.rsi = d_reference_sample_interval;
-  d_strm.state = nullptr;
-  d_strm.total_in = 0;
-  d_strm.total_out = 0;
+    d_strm.avail_in = 0;
+    d_strm.avail_out = CHUNK;
+    d_strm.bits_per_sample = d_sample_resolution;
+    d_strm.block_size = d_block_size;
+    d_strm.flags = 0;
+    /* Always use 3 bytes for 24bits samples and don't enforce */
+    d_strm.flags |= AEC_DATA_3BYTE;
+    d_strm.flags |= AEC_NOT_ENFORCE;
+    /* Shift option bit to corresponding bit in flag to initialize flags */
+    d_strm.flags |= (~(d_data_sense << (uint8_t) log2(AEC_DATA_SIGNED)))
+                    & AEC_DATA_SIGNED;
+    d_strm.flags |= (~(d_endianness << (uint8_t) log2(AEC_DATA_MSB)))
+                    & AEC_DATA_MSB;
+    d_strm.flags |= d_preprocessor_status << (uint8_t) log2(AEC_DATA_PREPROCESS);
+    d_strm.flags |= d_restricted_codes << (uint8_t) log2(AEC_RESTRICTED);
+    //d_strm.flags |= AEC_PAD_RSI;
+    d_strm.next_in = nullptr;
+    d_strm.next_out = nullptr;
+    d_strm.rsi = d_reference_sample_interval;
+    d_strm.state = nullptr;
+    d_strm.total_in = 0;
+    d_strm.total_out = 0;
 }
 
 uint32_t
-Iqzip::getChunk () const
+Iqzip::getChunk() const
 {
-  return CHUNK;
+    return CHUNK;
 }
 
 void
-Iqzip::setChunk (uint32_t chunk = 10485760)
+Iqzip::setChunk(uint32_t chunk = 10485760)
 {
-  CHUNK = chunk;
+    CHUNK = chunk;
 }
 
 uint16_t
-Iqzip::getApid () const
+Iqzip::getApid() const
 {
-  return d_apid;
+    return d_apid;
 }
 
 void
-Iqzip::setApid (uint16_t apid)
+Iqzip::setApid(uint16_t apid)
 {
-  d_apid = apid;
+    d_apid = apid;
 }
 
 uint16_t
-Iqzip::getBlockSize () const
+Iqzip::getBlockSize() const
 {
-  return d_block_size;
+    return d_block_size;
 }
 
 void
-Iqzip::setBlockSize (uint16_t blockSize)
+Iqzip::setBlockSize(uint16_t blockSize)
 {
-  d_block_size = blockSize;
+    d_block_size = blockSize;
 }
 
 uint16_t
-Iqzip::getCdsPerPacket () const
+Iqzip::getCdsPerPacket() const
 {
-  return d_cds_per_packet;
+    return d_cds_per_packet;
 }
 
 void
-Iqzip::setCdsPerPacket (uint16_t cdsPerPacket)
+Iqzip::setCdsPerPacket(uint16_t cdsPerPacket)
 {
-  d_cds_per_packet = cdsPerPacket;
+    d_cds_per_packet = cdsPerPacket;
 }
 
 uint8_t
-Iqzip::getCompressionTechId () const
+Iqzip::getCompressionTechId() const
 {
-  return d_compression_tech_id;
+    return d_compression_tech_id;
 }
 
 void
-Iqzip::setCompressionTechId (uint8_t compressionTechId)
+Iqzip::setCompressionTechId(uint8_t compressionTechId)
 {
-  d_compression_tech_id = compressionTechId;
+    d_compression_tech_id = compressionTechId;
 }
 
 uint8_t
-Iqzip::getDataSense () const
+Iqzip::getDataSense() const
 {
-  return d_data_sense;
+    return d_data_sense;
 }
 
 void
-Iqzip::setDataSense (uint8_t dataSense)
+Iqzip::setDataSense(uint8_t dataSense)
 {
-  d_data_sense = dataSense;
+    d_data_sense = dataSense;
 }
 
 uint8_t
-Iqzip::getEndianness () const
+Iqzip::getEndianness() const
 {
-  return d_endianness;
+    return d_endianness;
 }
 
 void
-Iqzip::setEndianness (uint8_t endianness)
+Iqzip::setEndianness(uint8_t endianness)
 {
-  d_endianness = endianness;
+    d_endianness = endianness;
 }
 
 uint16_t
-Iqzip::getGroupingDataLength () const
+Iqzip::getGroupingDataLength() const
 {
-  return d_grouping_data_length;
+    return d_grouping_data_length;
 }
 
 void
-Iqzip::setGroupingDataLength (uint16_t groupingDataLength)
+Iqzip::setGroupingDataLength(uint16_t groupingDataLength)
 {
-  d_grouping_data_length = groupingDataLength;
+    d_grouping_data_length = groupingDataLength;
 }
 
-const iqzip::compression::iqzip_compression_header&
-Iqzip::getIqHeader () const
+const iqzip::compression::iqzip_compression_header &
+Iqzip::getIqHeader() const
 {
-  return d_iq_header;
+    return d_iq_header;
 }
 
 void
-Iqzip::setIqHeader (
-    const iqzip::compression::iqzip_compression_header& iqHeader)
+Iqzip::setIqHeader(
+    const iqzip::compression::iqzip_compression_header &iqHeader)
 {
-  d_iq_header = iqHeader;
+    d_iq_header = iqHeader;
 }
 
 uint8_t
-Iqzip::getMapperType () const
+Iqzip::getMapperType() const
 {
-  return d_mapper_type;
+    return d_mapper_type;
 }
 
 void
-Iqzip::setMapperType (uint8_t mapperType)
+Iqzip::setMapperType(uint8_t mapperType)
 {
-  d_mapper_type = mapperType;
+    d_mapper_type = mapperType;
 }
 
 uint16_t
-Iqzip::getPacketDataLength () const
+Iqzip::getPacketDataLength() const
 {
-  return d_packet_data_length;
+    return d_packet_data_length;
 }
 
 void
-Iqzip::setPacketDataLength (uint16_t packetDataLength)
+Iqzip::setPacketDataLength(uint16_t packetDataLength)
 {
-  d_packet_data_length = packetDataLength;
+    d_packet_data_length = packetDataLength;
 }
 
 uint16_t
-Iqzip::getPacketSequenceCount () const
+Iqzip::getPacketSequenceCount() const
 {
-  return d_packet_sequence_count;
+    return d_packet_sequence_count;
 }
 
 void
-Iqzip::setPacketSequenceCount (uint16_t packetSequenceCount)
+Iqzip::setPacketSequenceCount(uint16_t packetSequenceCount)
 {
-  d_packet_sequence_count = packetSequenceCount;
+    d_packet_sequence_count = packetSequenceCount;
 }
 
 uint8_t
-Iqzip::getPredictorType () const
+Iqzip::getPredictorType() const
 {
-  return d_predictor_type;
+    return d_predictor_type;
 }
 
 void
-Iqzip::setPredictorType (uint8_t predictorType)
+Iqzip::setPredictorType(uint8_t predictorType)
 {
-  d_predictor_type = predictorType;
+    d_predictor_type = predictorType;
 }
 
 uint8_t
-Iqzip::getPreprocessorStatus () const
+Iqzip::getPreprocessorStatus() const
 {
-  return d_preprocessor_status;
+    return d_preprocessor_status;
 }
 
 void
-Iqzip::setPreprocessorStatus (uint8_t preprocessorStatus)
+Iqzip::setPreprocessorStatus(uint8_t preprocessorStatus)
 {
-  d_preprocessor_status = preprocessorStatus;
+    d_preprocessor_status = preprocessorStatus;
 }
 
 uint8_t
-Iqzip::getReferenceSampleInterval () const
+Iqzip::getReferenceSampleInterval() const
 {
-  return d_reference_sample_interval;
+    return d_reference_sample_interval;
 }
 
 void
-Iqzip::setReferenceSampleInterval (uint8_t referenceSampleInterval)
+Iqzip::setReferenceSampleInterval(uint8_t referenceSampleInterval)
 {
-  d_reference_sample_interval = referenceSampleInterval;
+    d_reference_sample_interval = referenceSampleInterval;
 }
 
 uint8_t
-Iqzip::getRestrictedCodes () const
+Iqzip::getRestrictedCodes() const
 {
-  return d_restricted_codes;
+    return d_restricted_codes;
 }
 
 void
-Iqzip::setRestrictedCodes (uint8_t restrictedCodes)
+Iqzip::setRestrictedCodes(uint8_t restrictedCodes)
 {
-  d_restricted_codes = restrictedCodes;
+    d_restricted_codes = restrictedCodes;
 }
 
 uint8_t
-Iqzip::getSampleResolution () const
+Iqzip::getSampleResolution() const
 {
-  return d_sample_resolution;
+    return d_sample_resolution;
 }
 
 void
-Iqzip::setSampleResolution (uint8_t sampleResolution)
+Iqzip::setSampleResolution(uint8_t sampleResolution)
 {
-  d_sample_resolution = sampleResolution;
+    d_sample_resolution = sampleResolution;
 }
 
 uint8_t
-Iqzip::getSecHdrFlag () const
+Iqzip::getSecHdrFlag() const
 {
-  return d_sec_hdr_flag;
+    return d_sec_hdr_flag;
 }
 
 void
-Iqzip::setSecHdrFlag (uint8_t secHdrFlag)
+Iqzip::setSecHdrFlag(uint8_t secHdrFlag)
 {
-  d_sec_hdr_flag = secHdrFlag;
+    d_sec_hdr_flag = secHdrFlag;
 }
 
 uint8_t
-Iqzip::getSequenceFlags () const
+Iqzip::getSequenceFlags() const
 {
-  return d_sequence_flags;
+    return d_sequence_flags;
 }
 
 void
-Iqzip::setSequenceFlags (uint8_t sequenceFlags)
+Iqzip::setSequenceFlags(uint8_t sequenceFlags)
 {
-  d_sequence_flags = sequenceFlags;
+    d_sequence_flags = sequenceFlags;
 }
 
-const aec_stream&
-Iqzip::getStrm () const
+const aec_stream &
+Iqzip::getStrm() const
 {
-  return d_strm;
+    return d_strm;
 }
 
 void
-Iqzip::setStrm (const aec_stream& strm)
+Iqzip::setStrm(const aec_stream &strm)
 {
-  d_strm = strm;
+    d_strm = strm;
 }
 
 uint8_t
-Iqzip::getType () const
+Iqzip::getType() const
 {
-  return d_type;
+    return d_type;
 }
 
 void
-Iqzip::setType (uint8_t type)
+Iqzip::setType(uint8_t type)
 {
-  d_type = type;
+    d_type = type;
 }
 
 uint8_t
-Iqzip::getVersion () const
+Iqzip::getVersion() const
 {
-  return d_version;
+    return d_version;
 }
 
 void
-Iqzip::setVersion (uint8_t version)
+Iqzip::setVersion(uint8_t version)
 {
-  d_version = version;
+    d_version = version;
 }
 
-const std::ifstream&
-Iqzip::getInputStream () const
+const std::ifstream &
+Iqzip::getInputStream() const
 {
-  return input_stream;
+    return input_stream;
 }
 
-const std::ofstream&
-Iqzip::getOutputStream () const
+const std::ofstream &
+Iqzip::getOutputStream() const
 {
-  return output_stream;
+    return output_stream;
 }
 

@@ -17,15 +17,17 @@
 #include <iqzip/iqzip_meta.h>
 #include <iostream>
 
-int main() {
+int main()
+{
 
     iqzip::meta::iqzip_meta meta = iqzip::meta::iqzip_meta("u8", "0.0.1");
-    std::cout << "My sigmf: " << meta.get_sigmf_global_segment().access<core::GlobalT>().datatype << std::endl;
+    std::cout << "My sigmf: " <<
+              meta.get_sigmf_global_segment().access<core::GlobalT>().datatype << std::endl;
 
     meta.append_capture_segment(10);
     meta.append_capture_segment(20);
     meta.append_capture_segment(25);
-    meta.set_capture_global_index(20,1);
+    meta.set_capture_global_index(20, 1);
 
     // Make it a json (from modernjson) object and verify its output
     std::stringstream json_output;

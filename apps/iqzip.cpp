@@ -74,130 +74,132 @@
 #define CHUNK 10485760
 
 template<class T>
-  int
-  get_param (T *param, int *iarg, char *argv[])
-  {
-    if (strlen (argv[*iarg]) == 2) {
-      (*iarg)++;
-      if (argv[*iarg][0] == '-')
-        return 1;
-      else
-        *param = atoi (argv[*iarg]);
+int
+get_param(T *param, int *iarg, char *argv[])
+{
+    if (strlen(argv[*iarg]) == 2) {
+        (*iarg)++;
+        if (argv[*iarg][0] == '-') {
+            return 1;
+        }
+        else {
+            *param = atoi(argv[*iarg]);
+        }
     }
     else {
-      *param = atoi (&argv[*iarg][2]);
+        *param = atoi(&argv[*iarg][2]);
     }
     return 0;
-  }
+}
 
 int
-main (int argc, char *argv[])
+main(int argc, char *argv[])
 {
-  char *infn, *outfn;
-  int dflag;
-  char *opt;
-  int iarg;
+    char *infn, *outfn;
+    int dflag;
+    char *opt;
+    int iarg;
 
-  dflag = 0;
-  iarg = 1;
+    dflag = 0;
+    iarg = 1;
 
-  uint8_t enable_preprocessing = 1;
-  uint8_t endianness = 1;
-  uint8_t data_sense = 1;
-  uint8_t restricted_codes = 0;
-  uint8_t sample_resolution = 8;
-  uint8_t reference_sample_interval = 1;
-  uint16_t block_size = 64;
+    uint8_t enable_preprocessing = 1;
+    uint8_t endianness = 1;
+    uint8_t data_sense = 1;
+    uint8_t restricted_codes = 0;
+    uint8_t sample_resolution = 8;
+    uint8_t reference_sample_interval = 1;
+    uint16_t block_size = 64;
 
-  while (iarg < argc - 2) {
-    opt = argv[iarg];
-    if (opt[0] != '-') {
-      goto FAIL;
+    while (iarg < argc - 2) {
+        opt = argv[iarg];
+        if (opt[0] != '-') {
+            goto FAIL;
+        }
+        switch (opt[1]) {
+        case 'N':
+            enable_preprocessing = 0;
+            break;
+        case 'd':
+            dflag = 1;
+            break;
+        case 'j':
+            if (get_param(&block_size, &iarg, argv)) {
+                goto FAIL;
+            }
+            break;
+        case 'm':
+            endianness = 0;
+            break;
+        case 'n':
+            if (get_param(&sample_resolution, &iarg, argv)) {
+                goto FAIL;
+            }
+            break;
+        case 'r':
+            if (get_param(&reference_sample_interval, &iarg, argv)) {
+                goto FAIL;
+            }
+            break;
+        case 's':
+            data_sense = 0;
+            break;
+        case 't':
+            restricted_codes = 1;
+            break;
+        default:
+            goto FAIL;
+        }
+        iarg++;
     }
-    switch (opt[1])
-      {
-      case 'N':
-        enable_preprocessing = 0;
-        break;
-      case 'd':
-        dflag = 1;
-        break;
-      case 'j':
-        if (get_param (&block_size, &iarg, argv)) {
-          goto FAIL;
-        }
-        break;
-      case 'm':
-        endianness = 0;
-        break;
-      case 'n':
-        if (get_param (&sample_resolution, &iarg, argv)) {
-          goto FAIL;
-        }
-        break;
-      case 'r':
-        if (get_param (&reference_sample_interval, &iarg, argv)) {
-          goto FAIL;
-        }
-        break;
-      case 's':
-        data_sense = 0;
-        break;
-      case 't':
-        restricted_codes = 1;
-        break;
-      default:
+
+    if (argc - iarg < 2) {
         goto FAIL;
-      }
-    iarg++;
-  }
+    }
 
-  if (argc - iarg < 2) {
-    goto FAIL;
-  }
+    infn = argv[iarg];
+    outfn = argv[iarg + 1];
 
-  infn = argv[iarg];
-  outfn = argv[iarg + 1];
+    if (dflag) {
+        iqzip::compression::Iqzip_decompressor decompressor;
+        /* Initialize decompressor */
+        decompressor.iqzip_decompress_init(infn, outfn);
+        /* Decompress file */
+        decompressor.iqzip_decompress();
+        /* Finalize decompression */
+        decompressor.iqzip_decompress_fin();
+    }
+    else {
+        iqzip::compression::Iqzip_compressor compressor(0, 0, 0, 7, 0, 0, 0, 0, 1,
+                reference_sample_interval,
+                enable_preprocessing, 1, 3,
+                block_size, data_sense,
+                sample_resolution, 1,
+                restricted_codes,
+                endianness);
+        /* Initialize compressor */
+        compressor.iqzip_compress_init(infn, outfn);
+        /* Compress file */
+        compressor.iqzip_compress();
+        /* Finalize compression */
+        compressor.iqzip_compress_fin();
+    }
+    return 0;
 
-  if (dflag) {
-    iqzip::compression::Iqzip_decompressor decompressor;
-    /* Initialize decompressor */
-    decompressor.iqzip_decompress_init (infn, outfn);
-    /* Decompress file */
-    decompressor.iqzip_decompress ();
-    /* Finalize decompression */
-    decompressor.iqzip_decompress_fin ();
-  }
-  else {
-    iqzip::compression::Iqzip_compressor compressor (0, 0, 0, 7, 0, 0, 0, 0, 1,
-                                                     reference_sample_interval,
-                                                     enable_preprocessing, 1, 3,
-                                                     block_size, data_sense,
-                                                     sample_resolution, 1,
-                                                     restricted_codes,
-                                                     endianness);
-    /* Initialize compressor */
-    compressor.iqzip_compress_init (infn, outfn);
-    /* Compress file */
-    compressor.iqzip_compress ();
-    /* Finalize compression */
-    compressor.iqzip_compress_fin ();
-  }
-  return 0;
-
-  FAIL: fprintf (stderr, "NAME\n\taec - encode or decode files ");
-  fprintf (stderr, "with Adaptive Entropy Coding\n\n");
-  fprintf (stderr, "SYNOPSIS\n\taec [OPTION]... SOURCE DEST\n");
-  fprintf (stderr, "\nOPTIONS\n");
-  fprintf (stderr, "\t-N\n\t\tdisable pre/post processing\n");
-  fprintf (stderr, "\t-d\n\t\tdecode SOURCE. If -d is not used: encode.\n");
-  fprintf (stderr, "\t-j samples\n\t\tblock size in samples\n");
-  fprintf (stderr,
-           "\t-F\n\t\tdo not enforce standard regarding legal block sizes\n");
-  fprintf (stderr, "\t-m\n\t\tsamples are MSB first. Default is LSB\n");
-  fprintf (stderr, "\t-n bits\n\t\tbits per sample\n");
-  fprintf (stderr, "\t-r blocks\n\t\treference sample interval in blocks\n");
-  fprintf (stderr, "\t-s\n\t\tsamples are signed. Default is unsigned\n");
-  fprintf (stderr, "\t-t\n\t\tuse restricted set of code options\n\n");
-  return 1;
+FAIL:
+    fprintf(stderr, "NAME\n\taec - encode or decode files ");
+    fprintf(stderr, "with Adaptive Entropy Coding\n\n");
+    fprintf(stderr, "SYNOPSIS\n\taec [OPTION]... SOURCE DEST\n");
+    fprintf(stderr, "\nOPTIONS\n");
+    fprintf(stderr, "\t-N\n\t\tdisable pre/post processing\n");
+    fprintf(stderr, "\t-d\n\t\tdecode SOURCE. If -d is not used: encode.\n");
+    fprintf(stderr, "\t-j samples\n\t\tblock size in samples\n");
+    fprintf(stderr,
+            "\t-F\n\t\tdo not enforce standard regarding legal block sizes\n");
+    fprintf(stderr, "\t-m\n\t\tsamples are MSB first. Default is LSB\n");
+    fprintf(stderr, "\t-n bits\n\t\tbits per sample\n");
+    fprintf(stderr, "\t-r blocks\n\t\treference sample interval in blocks\n");
+    fprintf(stderr, "\t-s\n\t\tsamples are signed. Default is unsigned\n");
+    fprintf(stderr, "\t-t\n\t\tuse restricted set of code options\n\n");
+    return 1;
 }

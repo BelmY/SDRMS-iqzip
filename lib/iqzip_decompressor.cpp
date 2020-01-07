@@ -21,229 +21,234 @@
 #include <iqzip/iqzip_decompressor.h>
 #include <cstring>
 
-namespace iqzip
-{
+namespace iqzip {
 
-namespace compression
-{
+namespace compression {
 
-Iqzip_decompressor::Iqzip_decompressor () :
-	Iqzip(),
-	d_iqzip_header_size (0),
-	d_tmp_stream(new char[STREAM_CHUNK]),
-	d_stream_avail_in(0),
-	d_out(new char[CHUNK]),
-	d_total_out(0){
+Iqzip_decompressor::Iqzip_decompressor() :
+    Iqzip(),
+    d_iqzip_header_size(0),
+    d_tmp_stream(new char[STREAM_CHUNK]),
+    d_stream_avail_in(0),
+    d_out(new char[CHUNK]),
+    d_total_out(0)
+{
 }
 
-Iqzip_decompressor::~Iqzip_decompressor() {
-	d_iq_header.~iqzip_compression_header();
+Iqzip_decompressor::~Iqzip_decompressor()
+{
+    d_iq_header.~iqzip_compression_header();
 }
 
 int
-Iqzip_decompressor::iqzip_decompress_init (const std::string fin,
-											const std::string fout) {
-	/* Read header and save options to class fields */
-	d_iqzip_header_size = d_iq_header.parse_header_from_file(fin);
-	d_version = d_iq_header.decode_version();
-	d_type = d_iq_header.decode_type();
-	d_sec_hdr_flag = d_iq_header.decode_secondary_header_flag();
-	d_apid = d_iq_header.decode_application_process_identifier();
-	d_sequence_flags = d_iq_header.decode_sequence_flags();
-	d_packet_sequence_count = d_iq_header.decode_packet_sequence_count();
-	d_packet_data_length = d_iq_header.decode_packet_data_length();
-	d_grouping_data_length = d_iq_header.decode_grouping_data_length();
-	d_compression_tech_id = d_iq_header.decode_compression_technique_id();
-	d_reference_sample_interval = d_iq_header.decode_reference_sample_interval();
-	d_preprocessor_status = d_iq_header.decode_preprocessor_status();
-	d_predictor_type = d_iq_header.decode_preprocessor_predictor_type();
-	d_mapper_type = d_iq_header.decode_preprocessor_mapper_type();
-	d_block_size = d_iq_header.decode_block_size();
-	d_data_sense = d_iq_header.decode_preprocessor_data_sense();
-	d_sample_resolution = d_iq_header.decode_preprocessor_sample_resolution();
-	d_cds_per_packet = 0;
-	d_restricted_codes =
-			d_iq_header.decode_extended_parameters_restricted_code_option();
-	d_endianness = d_iq_header.decode_iqzip_header_endianess();
+Iqzip_decompressor::iqzip_decompress_init(const std::string fin,
+        const std::string fout)
+{
+    /* Read header and save options to class fields */
+    d_iqzip_header_size = d_iq_header.parse_header_from_file(fin);
+    d_version = d_iq_header.decode_version();
+    d_type = d_iq_header.decode_type();
+    d_sec_hdr_flag = d_iq_header.decode_secondary_header_flag();
+    d_apid = d_iq_header.decode_application_process_identifier();
+    d_sequence_flags = d_iq_header.decode_sequence_flags();
+    d_packet_sequence_count = d_iq_header.decode_packet_sequence_count();
+    d_packet_data_length = d_iq_header.decode_packet_data_length();
+    d_grouping_data_length = d_iq_header.decode_grouping_data_length();
+    d_compression_tech_id = d_iq_header.decode_compression_technique_id();
+    d_reference_sample_interval = d_iq_header.decode_reference_sample_interval();
+    d_preprocessor_status = d_iq_header.decode_preprocessor_status();
+    d_predictor_type = d_iq_header.decode_preprocessor_predictor_type();
+    d_mapper_type = d_iq_header.decode_preprocessor_mapper_type();
+    d_block_size = d_iq_header.decode_block_size();
+    d_data_sense = d_iq_header.decode_preprocessor_data_sense();
+    d_sample_resolution = d_iq_header.decode_preprocessor_sample_resolution();
+    d_cds_per_packet = 0;
+    d_restricted_codes =
+        d_iq_header.decode_extended_parameters_restricted_code_option();
+    d_endianness = d_iq_header.decode_iqzip_header_endianess();
 
     /* Initialize libaec stream */
     init_aec_stream();
 
-	/* Open input & output file */
-	input_stream.open(fin, std::ios::in | std::ios::binary);
-	if (!input_stream.is_open()) {
-		std::cout << "Error opening input file" << std::endl;
-		return -1;
-	}
-	output_stream.open(fout, std::ios::out | std::ios::binary);
-	if (!output_stream.is_open()) {
-		std::cout << "Error opening output file" << std::endl;
-		return -1;
-	}
+    /* Open input & output file */
+    input_stream.open(fin, std::ios::in | std::ios::binary);
+    if (!input_stream.is_open()) {
+        std::cout << "Error opening input file" << std::endl;
+        return -1;
+    }
+    output_stream.open(fout, std::ios::out | std::ios::binary);
+    if (!output_stream.is_open()) {
+        std::cout << "Error opening output file" << std::endl;
+        return -1;
+    }
 
-	/* Skip header from file */
-	input_stream.seekg(d_iqzip_header_size);
+    /* Skip header from file */
+    input_stream.seekg(d_iqzip_header_size);
 
-	/* Initialize libaec stream for decompression */
-	int status = aec_decode_init(&d_strm);
-	if (status != AEC_OK) {
-		std::cout << "Error in initializing stream" << std::endl;
-		print_error(status);
-	}
-	return status;
+    /* Initialize libaec stream for decompression */
+    int status = aec_decode_init(&d_strm);
+    if (status != AEC_OK) {
+        std::cout << "Error in initializing stream" << std::endl;
+        print_error(status);
+    }
+    return status;
 }
 
 int
-Iqzip_decompressor::iqzip_decompress() {
-	int total_out = 0;
-	int input_avail = 1;
-	int output_avail = 1;
-	int status;
-	char *in = new char[CHUNK];
-	char *out = new char[CHUNK];
+Iqzip_decompressor::iqzip_decompress()
+{
+    int total_out = 0;
+    int input_avail = 1;
+    int output_avail = 1;
+    int status;
+    char *in = new char[CHUNK];
+    char *out = new char[CHUNK];
 
-	d_strm.next_out = reinterpret_cast<unsigned char*>(out);
+    d_strm.next_out = reinterpret_cast<unsigned char *>(out);
 
-	while (input_avail || output_avail) {
-		if (d_strm.avail_in == 0 && input_avail) {
-			input_stream.read(in, CHUNK);
-			d_strm.avail_in = input_stream.gcount();
-			if (d_strm.avail_in != CHUNK) {
-				input_avail = 0;
-			}
-			d_strm.next_in = reinterpret_cast<const unsigned char*>(in);
-		}
+    while (input_avail || output_avail) {
+        if (d_strm.avail_in == 0 && input_avail) {
+            input_stream.read(in, CHUNK);
+            d_strm.avail_in = input_stream.gcount();
+            if (d_strm.avail_in != CHUNK) {
+                input_avail = 0;
+            }
+            d_strm.next_in = reinterpret_cast<const unsigned char *>(in);
+        }
 
-		status = aec_decode(&d_strm, AEC_NO_FLUSH);
-		if (status != AEC_OK) {
-			std::cout << "Error in decoding" << std::endl;
-			print_error(status);
-			return status;
-		}
+        status = aec_decode(&d_strm, AEC_NO_FLUSH);
+        if (status != AEC_OK) {
+            std::cout << "Error in decoding" << std::endl;
+            print_error(status);
+            return status;
+        }
 
-		if (d_strm.total_out - total_out > 0) {
-			output_stream.write(out, d_strm.total_out - total_out);
-			total_out = d_strm.total_out;
-			output_avail = 1;
-			d_strm.next_out = reinterpret_cast<unsigned char*>(out);
-			d_strm.avail_out = CHUNK;
-		}
-		else {
-			output_avail = 0;
-		}
-	}
-	return 0;
+        if (d_strm.total_out - total_out > 0) {
+            output_stream.write(out, d_strm.total_out - total_out);
+            total_out = d_strm.total_out;
+            output_avail = 1;
+            d_strm.next_out = reinterpret_cast<unsigned char *>(out);
+            d_strm.avail_out = CHUNK;
+        }
+        else {
+            output_avail = 0;
+        }
+    }
+    return 0;
 }
 
 int
-Iqzip_decompressor::iqzip_stream_decompress(const char* inbuf,
-		size_t nbytes) {
-	int status;
-	/* Save input buffer to internal buffer */
-	if (d_stream_avail_in + nbytes < STREAM_CHUNK) {
-		std::memcpy(&d_tmp_stream[d_stream_avail_in], inbuf, nbytes);
-		d_stream_avail_in += nbytes;
-		d_strm.avail_in = d_stream_avail_in;
-		return AEC_OK;
-	}
-	/* d_stream_avail_in + nbytes >= STREAM_CHUNK */
-	long int remainder = d_stream_avail_in + nbytes - STREAM_CHUNK;
-	while (remainder >= 0) {
-		std::memcpy(&d_tmp_stream[d_stream_avail_in], inbuf,
-				STREAM_CHUNK - d_stream_avail_in);
-		d_stream_avail_in = STREAM_CHUNK;
-		/* Ready aec_stream */
-		d_strm.avail_in = d_stream_avail_in;
-		d_strm.next_out = reinterpret_cast<unsigned char*>(d_out);
-		d_strm.next_in = reinterpret_cast<unsigned char*>(d_tmp_stream);
+Iqzip_decompressor::iqzip_stream_decompress(const char *inbuf,
+        size_t nbytes)
+{
+    int status;
+    /* Save input buffer to internal buffer */
+    if (d_stream_avail_in + nbytes < STREAM_CHUNK) {
+        std::memcpy(&d_tmp_stream[d_stream_avail_in], inbuf, nbytes);
+        d_stream_avail_in += nbytes;
+        d_strm.avail_in = d_stream_avail_in;
+        return AEC_OK;
+    }
+    /* d_stream_avail_in + nbytes >= STREAM_CHUNK */
+    long int remainder = d_stream_avail_in + nbytes - STREAM_CHUNK;
+    while (remainder >= 0) {
+        std::memcpy(&d_tmp_stream[d_stream_avail_in], inbuf,
+                    STREAM_CHUNK - d_stream_avail_in);
+        d_stream_avail_in = STREAM_CHUNK;
+        /* Ready aec_stream */
+        d_strm.avail_in = d_stream_avail_in;
+        d_strm.next_out = reinterpret_cast<unsigned char *>(d_out);
+        d_strm.next_in = reinterpret_cast<unsigned char *>(d_tmp_stream);
 
-		status = aec_decode(&d_strm, AEC_NO_FLUSH);
-		if (status != AEC_OK) {
-			std::cout << "Error in decoding" << std::endl;
-			print_error(status);
-			return status;
-		}
-		if (d_strm.total_out - d_total_out > 0) {
-			/* Write encoded output to file */
-			output_stream.write(d_out, d_strm.total_out - d_total_out);
-			d_strm.avail_out = CHUNK;
-			d_total_out = d_strm.total_out;
-		}
-		inbuf += nbytes - remainder;
-		nbytes -= nbytes - remainder;
-		d_stream_avail_in = 0;
-		d_strm.avail_in = d_stream_avail_in;
-		//d_stream_avail_in = d_strm.avail_in;
-		remainder = d_stream_avail_in + nbytes - STREAM_CHUNK;
-	}
+        status = aec_decode(&d_strm, AEC_NO_FLUSH);
+        if (status != AEC_OK) {
+            std::cout << "Error in decoding" << std::endl;
+            print_error(status);
+            return status;
+        }
+        if (d_strm.total_out - d_total_out > 0) {
+            /* Write encoded output to file */
+            output_stream.write(d_out, d_strm.total_out - d_total_out);
+            d_strm.avail_out = CHUNK;
+            d_total_out = d_strm.total_out;
+        }
+        inbuf += nbytes - remainder;
+        nbytes -= nbytes - remainder;
+        d_stream_avail_in = 0;
+        d_strm.avail_in = d_stream_avail_in;
+        //d_stream_avail_in = d_strm.avail_in;
+        remainder = d_stream_avail_in + nbytes - STREAM_CHUNK;
+    }
 
-	/* If we have leftover samples copy them to stream */
-	if (nbytes) {
-		std::memcpy(&d_tmp_stream[d_stream_avail_in], inbuf, nbytes);
-		d_stream_avail_in = nbytes;
-		return AEC_OK;
-	}
+    /* If we have leftover samples copy them to stream */
+    if (nbytes) {
+        std::memcpy(&d_tmp_stream[d_stream_avail_in], inbuf, nbytes);
+        d_stream_avail_in = nbytes;
+        return AEC_OK;
+    }
 
-	return AEC_OK;
+    return AEC_OK;
 }
 
 int
-Iqzip_decompressor::iqzip_decompress_fin() {
-	int status;
-	status = aec_decode_end(&d_strm);
-	if (status != AEC_OK) {
-		std::cout << "Error finishing stream" << std::endl;
-		print_error(status);
-		return status;
-	}
-	d_strm.next_in = nullptr;
-	d_strm.next_out = nullptr;
-	d_strm.state = nullptr;
+Iqzip_decompressor::iqzip_decompress_fin()
+{
+    int status;
+    status = aec_decode_end(&d_strm);
+    if (status != AEC_OK) {
+        std::cout << "Error finishing stream" << std::endl;
+        print_error(status);
+        return status;
+    }
+    d_strm.next_in = nullptr;
+    d_strm.next_out = nullptr;
+    d_strm.state = nullptr;
 
-	input_stream.close();
-	output_stream.close();
+    input_stream.close();
+    output_stream.close();
 
-	return 0;
+    return 0;
 }
 
 int
-Iqzip_decompressor::iqzip_stream_decompress_fin() {
-	int status;
+Iqzip_decompressor::iqzip_stream_decompress_fin()
+{
+    int status;
 
-	d_strm.next_out = reinterpret_cast<unsigned char*>(d_out);
-	d_strm.next_in = reinterpret_cast<unsigned char*>(d_tmp_stream);
-	d_strm.avail_in = d_stream_avail_in;
+    d_strm.next_out = reinterpret_cast<unsigned char *>(d_out);
+    d_strm.next_in = reinterpret_cast<unsigned char *>(d_tmp_stream);
+    d_strm.avail_in = d_stream_avail_in;
 
-	status = aec_decode(&d_strm, AEC_NO_FLUSH);
-	if (status != AEC_OK) {
-		std::cout << "ERROR: while flushing output" << std::endl;
-		print_error(status);
-		return -1;
-	}
-	if (d_strm.total_out - d_total_out > 0) {
-		output_stream.write(d_out, d_strm.total_out - d_total_out);
-	}
+    status = aec_decode(&d_strm, AEC_NO_FLUSH);
+    if (status != AEC_OK) {
+        std::cout << "ERROR: while flushing output" << std::endl;
+        print_error(status);
+        return -1;
+    }
+    if (d_strm.total_out - d_total_out > 0) {
+        output_stream.write(d_out, d_strm.total_out - d_total_out);
+    }
 
-	status = aec_decode_end(&d_strm);
-	if (status != AEC_OK) {
-		std::cout << "Error finishing stream" << std::endl;
-		print_error(status);
-		return status;
-	}
-	d_strm.next_in = nullptr;
-	d_strm.next_out = nullptr;
-	d_strm.state = nullptr;
+    status = aec_decode_end(&d_strm);
+    if (status != AEC_OK) {
+        std::cout << "Error finishing stream" << std::endl;
+        print_error(status);
+        return status;
+    }
+    d_strm.next_in = nullptr;
+    d_strm.next_out = nullptr;
+    d_strm.state = nullptr;
 
-	input_stream.close();
-	output_stream.close();
+    input_stream.close();
+    output_stream.close();
 
-	return 0;
+    return 0;
 }
 
 void
-Iqzip_decompressor::print_error(int status) {
-    switch (status)
-    {
+Iqzip_decompressor::print_error(int status)
+{
+    switch (status) {
     case AEC_CONF_ERROR:
         std::cout << "Decompressor: Configuration Error" << std::endl;
         break;
@@ -262,149 +267,174 @@ Iqzip_decompressor::print_error(int status) {
 }
 
 uint32_t
-Iqzip_decompressor::getChunk() const {
-	return Iqzip::getChunk();
+Iqzip_decompressor::getChunk() const
+{
+    return Iqzip::getChunk();
 }
 
 void
-Iqzip_decompressor::setChunk (uint32_t chunk = 10485760)
+Iqzip_decompressor::setChunk(uint32_t chunk = 10485760)
 {
-  delete[] d_out;
-  d_out = new char[chunk];
-  Iqzip::setChunk (chunk);
+    delete[] d_out;
+    d_out = new char[chunk];
+    Iqzip::setChunk(chunk);
 }
 
 uint32_t
-Iqzip_decompressor::getStreamChunk () const
+Iqzip_decompressor::getStreamChunk() const
 {
-	return STREAM_CHUNK;
+    return STREAM_CHUNK;
 }
 
 void
-Iqzip_decompressor::setStreamChunk (uint32_t stream_chunk)
+Iqzip_decompressor::setStreamChunk(uint32_t stream_chunk)
 {
-	delete[] d_tmp_stream;
-	d_tmp_stream = new char[stream_chunk];
-	STREAM_CHUNK = stream_chunk;
+    delete[] d_tmp_stream;
+    d_tmp_stream = new char[stream_chunk];
+    STREAM_CHUNK = stream_chunk;
 }
 
 uint16_t
-Iqzip_decompressor::getApid() const {
-	return Iqzip::getApid();
+Iqzip_decompressor::getApid() const
+{
+    return Iqzip::getApid();
 }
 
 uint16_t
-Iqzip_decompressor::getBlockSize() const {
-	return Iqzip::getBlockSize();
+Iqzip_decompressor::getBlockSize() const
+{
+    return Iqzip::getBlockSize();
 }
 
 uint16_t
-Iqzip_decompressor::getCdsPerPacket() const {
-	return Iqzip::getCdsPerPacket();
+Iqzip_decompressor::getCdsPerPacket() const
+{
+    return Iqzip::getCdsPerPacket();
 }
 
 uint8_t
-Iqzip_decompressor::getCompressionTechId() const {
-	return Iqzip::getCompressionTechId();
+Iqzip_decompressor::getCompressionTechId() const
+{
+    return Iqzip::getCompressionTechId();
 }
 
 uint8_t
-Iqzip_decompressor::getDataSense() const {
-	return Iqzip::getDataSense();
+Iqzip_decompressor::getDataSense() const
+{
+    return Iqzip::getDataSense();
 }
 
 uint8_t
-Iqzip_decompressor::getEndianness() const {
-	return Iqzip::getEndianness();
+Iqzip_decompressor::getEndianness() const
+{
+    return Iqzip::getEndianness();
 }
 
 uint16_t
-Iqzip_decompressor::getGroupingDataLength() const {
-	return Iqzip::getGroupingDataLength();
+Iqzip_decompressor::getGroupingDataLength() const
+{
+    return Iqzip::getGroupingDataLength();
 }
 
-const iqzip::compression::iqzip_compression_header&
-Iqzip_decompressor::getIqHeader() const {
-	return Iqzip::getIqHeader();
+const iqzip::compression::iqzip_compression_header &
+Iqzip_decompressor::getIqHeader() const
+{
+    return Iqzip::getIqHeader();
 }
 
 uint8_t
-Iqzip_decompressor::getMapperType() const {
-	return Iqzip::getMapperType();
+Iqzip_decompressor::getMapperType() const
+{
+    return Iqzip::getMapperType();
 }
 
 uint16_t
-Iqzip_decompressor::getPacketDataLength() const {
-	return Iqzip::getPacketDataLength();
+Iqzip_decompressor::getPacketDataLength() const
+{
+    return Iqzip::getPacketDataLength();
 }
 
 uint16_t
-Iqzip_decompressor::getPacketSequenceCount() const {
-	return Iqzip::getPacketSequenceCount();
+Iqzip_decompressor::getPacketSequenceCount() const
+{
+    return Iqzip::getPacketSequenceCount();
 }
 
 uint8_t
-Iqzip_decompressor::getPredictorType() const {
-	return Iqzip::getPredictorType();
+Iqzip_decompressor::getPredictorType() const
+{
+    return Iqzip::getPredictorType();
 }
 
 uint8_t
-Iqzip_decompressor::getPreprocessorStatus() const {
-	return Iqzip::getPreprocessorStatus();
+Iqzip_decompressor::getPreprocessorStatus() const
+{
+    return Iqzip::getPreprocessorStatus();
 }
 
 uint8_t
-Iqzip_decompressor::getReferenceSampleInterval() const {
-	return Iqzip::getReferenceSampleInterval();
+Iqzip_decompressor::getReferenceSampleInterval() const
+{
+    return Iqzip::getReferenceSampleInterval();
 }
 
 uint8_t
-Iqzip_decompressor::getRestrictedCodes() const {
-	return Iqzip::getRestrictedCodes();
+Iqzip_decompressor::getRestrictedCodes() const
+{
+    return Iqzip::getRestrictedCodes();
 }
 
 uint8_t
-Iqzip_decompressor::getSampleResolution() const {
-	return Iqzip::getSampleResolution();
+Iqzip_decompressor::getSampleResolution() const
+{
+    return Iqzip::getSampleResolution();
 }
 
 uint8_t
-Iqzip_decompressor::getSecHdrFlag() const {
-	return Iqzip::getSecHdrFlag();
+Iqzip_decompressor::getSecHdrFlag() const
+{
+    return Iqzip::getSecHdrFlag();
 }
 
 uint8_t
-Iqzip_decompressor::getSequenceFlags() const {
-	return Iqzip::getSequenceFlags();
+Iqzip_decompressor::getSequenceFlags() const
+{
+    return Iqzip::getSequenceFlags();
 }
 
-const aec_stream&
-Iqzip_decompressor::getStrm() const {
-	return Iqzip::getStrm();
-}
-
-uint8_t
-Iqzip_decompressor::getType() const {
-	return Iqzip::getType();
+const aec_stream &
+Iqzip_decompressor::getStrm() const
+{
+    return Iqzip::getStrm();
 }
 
 uint8_t
-Iqzip_decompressor::getVersion() const {
-	return Iqzip::getVersion();
+Iqzip_decompressor::getType() const
+{
+    return Iqzip::getType();
 }
 
-const std::ifstream&
-Iqzip_decompressor::getInputStream() const {
-	return Iqzip::getInputStream();
+uint8_t
+Iqzip_decompressor::getVersion() const
+{
+    return Iqzip::getVersion();
 }
 
-const std::ofstream&
-Iqzip_decompressor::getOutputStream() const {
-	return Iqzip::getOutputStream();
+const std::ifstream &
+Iqzip_decompressor::getInputStream() const
+{
+    return Iqzip::getInputStream();
+}
+
+const std::ofstream &
+Iqzip_decompressor::getOutputStream() const
+{
+    return Iqzip::getOutputStream();
 }
 size_t
-Iqzip_decompressor::getHeaderSize() const {
-	return d_iqzip_header_size;
+Iqzip_decompressor::getHeaderSize() const
+{
+    return d_iqzip_header_size;
 }
 
 }
