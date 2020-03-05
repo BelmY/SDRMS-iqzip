@@ -52,7 +52,6 @@ iqzip_compression_header::iqzip_compression_header(
     d_sample_resolution(sample_resolution),
     d_restricted_codes(restricted_codes)
 {
-
     encode();
 
     d_primary_header = new ccsds_packet_primary_header(version, type,
@@ -71,7 +70,6 @@ iqzip_compression_header::iqzip_compression_header(
             sample_resolution,
             csd_per_packet,
             restricted_codes);
-
 }
 
 iqzip_compression_header::iqzip_compression_header() :
@@ -150,7 +148,6 @@ iqzip_compression_header::parse_header_from_file(std::string path)
         exit(3);
     }
     fclose(f);
-
     hdr_primary =
         (ccsds_packet_primary_header::packet_primary_header_t *)(&buffer[0]);
     hdr_src_cnf =
@@ -165,10 +162,10 @@ iqzip_compression_header::parse_header_from_file(std::string path)
         (iqzip_compression_header_t *)(&buffer[CCSDS_PRIMARY_HEADER_SIZE
                                        + SOURCE_DATA_FIXED_SIZE + PREPROCESSOR_SUBFIELD_SIZE
                                        + ENTROPY_CODER_SUBFIELD_SIZE + EXTENDED_PARAMETERS_SUBFIELD_SIZE]);
-    d_primary_header->set_primary_header(*hdr_primary);
-    d_cip->set_source_data_fixed(*hdr_src_cnf_fixed);
-    d_cip->set_source_data_variable(*hdr_src_cnf);
-    set_iqzip_compression_header(*iqzip_hdr);
+    d_primary_header->set_primary_header(hdr_primary);
+    d_cip->set_source_data_fixed(hdr_src_cnf_fixed);
+    d_cip->set_source_data_variable(hdr_src_cnf);
+    set_iqzip_compression_header(iqzip_hdr);
 
     /* Retrieve header size */
     if (!(d_block_size = decode_preprocessor_block_size())) {
@@ -193,9 +190,9 @@ iqzip_compression_header::get_iqzip_compression_header()
 
 void
 iqzip_compression_header::set_iqzip_compression_header(
-    iqzip_compression_header_t hdr)
+    iqzip_compression_header_t *hdr)
 {
-    d_iqzip_header = hdr;
+    memcpy(&d_iqzip_header, hdr, sizeof(iqzip_compression_header_t));
 }
 
 void
@@ -431,7 +428,7 @@ iqzip_compression_header::encode_iqzip_header_endianness(
         d_iqzip_header.endianness = (uint8_t)(ENDIANNESS::BIG);
         break;
     default:
-        std::runtime_error("Invalid IQzip header endianness");
+        std::runtime_error("Invalid IQzip header endianess");
     }
 }
 

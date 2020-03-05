@@ -27,12 +27,35 @@
 /*
  * Max size of CIP header in bytes excluding Secondary header and Instrument Configuration
  */
-#define MAX_CIP_HEADER_SIZE_BYTES               16
-#define SOURCE_DATA_FIXED_SIZE                  4
-#define PREPROCESSOR_SUBFIELD_SIZE              2
-#define ENTROPY_CODER_SUBFIELD_SIZE             2
-#define EXTENDED_PARAMETERS_SUBFIELD_SIZE       2
-#define INSTRUMENT_CONFIG_SUBFIELD_SIZE         2
+#define MAX_CIP_HEADER_SIZE_BYTES                           16
+#define SOURCE_DATA_FIXED_SIZE                              4
+
+#define GROUPING_DATA_LENGTH_MASK                           0xfff
+#define COMPRESSION_TECHNIQUE_IDENTIFICATION_MASK           0xf
+#define REFERENCE_SAMPLE_INTERVAL_MASK                      0xf
+
+#define PREPROCESSOR_SUBFIELD_SIZE                          2
+
+#define PREPROCESSOR_HEADER_MASK                            0xc0
+#define PREPROCESSOR_STATUS_MASK                            0x20
+#define PREPROCESSOR_PREDICTOR_TYPE_MASK                    0x1c
+#define PREPROCESSOR_MAPPER_TYPE_MASK                       0x3
+#define PREPROCESSOR_BLOCK_SIZE_MASK                        0xc0
+#define PREPROCESSOR_DATA_SENSE_MASK                        0x20
+#define PREPROCESSOR_SAMPLE_RESOLUTION_MASK                 0x1f
+
+#define ENTROPY_CODER_SUBFIELD_SIZE                         2
+#define ENTROPY_CODER_HEADER_MASK                           0xc0
+#define ENTROPY_CODER_DATA_RESOLUTION_MASK                  0x30
+#define ENTROPY_CODER_CDSES_NUM_MASK                        0xfff
+
+#define EXTENDED_PARAMETERS_SUBFIELD_SIZE                   2
+#define EXTENDED_PARAMETERS_HEADER_MASK                     0xc0
+#define EXTENDED_PARAMETERS_BLOCK_SIZE_MASK                 0xf
+#define EXTENDED_PARAMETERS_RESTRICTED_CODES_MASK           0x40
+#define EXTENDED_PARAMETERS_REFERENCE_SAMPLE_INTERVAL_MASK  0xf
+
+#define INSTRUMENT_CONFIG_SUBFIELD_SIZE                     2
 
 namespace iqzip {
 
@@ -59,9 +82,82 @@ namespace compression {
  * CCSDS Lossless Data Compression Blue Book and provides all the appropriate
  * setter and getter functions to access its subfields.
  *
- * TODO: Describe the structure of CIP header and explain why Secondary Header is
- * omitted.
+ *
+ *  +-----------------------+--------------------------------------------------------------------+
+ *  |                           COMPRESSION IDENTIFICATION PACKET                                |
+ *  +-----------------------+------------+-------------------------------------------------------+
+ *  |                       |                          PACKET DATA FIELD                         |
+ *  +-----------------------+------------+-------------------------------------------------------+
+ *  |                                    |                   SOURCE DATA FIELD                   |
+ *  +-------------+---------+------------+----------+----------------+-----------+---------------+
+ *  |             |         |            |          |                |           |               |
+ *  |             |  CCSDS  |  SECONDARY | GROUPING |   COMPRESSION  | REFERENCE |     SOURCE    |
+ *  |    FIELD    |  PACKET |   HEADER   |   DATA   |    TECHNIQUE   |   SAMPLE  | CONFIGURATION |
+ *  |             | PRIMARY | (OPTIONAL) |  LENGTH  | IDENTIFICATION |  INTERVAL |     FIELD     |
+ *  |             |  PACKET |            |   FIELD  |      FIELD     |   FIELD   |               |
+ *  +-------------+---------+------------+----------+----------------+-----------+---------------+
+ *  | SIZE (BITS) |    48   |      -     |    16    |        8       |     8     |    VARIABLE   |
+ *  +-------------+---------+------------+----------+----------------+-----------+---------------+
+ *  |     MASK    |    -    |      -     |   0xFFF  |       0xF      |    0xF    |       -       |
+ *  +-------------+---------+------------+----------+----------------+-----------+---------------+
+ *
+ *
+ *                +-------------------------------------------------------------------------------------------------------------------+
+ *                |                                             SOURCE CONFIGURATION FIELD                                            |
+ *  +------------ +-----------------------+------------------------+------------------------------+-----------------------------------+
+ *  |             |                       |                        |                              |                                   |
+ *  |             |      PREPROCESSOR     |      ENTROPY CODER     |      EXTENDED PARAMETERS     |      INSTRUMENT CONFIGURATION     |
+ *  |             |        SUBFIELD       |        SUBFIELD        |           SUBFIELD           |              SUBFILED             |
+ *  |             +--------+--------------+--------+---------------+--------+---------------------+--------+--------------------------+
+ *  |             |        |              |        | ENTROPY CODER |        | EXTENDED PARAMETERS |        | INSTRUMENT CONFIGURATION |
+ *  |             | HEADER | PREPROCESSOR | HEADER |   PARAMETERS  | HEADER |      PARAMETERS     | HEADER |        PARAMETERS        |
+ *  |             |        |  PARAMETERS  |        |               |        |                     |        |                          |
+ *  +-------------+--------+--------------+--------+---------------+--------+---------------------+--------+--------------------------+
+ *  | SIZE (BITS) |    2   |      14      |    2   |       14      |    2   |          14         |    2   |            14            |
+ *  +-------------+--------+--------------+--------+---------------+--------+---------------------+--------+--------------------------+
+ *
+ *          +-------------------------------------------------------------------------+
+ *          |                          PREPROCESSOR SUBFIELD                          |
+ *  +-------+--------+--------------+-----------+--------+-------+-------+------------+
+ *  |       |        |              |           |        |       |       |            |
+ *  | FIELD | HEADER | PREPROCESSOR | PREDICTOR | MAPPER | BLOCK |  DATA |   SAMPLE   |
+ *  |       |        |    STATUS    |    TYPE   |  TYPE  |  SIZE | SENSE | RESOLUTION |
+ *  +-------+--------+--------------+-----------+--------+-------+-------+------------+
+ *  |  BIT  |   0-1  |       2      |    3-5    |   6-7  |  8-9  |   10  |    11-15   |
+ *  +-------+--------+--------------+-----------+--------+-------+-------+------------+
+ *  |  MASK |  0xC0  |     0x20     |    0x1C   |   0x3  |  0xC0 |  0x20 |    0x1F    |
+ *  +-------+--------+--------------+-----------+--------+-------+-------+------------+
+ *
+ *          +-------------------------------------------+
+ *          |           ENTROPY CODER SUBFIELD          |
+ *  +-------+--------+------------+---------------------+
+ *  |       |        |            |                     |
+ *  | FIELD | HEADER |    DATA    | NUMBER OF CDSES PER |
+ *  |       |        | RESOLUTION |        PACKET       |
+ *  |       |        |    RANGE   |                     |
+ *  +-------+--------+------------+---------------------+
+ *  |  BIT  |   0-1  |     2-3    |         4-15        |
+ *  +-------+--------+------------+---------------------+
+ *  |  MASK |  0xC0  |    0x30    |        0xFFF        |
+ *  +-------+--------+------------+---------------------+
+ *
+ *  +-------+-------------------------------------------------------------------------------+
+ *  |       |                          EXTENDED PARAMETERS SUBFIELD                         |
+ *  +-------+--------+----------+------------+----------+------------+----------+-----------+
+ *  |       |        |          |            |          |            |          |           |
+ *  |       |        |          |            |          | RESTRICTED |          | REFERENCE |
+ *  | FIELD | HEADER | RESERVED | BLOCK SIZE | RESERVED |    CODE    | RESERVED |   SAMPLE  |
+ *  |       |        |          |            |          |   OPTIONS  |          |  INTERVAL |
+ *  |       |        |          |            |          |            |          | EXTENSION |
+ *  +-------+--------+----------+------------+----------+------------+----------+-----------+
+ *  |  BIT  |   0-1  |    2-3   |     4-7    | 8        |      9     |   10-11  |   12-15   |
+ *  +-------+--------+----------+------------+----------+------------+----------+-----------+
+ *  |  MASK |  0xC0  |   0x30   |     0xF    | 0x80     |    0x40    |   0x30   |    0xF    |
+ *  +-------+--------+----------+------------+----------+------------+----------+-----------+
+ *
+ *
  */
+
 class compression_identification_packet {
 
 public:
@@ -160,26 +256,14 @@ public:
     };
 
     /*!
-     * A bit-field that defines the structure of the Preprocessor subfield.
+     * A uint8_t[2] that defines the structure of the Preprocessor subfield.
      */
-    typedef struct {
-        uint8_t header : 2;
-        uint8_t status : 1;
-        uint8_t predictor_type : 3;
-        uint8_t mapper_type : 2;
-        uint8_t block_size : 2;
-        uint8_t data_sense : 1;
-        uint8_t sample_resolution : 5;
-    } preprocessor_t;
+    typedef uint8_t preprocessor_t[PREPROCESSOR_SUBFIELD_SIZE];
 
     /*!
-     * A bit-field that defines the structure of the Entropy Coder subfield.
+     * A uint8_t[2] that defines the structure of the Entropy Coder subfield.
      */
-    typedef struct {
-        uint8_t header : 2;
-        uint8_t resolution_range : 2;
-        uint16_t cds_num : 12;
-    } entropy_coder_t;
+    typedef uint8_t entropy_coder_t[ENTROPY_CODER_SUBFIELD_SIZE];
 
     /*!
      * A bit-field that defines the structure of the Instrument Configuration subfield.
@@ -190,28 +274,16 @@ public:
     } instrument_configuration_t;
 
     /*!
-     * A bit-field that defines the structure of the Extended Parameters subfield.
+     * A uint8_t[2] that defines the structure of the Extended Parameters subfield.
      */
-    typedef struct {
-        uint8_t header : 2;
-        uint8_t reserved_1 : 2;
-        uint8_t block_size : 4;
-        uint8_t reserved_2 : 1;
-        uint8_t restricted_code_options : 1;
-        uint8_t reserved_3 : 2;
-        uint8_t reference_sample_interval : 4;
-    } extended_parameters_t;
+    typedef uint8_t extended_parameters_t[EXTENDED_PARAMETERS_SUBFIELD_SIZE];
 
     /*!
-     * A bit-field that defines the structure of the fixed part of the Source Data
+     * A uint8_t[4] that defines the structure of the fixed part of the Source Data
      * Field.
      */
-    typedef struct {
-        uint8_t grouping_data_length_reserved : 4;
-        uint16_t grouping_data_length : 12;
-        uint8_t compression_technique_id : 8;
-        uint8_t reference_sample_interval : 8;
-    } source_data_fixed_t;
+    typedef uint8_t source_data_fixed_t[SOURCE_DATA_FIXED_SIZE];
+
 
     /*!
      * A bit-field that defines the structure of the Source Configuration Field.
@@ -257,10 +329,10 @@ public:
     get_source_data_variable();
 
     void
-    set_source_data_fixed(source_data_fixed_t hdr);
+    set_source_data_fixed(source_data_fixed_t *hdr);
 
     void
-    set_source_data_variable(source_data_variable_t hdr);
+    set_source_data_variable(source_data_variable_t *hdr);
 
     /*!
      * Encode the grouping data length into the appropriate header subfield.

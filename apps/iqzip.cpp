@@ -170,13 +170,27 @@ main(int argc, char *argv[])
         decompressor.iqzip_decompress_fin();
     }
     else {
-        iqzip::compression::Iqzip_compressor compressor(0, 0, 0, 7, 0, 0, 0, 0, 1,
-                reference_sample_interval,
-                enable_preprocessing, 1, 3,
-                block_size, data_sense,
-                sample_resolution, 1,
-                restricted_codes,
-                endianness);
+        iqzip::compression::Iqzip_compressor compressor(
+            (uint8_t)iqzip::compression::ccsds_packet_primary_header::PACKET_VERSION::CCSDS_PACKET_VERSION_1,
+            (uint8_t)iqzip::compression::ccsds_packet_primary_header::PACKET_TYPE::CCSDS_TELECOMMAND,
+            (uint8_t)iqzip::compression::ccsds_packet_primary_header::PACKET_SECONDARY_HEADER_FLAG::SEC_HDR_PRESENT,
+            (uint16_t)
+            iqzip::compression::ccsds_packet_primary_header::PACKET_APPLICATION_PROCESS_IDENTIFIER::IDLE_PACKET,
+            (uint8_t)iqzip::compression::ccsds_packet_primary_header::PACKET_SEQUENCE_FLAGS::CONTINUATION_SEGMENT,
+            0xdffe,
+            0x7efe,
+            0xffff,
+            (uint8_t)iqzip::compression::compression_identification_packet::COMPRESSION_TECHNIQUE_IDENTIFICATION::CCSDS_LOSSLESS_COMPRESSION,
+            reference_sample_interval,
+            enable_preprocessing,
+            (uint8_t)iqzip::compression::compression_identification_packet::PREPROCESSOR_PREDICTOR_TYPE::APPLICATION_SPECIFIC,
+            (uint8_t)iqzip::compression::compression_identification_packet::PREPROCESSOR_MAPPER_TYPE::PREDICTION_ERROR,
+            block_size,
+            data_sense,
+            8,
+            1,
+            restricted_codes,
+            endianness);
         /* Initialize compressor */
         compressor.iqzip_compress_init(infn, outfn);
         /* Compress file */

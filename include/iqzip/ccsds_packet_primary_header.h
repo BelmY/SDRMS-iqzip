@@ -25,6 +25,19 @@
 
 #define CCSDS_PRIMARY_HEADER_SIZE               6
 
+/**
+ * CCSDS Packet Primary Header field masks
+ */
+
+#define PACKET_VERSION_MASK                     0xe0
+#define PACKET_TYPE_MASK                        0x10
+#define SECONDARY_HEADER_FLAG_MASK              0x8
+#define APPLICATION_PROCESS_ID_MASK             0x7ff
+#define SEQUENCE_FLAGS_MASK                     0xc0
+#define PACKET_SEQUENCE_COUNT_MASK              0x3fff
+#define PACKET_LENGTH_MASK                      0xffff
+
+
 namespace iqzip {
 
 namespace compression {
@@ -39,23 +52,38 @@ namespace compression {
  * This class defines the packet_primary_header_t type that fully represents the
  * Packet Primary Header and all of its fields. The appropriate setter and getter
  * functions to access the header fields are provided.
+ *
+ *
+ *          +-------------------------------------------------------------------------+
+ *          |                          PACKET PRIMARY HEADER                          |
+ *  +-------|---------+-----------------------------+------------------------+--------+
+ *  |       |         |                             |                        |        |
+ *  |       |         |    PACKET IDENTIFICATION    |         PACKET         |        |
+ *  |       |         |                             |        SEQUENCE        |        |
+ *  |       |         |                             |         CONTROL        |        |
+ *  |       |  PACKET +--------+------+-------------+----------+-------------+ PACKET |
+ *  |       | VERSION |        |      |             |          |             |  DATA  |
+ *  | FIELD |  NUMBER |        | SEC. | APPLICATION |          |    PACKET   | LENGTH |
+ *  |       |         | PACKET | HDR. |   PROCESS   | SEQUENCE |   SEQUENCE  |        |
+ *  |       |         |  TYPE  | FLAG |  IDENTIFIER |   FLAGS  |   COUNT OR  |        |
+ *  |       |         |        |      |             |          | PACKET NAME |        |
+ *  +-------+---------+--------+------+-------------+----------+-------------+--------+
+ *  | BIT   |   0-2   |    3   |   4  |     5-15    |   16-17  |    18-31    | 32-47  |
+ *  +-------+---------+--------+------+-------------+----------+-------------+--------+
+ *  | MASK  |   0xE0  |  0x10  |  0x8 |    0x7FF    |   0xC0   |     0x3F    | 0xFF   |
+ *  +-------+---------+--------+------+-------------+----------+-------------+--------+
+ *
  */
+
 class ccsds_packet_primary_header {
 
 public:
 
     /*!
-     * A bit-field that defines the structure of the packet primary header
+     * The CCSDS packet primary header
      */
-    typedef struct {
-        uint8_t version : 3;
-        uint8_t type : 1;
-        uint8_t sec_hdr_flag : 1;
-        uint16_t apid : 11;
-        uint8_t sequence_flags : 2;
-        uint16_t sequence_count : 14;
-        uint16_t data_length : 16;
-    } packet_primary_header_t;
+
+    typedef uint8_t packet_primary_header_t[CCSDS_PRIMARY_HEADER_SIZE];
 
     /*!
      * The default version value as defined by the CCSDS Space Packet Protocol Blue Book.
@@ -68,7 +96,7 @@ public:
      * The default type values as defined by the CCSDS Space Packet Protocol Blue Book.
      */
     enum class PACKET_TYPE {
-        CCSDS_TELECOMMAND = 0x0, CCSDS_TELEMETRY = 0x1,
+        CCSDS_TELEMETRY = 0x0, CCSDS_TELECOMMAND = 0x1,
     };
 
     /*!
@@ -84,7 +112,7 @@ public:
      * Protocol Blue Book.
      */
     enum class PACKET_APPLICATION_PROCESS_IDENTIFIER {
-        IDLE_PACKET = 0x0
+        IDLE_PACKET = 0x7FF,
     };
 
     /*!
@@ -117,7 +145,7 @@ public:
     get_primary_header();
 
     void
-    set_primary_header(packet_primary_header_t hdr);
+    set_primary_header(packet_primary_header_t *hdr);
 
     /*!
      * Get the decoded value of the version subfield.

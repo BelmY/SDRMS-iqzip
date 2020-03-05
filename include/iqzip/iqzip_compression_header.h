@@ -486,7 +486,7 @@ private:
     compression_identification_packet *d_cip;
 
     uint16_t d_block_size;
-    uint8_t d_rsi;
+    uint16_t d_rsi;
     uint8_t d_enable_preprocessing;
     uint8_t d_endianness;
     int8_t d_version;
@@ -505,7 +505,7 @@ private:
     get_iqzip_compression_header();
 
     void
-    set_iqzip_compression_header(iqzip_compression_header_t hdr);
+    set_iqzip_compression_header(iqzip_compression_header_t *hdr);
 
     void
     encode();
