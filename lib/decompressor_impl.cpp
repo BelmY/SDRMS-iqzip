@@ -18,15 +18,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iqzip/iqzip_decompressor.h>
-#include <cstring>
+#include "decompressor_impl.h"
 
-namespace iqzip {
+#include <cstring>
 
 namespace compression {
 
-Iqzip_decompressor::Iqzip_decompressor() :
-    Iqzip(),
+decompressor_impl::decompressor_impl() :
+    iqzip(),
     d_iqzip_header_size(0),
     d_tmp_stream(new char[STREAM_CHUNK]),
     d_stream_avail_in(0),
@@ -35,37 +34,37 @@ Iqzip_decompressor::Iqzip_decompressor() :
 {
 }
 
-Iqzip_decompressor::~Iqzip_decompressor()
+decompressor_impl::~decompressor_impl()
 {
-    d_iq_header.~iqzip_compression_header();
 }
 
 int
-Iqzip_decompressor::iqzip_decompress_init(const std::string fin,
-        const std::string fout)
+decompressor_impl::decompress_init(const std::string fin,
+                                   const std::string fout)
 {
     /* Read header and save options to class fields */
-    d_iqzip_header_size = d_iq_header.parse_header_from_file(fin);
-    d_version = d_iq_header.decode_version();
-    d_type = d_iq_header.decode_type();
-    d_sec_hdr_flag = d_iq_header.decode_secondary_header_flag();
-    d_apid = d_iq_header.decode_application_process_identifier();
-    d_sequence_flags = d_iq_header.decode_sequence_flags();
-    d_packet_sequence_count = d_iq_header.decode_packet_sequence_count();
-    d_packet_data_length = d_iq_header.decode_packet_data_length();
-    d_grouping_data_length = d_iq_header.decode_grouping_data_length();
-    d_compression_tech_id = d_iq_header.decode_compression_technique_id();
-    d_reference_sample_interval = d_iq_header.decode_reference_sample_interval();
-    d_preprocessor_status = d_iq_header.decode_preprocessor_status();
-    d_predictor_type = d_iq_header.decode_preprocessor_predictor_type();
-    d_mapper_type = d_iq_header.decode_preprocessor_mapper_type();
-    d_block_size = d_iq_header.decode_block_size();
-    d_data_sense = d_iq_header.decode_preprocessor_data_sense();
-    d_sample_resolution = d_iq_header.decode_preprocessor_sample_resolution();
+    d_iqzip_header_size = d_ccsds_cip_hdr.parse_header_from_file(fin);
+    d_version = d_ccsds_cip_hdr.decode_version();
+    d_type = d_ccsds_cip_hdr.decode_type();
+    d_sec_hdr_flag = d_ccsds_cip_hdr.decode_secondary_header_flag();
+    d_apid = d_ccsds_cip_hdr.decode_application_process_identifier();
+    d_sequence_flags = d_ccsds_cip_hdr.decode_sequence_flags();
+    d_packet_sequence_count = d_ccsds_cip_hdr.decode_packet_sequence_count();
+    d_packet_data_length = d_ccsds_cip_hdr.decode_packet_data_length();
+    d_grouping_data_length = d_ccsds_cip_hdr.decode_grouping_data_length();
+    d_compression_tech_id = d_ccsds_cip_hdr.decode_compression_technique_id();
+    d_reference_sample_interval =
+        d_ccsds_cip_hdr.decode_reference_sample_interval();
+    d_preprocessor_status = d_ccsds_cip_hdr.decode_preprocessor_status();
+    d_predictor_type = d_ccsds_cip_hdr.decode_preprocessor_predictor_type();
+    d_mapper_type = d_ccsds_cip_hdr.decode_preprocessor_mapper_type();
+    d_block_size = d_ccsds_cip_hdr.decode_block_size();
+    d_data_sense = d_ccsds_cip_hdr.decode_preprocessor_data_sense();
+    d_sample_resolution = d_ccsds_cip_hdr.decode_preprocessor_sample_resolution();
     d_cds_per_packet = 0;
     d_restricted_codes =
-        d_iq_header.decode_extended_parameters_restricted_code_option();
-    d_endianness = d_iq_header.decode_iqzip_header_endianess();
+        d_ccsds_cip_hdr.decode_extended_parameters_restricted_code_option();
+    d_endianness = d_ccsds_cip_hdr.decode_iqzip_header_endianess();
 
     /* Initialize libaec stream */
     init_aec_stream();
@@ -95,7 +94,7 @@ Iqzip_decompressor::iqzip_decompress_init(const std::string fin,
 }
 
 int
-Iqzip_decompressor::iqzip_decompress()
+decompressor_impl::decompress()
 {
     int total_out = 0;
     int input_avail = 1;
@@ -138,8 +137,8 @@ Iqzip_decompressor::iqzip_decompress()
 }
 
 int
-Iqzip_decompressor::iqzip_stream_decompress(const char *inbuf,
-        size_t nbytes)
+decompressor_impl::stream_decompress(const char *inbuf,
+                                     size_t nbytes)
 {
     int status;
     /* Save input buffer to internal buffer */
@@ -191,7 +190,7 @@ Iqzip_decompressor::iqzip_stream_decompress(const char *inbuf,
 }
 
 int
-Iqzip_decompressor::iqzip_decompress_fin()
+decompressor_impl::decompress_fin()
 {
     int status;
     status = aec_decode_end(&d_strm);
@@ -211,7 +210,7 @@ Iqzip_decompressor::iqzip_decompress_fin()
 }
 
 int
-Iqzip_decompressor::iqzip_stream_decompress_fin()
+decompressor_impl::stream_decompress_fin()
 {
     int status;
 
@@ -245,198 +244,9 @@ Iqzip_decompressor::iqzip_stream_decompress_fin()
     return 0;
 }
 
-void
-Iqzip_decompressor::print_error(int status)
+decompressor_sptr
+create_decompressor()
 {
-    switch (status) {
-    case AEC_CONF_ERROR:
-        std::cout << "Decompressor: Configuration Error" << std::endl;
-        break;
-    case AEC_STREAM_ERROR:
-        std::cout << "Decompressor: Streaming Error" << std::endl;
-        break;
-    case AEC_DATA_ERROR:
-        std::cout << "Decompressor: Data Error" << std::endl;
-        break;
-    case AEC_MEM_ERROR:
-        std::cout << "Decompressor: Memory allocation Error" << std::endl;
-        break;
-    default:
-        std::cout << "Decompressor: Unknown Error" << std::endl;
-    }
-}
-
-uint32_t
-Iqzip_decompressor::getChunk() const
-{
-    return Iqzip::getChunk();
-}
-
-void
-Iqzip_decompressor::setChunk(uint32_t chunk = 10485760)
-{
-    delete[] d_out;
-    d_out = new char[chunk];
-    Iqzip::setChunk(chunk);
-}
-
-uint32_t
-Iqzip_decompressor::getStreamChunk() const
-{
-    return STREAM_CHUNK;
-}
-
-void
-Iqzip_decompressor::setStreamChunk(uint32_t stream_chunk)
-{
-    delete[] d_tmp_stream;
-    d_tmp_stream = new char[stream_chunk];
-    STREAM_CHUNK = stream_chunk;
-}
-
-uint16_t
-Iqzip_decompressor::getApid() const
-{
-    return Iqzip::getApid();
-}
-
-uint16_t
-Iqzip_decompressor::getBlockSize() const
-{
-    return Iqzip::getBlockSize();
-}
-
-uint16_t
-Iqzip_decompressor::getCdsPerPacket() const
-{
-    return Iqzip::getCdsPerPacket();
-}
-
-uint8_t
-Iqzip_decompressor::getCompressionTechId() const
-{
-    return Iqzip::getCompressionTechId();
-}
-
-uint8_t
-Iqzip_decompressor::getDataSense() const
-{
-    return Iqzip::getDataSense();
-}
-
-uint8_t
-Iqzip_decompressor::getEndianness() const
-{
-    return Iqzip::getEndianness();
-}
-
-uint16_t
-Iqzip_decompressor::getGroupingDataLength() const
-{
-    return Iqzip::getGroupingDataLength();
-}
-
-const iqzip::compression::iqzip_compression_header &
-Iqzip_decompressor::getIqHeader() const
-{
-    return Iqzip::getIqHeader();
-}
-
-uint8_t
-Iqzip_decompressor::getMapperType() const
-{
-    return Iqzip::getMapperType();
-}
-
-uint16_t
-Iqzip_decompressor::getPacketDataLength() const
-{
-    return Iqzip::getPacketDataLength();
-}
-
-uint16_t
-Iqzip_decompressor::getPacketSequenceCount() const
-{
-    return Iqzip::getPacketSequenceCount();
-}
-
-uint8_t
-Iqzip_decompressor::getPredictorType() const
-{
-    return Iqzip::getPredictorType();
-}
-
-uint8_t
-Iqzip_decompressor::getPreprocessorStatus() const
-{
-    return Iqzip::getPreprocessorStatus();
-}
-
-uint8_t
-Iqzip_decompressor::getReferenceSampleInterval() const
-{
-    return Iqzip::getReferenceSampleInterval();
-}
-
-uint8_t
-Iqzip_decompressor::getRestrictedCodes() const
-{
-    return Iqzip::getRestrictedCodes();
-}
-
-uint8_t
-Iqzip_decompressor::getSampleResolution() const
-{
-    return Iqzip::getSampleResolution();
-}
-
-uint8_t
-Iqzip_decompressor::getSecHdrFlag() const
-{
-    return Iqzip::getSecHdrFlag();
-}
-
-uint8_t
-Iqzip_decompressor::getSequenceFlags() const
-{
-    return Iqzip::getSequenceFlags();
-}
-
-const aec_stream &
-Iqzip_decompressor::getStrm() const
-{
-    return Iqzip::getStrm();
-}
-
-uint8_t
-Iqzip_decompressor::getType() const
-{
-    return Iqzip::getType();
-}
-
-uint8_t
-Iqzip_decompressor::getVersion() const
-{
-    return Iqzip::getVersion();
-}
-
-const std::ifstream &
-Iqzip_decompressor::getInputStream() const
-{
-    return Iqzip::getInputStream();
-}
-
-const std::ofstream &
-Iqzip_decompressor::getOutputStream() const
-{
-    return Iqzip::getOutputStream();
-}
-size_t
-Iqzip_decompressor::getHeaderSize() const
-{
-    return d_iqzip_header_size;
-}
-
+    return std::shared_ptr<decompressor>(new decompressor_impl);
 }
 }
-

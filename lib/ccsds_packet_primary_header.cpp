@@ -23,8 +23,6 @@
 #include <cstring>
 #include <iostream>
 
-namespace iqzip {
-
 namespace compression {
 
 ccsds_packet_primary_header::ccsds_packet_primary_header(
@@ -193,5 +191,4 @@ ccsds_packet_primary_header::encode_version(uint8_t version)
     d_primary_header[0] |= (version & 0x7) << 5;
 }
 
-}
 }

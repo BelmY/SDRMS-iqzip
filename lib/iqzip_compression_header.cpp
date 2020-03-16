@@ -24,8 +24,6 @@
 #include <cstring>
 #include <iostream>
 
-namespace iqzip {
-
 namespace compression {
 
 iqzip_compression_header::iqzip_compression_header(
@@ -489,6 +487,5 @@ uint16_t
 iqzip_compression_header::decode_iqzip_header_reference_sample_interval() const
 {
     return d_iqzip_header.rsi;
-}
 }
 }

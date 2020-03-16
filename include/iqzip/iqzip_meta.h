@@ -32,8 +32,6 @@ extern "C" {
 #include <sigmf/sigmf_antenna_generated.h>
 #include <sigmf/sigmf.h>
 
-namespace iqzip {
-
 namespace meta {
 
 /*!
@@ -216,7 +214,5 @@ private:
 };
 
 } //namespace meta
-
-} //namespace iqzip
 
 #endif /* IQZIP_META_H_ */

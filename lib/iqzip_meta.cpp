@@ -26,8 +26,6 @@
 #include <iostream>
 #include <fstream>
 
-namespace iqzip {
-
 namespace meta {
 
 iqzip_meta::iqzip_meta()
@@ -408,5 +406,4 @@ iqzip_meta::initialize_global(std::string datatype, double sample_rate,
     d_sigmf.global.access<core::GlobalT> ().hw = hw;
 }
 
-}
 }

@@ -57,8 +57,6 @@
 
 #define INSTRUMENT_CONFIG_SUBFIELD_SIZE                     2
 
-namespace iqzip {
-
 namespace compression {
 
 /*!
@@ -572,7 +570,6 @@ private:
     encode_extended_parameters();
 
 };
-}
 }
 
 #endif /* COMPRESSION_IDENTIFICATION_PACKET_H_ */

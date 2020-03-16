@@ -37,9 +37,6 @@
 #define PACKET_SEQUENCE_COUNT_MASK              0x3fff
 #define PACKET_LENGTH_MASK                      0xffff
 
-
-namespace iqzip {
-
 namespace compression {
 
 /*!
@@ -259,7 +256,6 @@ private:
     packet_primary_header_t d_primary_header;
 
 };
-}
 }
 
 #endif /* CCSDS_PACKET_PRIMARY_HEADER_H_ */

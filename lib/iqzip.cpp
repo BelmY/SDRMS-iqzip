@@ -1,6 +1,6 @@
 /* -*- c++ -*- */
 /*
- *  IQzip
+ *  iqzip
  *
  *  Copyright (C) 2019, Libre Space Foundation <https://libre.space/>
  *
@@ -22,7 +22,7 @@
 
 #include <iqzip/iqzip.h>
 
-Iqzip::Iqzip() :
+iqzip::iqzip() :
     d_version(0),
     d_type(0),
     d_sec_hdr_flag(0),
@@ -43,11 +43,10 @@ Iqzip::Iqzip() :
     d_restricted_codes(0),
     d_endianness(0)
 {
-    d_iq_header = iqzip::compression::iqzip_compression_header();
+    d_ccsds_cip_hdr = compression::iqzip_compression_header();
 }
-;
 
-Iqzip::Iqzip(uint8_t version, uint8_t type, uint8_t sec_hdr_flag,
+iqzip::iqzip(uint8_t version, uint8_t type, uint8_t sec_hdr_flag,
              uint16_t apid, uint8_t sequence_flags,
              uint16_t packet_sequence_count, uint16_t packet_data_length,
              uint16_t grouping_data_length, uint8_t compression_tech_id,
@@ -77,20 +76,20 @@ Iqzip::Iqzip(uint8_t version, uint8_t type, uint8_t sec_hdr_flag,
     d_endianness(endianness)
 {
     /* Initialize IQ CCSDS header */
-    d_iq_header = iqzip::compression::iqzip_compression_header(
-                      d_version, d_type, d_sec_hdr_flag, d_apid, d_sequence_flags,
-                      d_packet_sequence_count, d_packet_data_length, d_grouping_data_length,
-                      d_compression_tech_id, d_reference_sample_interval, d_preprocessor_status,
-                      d_predictor_type, d_mapper_type, d_block_size, d_data_sense,
-                      d_sample_resolution, d_cds_per_packet, d_restricted_codes, d_endianness);
+    d_ccsds_cip_hdr = compression::iqzip_compression_header(
+                          d_version, d_type, d_sec_hdr_flag, d_apid, d_sequence_flags,
+                          d_packet_sequence_count, d_packet_data_length, d_grouping_data_length,
+                          d_compression_tech_id, d_reference_sample_interval, d_preprocessor_status,
+                          d_predictor_type, d_mapper_type, d_block_size, d_data_sense,
+                          d_sample_resolution, d_cds_per_packet, d_restricted_codes, d_endianness);
 }
 
-Iqzip::~Iqzip()
+iqzip::~iqzip()
 {
 }
 
 void
-Iqzip::init_aec_stream(void)
+iqzip::init_aec_stream(void)
 {
     d_strm.avail_in = 0;
     d_strm.avail_out = CHUNK;
@@ -116,280 +115,24 @@ Iqzip::init_aec_stream(void)
     d_strm.total_out = 0;
 }
 
-uint32_t
-Iqzip::getChunk() const
-{
-    return CHUNK;
-}
-
 void
-Iqzip::setChunk(uint32_t chunk = 10485760)
+iqzip::print_error(int status)
 {
-    CHUNK = chunk;
-}
-
-uint16_t
-Iqzip::getApid() const
-{
-    return d_apid;
-}
-
-void
-Iqzip::setApid(uint16_t apid)
-{
-    d_apid = apid;
-}
-
-uint16_t
-Iqzip::getBlockSize() const
-{
-    return d_block_size;
-}
-
-void
-Iqzip::setBlockSize(uint16_t blockSize)
-{
-    d_block_size = blockSize;
-}
-
-uint16_t
-Iqzip::getCdsPerPacket() const
-{
-    return d_cds_per_packet;
-}
-
-void
-Iqzip::setCdsPerPacket(uint16_t cdsPerPacket)
-{
-    d_cds_per_packet = cdsPerPacket;
-}
-
-uint8_t
-Iqzip::getCompressionTechId() const
-{
-    return d_compression_tech_id;
-}
-
-void
-Iqzip::setCompressionTechId(uint8_t compressionTechId)
-{
-    d_compression_tech_id = compressionTechId;
-}
-
-uint8_t
-Iqzip::getDataSense() const
-{
-    return d_data_sense;
-}
-
-void
-Iqzip::setDataSense(uint8_t dataSense)
-{
-    d_data_sense = dataSense;
-}
-
-uint8_t
-Iqzip::getEndianness() const
-{
-    return d_endianness;
-}
-
-void
-Iqzip::setEndianness(uint8_t endianness)
-{
-    d_endianness = endianness;
-}
-
-uint16_t
-Iqzip::getGroupingDataLength() const
-{
-    return d_grouping_data_length;
-}
-
-void
-Iqzip::setGroupingDataLength(uint16_t groupingDataLength)
-{
-    d_grouping_data_length = groupingDataLength;
-}
-
-const iqzip::compression::iqzip_compression_header &
-Iqzip::getIqHeader() const
-{
-    return d_iq_header;
-}
-
-void
-Iqzip::setIqHeader(
-    const iqzip::compression::iqzip_compression_header &iqHeader)
-{
-    d_iq_header = iqHeader;
-}
-
-uint8_t
-Iqzip::getMapperType() const
-{
-    return d_mapper_type;
-}
-
-void
-Iqzip::setMapperType(uint8_t mapperType)
-{
-    d_mapper_type = mapperType;
-}
-
-uint16_t
-Iqzip::getPacketDataLength() const
-{
-    return d_packet_data_length;
-}
-
-void
-Iqzip::setPacketDataLength(uint16_t packetDataLength)
-{
-    d_packet_data_length = packetDataLength;
-}
-
-uint16_t
-Iqzip::getPacketSequenceCount() const
-{
-    return d_packet_sequence_count;
-}
-
-void
-Iqzip::setPacketSequenceCount(uint16_t packetSequenceCount)
-{
-    d_packet_sequence_count = packetSequenceCount;
-}
-
-uint8_t
-Iqzip::getPredictorType() const
-{
-    return d_predictor_type;
-}
-
-void
-Iqzip::setPredictorType(uint8_t predictorType)
-{
-    d_predictor_type = predictorType;
-}
-
-uint8_t
-Iqzip::getPreprocessorStatus() const
-{
-    return d_preprocessor_status;
-}
-
-void
-Iqzip::setPreprocessorStatus(uint8_t preprocessorStatus)
-{
-    d_preprocessor_status = preprocessorStatus;
-}
-
-uint8_t
-Iqzip::getReferenceSampleInterval() const
-{
-    return d_reference_sample_interval;
-}
-
-void
-Iqzip::setReferenceSampleInterval(uint8_t referenceSampleInterval)
-{
-    d_reference_sample_interval = referenceSampleInterval;
-}
-
-uint8_t
-Iqzip::getRestrictedCodes() const
-{
-    return d_restricted_codes;
-}
-
-void
-Iqzip::setRestrictedCodes(uint8_t restrictedCodes)
-{
-    d_restricted_codes = restrictedCodes;
-}
-
-uint8_t
-Iqzip::getSampleResolution() const
-{
-    return d_sample_resolution;
-}
-
-void
-Iqzip::setSampleResolution(uint8_t sampleResolution)
-{
-    d_sample_resolution = sampleResolution;
-}
-
-uint8_t
-Iqzip::getSecHdrFlag() const
-{
-    return d_sec_hdr_flag;
-}
-
-void
-Iqzip::setSecHdrFlag(uint8_t secHdrFlag)
-{
-    d_sec_hdr_flag = secHdrFlag;
-}
-
-uint8_t
-Iqzip::getSequenceFlags() const
-{
-    return d_sequence_flags;
-}
-
-void
-Iqzip::setSequenceFlags(uint8_t sequenceFlags)
-{
-    d_sequence_flags = sequenceFlags;
-}
-
-const aec_stream &
-Iqzip::getStrm() const
-{
-    return d_strm;
-}
-
-void
-Iqzip::setStrm(const aec_stream &strm)
-{
-    d_strm = strm;
-}
-
-uint8_t
-Iqzip::getType() const
-{
-    return d_type;
-}
-
-void
-Iqzip::setType(uint8_t type)
-{
-    d_type = type;
-}
-
-uint8_t
-Iqzip::getVersion() const
-{
-    return d_version;
-}
-
-void
-Iqzip::setVersion(uint8_t version)
-{
-    d_version = version;
-}
-
-const std::ifstream &
-Iqzip::getInputStream() const
-{
-    return input_stream;
-}
-
-const std::ofstream &
-Iqzip::getOutputStream() const
-{
-    return output_stream;
+    switch (status) {
+    case AEC_CONF_ERROR:
+        std::cout << "Compressor: Configuration Error" << std::endl;
+        break;
+    case AEC_STREAM_ERROR:
+        std::cout << "Compressor: Streaming Error" << std::endl;
+        break;
+    case AEC_DATA_ERROR:
+        std::cout << "Compressor: Data Error" << std::endl;
+        break;
+    case AEC_MEM_ERROR:
+        std::cout << "Compressor: Memory allocation Error" << std::endl;
+        break;
+    default:
+        std::cout << "Compressor: Unknown Error" << std::endl;
+    }
 }
 

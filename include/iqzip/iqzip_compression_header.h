@@ -27,8 +27,6 @@
 
 #define IQZIP_COMPRESSION_HDR_SIZE      2
 
-namespace iqzip {
-
 namespace compression {
 
 /*!
@@ -510,7 +508,6 @@ private:
     void
     encode();
 };
-}
 }
 
 #endif /* IQZIP_COMPRESSION_HEADER_H_ */

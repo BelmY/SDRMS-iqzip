@@ -23,10 +23,8 @@ list(APPEND iqzip_sources
             ccsds_packet_primary_header.cpp
             compression_identification_packet.cpp
             iqzip_compression_header.cpp
-            iqzip.cpp
-            iqzip_decompressor.cpp
-            iqzip_compressor.cpp
-            iqzip_meta.cpp)
+#            iqzip_meta.cpp
+            )
 
 list(APPEND IQZIP_INCLUDE_DIRS
             ${PROJECT_SOURCE_DIR}/include
@@ -47,10 +45,19 @@ endif(APPLE)
 
 add_library(iqzip SHARED ${iqzip_sources})
 target_link_libraries(iqzip ${AEC_LIBRARIES} ${LIBTAR_LIBRARIES})
-target_include_directories(iqzip PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_include_directories(iqzip BEFORE
-                           PUBLIC "$<BUILD_INTERFACE:${IQZIP_INCLUDE_DIRS}>"
-                                  $<INSTALL_INTERFACE:${IQZIP_INCLUDE_DIRS}>)
+
+target_sources(iqzip PRIVATE
+    iqzip.cpp
+    compressor_impl.cpp
+    decompressor_impl.cpp
+    )
+
+target_include_directories(iqzip
+  PUBLIC
+  $<INSTALL_INTERFACE:include>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
+  )
+  
 set_target_properties(iqzip
                       PROPERTIES VERSION
                                  ${LIBVERSION}

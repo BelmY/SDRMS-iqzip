@@ -25,8 +25,6 @@
 #include <byteswap.h>
 #include <iostream>
 
-namespace iqzip {
-
 namespace compression {
 
 compression_identification_packet::compression_identification_packet(
@@ -526,6 +524,5 @@ const
            EXTENDED_PARAMETERS_RESTRICTED_CODES_MASK;
 }
 
-}
 }
 
