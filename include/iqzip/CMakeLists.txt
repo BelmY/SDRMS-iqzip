@@ -24,5 +24,5 @@ install(FILES ccsds_packet_primary_header.h
               compressor.h
               decompressor.h
               iqzip.h
-#              iqzip_meta.h
+              meta.h
         DESTINATION include/iqzip)

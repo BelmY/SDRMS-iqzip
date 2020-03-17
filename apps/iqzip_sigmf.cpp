@@ -14,27 +14,23 @@
  *  limitations under the License.
  */
 
-#include <iqzip/iqzip_meta.h>
 #include <iostream>
+#include <iqzip/meta.h>
 
 int main()
 {
 
-    iqzip::meta::iqzip_meta meta = iqzip::meta::iqzip_meta("u8", "0.0.1");
+    metafile::meta_sptr sptr = metafile::create_iqzip_meta("u8", "0.0.1");
     std::cout << "My sigmf: " <<
-              meta.get_sigmf_global_segment().access<core::GlobalT>().datatype << std::endl;
+              sptr->get_global_datatype() << std::endl;
 
-    meta.append_capture_segment(10);
-    meta.append_capture_segment(20);
-    meta.append_capture_segment(25);
-    meta.set_capture_global_index(20, 1);
+    sptr->append_capture_segment(10);
+    sptr->append_capture_segment(20);
+    sptr->append_capture_segment(25);
+    sptr->set_capture_global_index(20, 1);
 
-    // Make it a json (from modernjson) object and verify its output
-    std::stringstream json_output;
-    json_output << json(meta.get_sigmf()).dump(2) << std::flush;
-    std::cout << json(meta.get_sigmf()).dump(2) << std::endl;
-    meta.write_json("meta.sigmf-meta");
-    meta.parse_json("meta.sigmf-meta");
-    meta.create_tar("satnogs.sigmf", "meta.sigmf-meta");
+    sptr->write_json("meta.sigmf-meta");
+    sptr->parse_json("meta.sigmf-meta");
+    sptr->create_archive("satnogs.sigmf", "meta.sigmf-meta");
     return 0;
 }

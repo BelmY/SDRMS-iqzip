@@ -23,7 +23,6 @@ list(APPEND iqzip_sources
             ccsds_packet_primary_header.cpp
             compression_identification_packet.cpp
             iqzip_compression_header.cpp
-#            iqzip_meta.cpp
             )
 
 list(APPEND IQZIP_INCLUDE_DIRS
@@ -50,6 +49,7 @@ target_sources(iqzip PRIVATE
     iqzip.cpp
     compressor_impl.cpp
     decompressor_impl.cpp
+    meta_impl.cpp
     )
 
 target_include_directories(iqzip
