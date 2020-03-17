@@ -1,7 +1,5 @@
 /* -*- c++ -*- */
 /*
- *  IQzip
- *
  *  Copyright (C) 2019, Libre Space Foundation <https://libre.space/>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -22,6 +20,8 @@
 #include <stdexcept>
 #include <cstring>
 #include <iostream>
+
+namespace iqzip {
 
 namespace compression {
 
@@ -191,4 +191,5 @@ ccsds_packet_primary_header::encode_version(uint8_t version)
     d_primary_header[0] |= (version & 0x7) << 5;
 }
 
-}
+} // namespace compression
+} // namespace iqzip

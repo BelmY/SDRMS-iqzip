@@ -1,7 +1,5 @@
 /* -*- c++ -*- */
 /*
- *  IQzip
- *
  *  Copyright (C) 2019, Libre Space Foundation <https://libre.space/>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -18,8 +16,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef IQZIP_H
-#define IQZIP_H
+#ifndef IQZIP_IMPL_H
+#define IQZIP_IMPL_H
 
 #include <cmath>
 #include <fstream>
@@ -27,7 +25,10 @@
 #include <libaec.h>
 #include <iqzip/iqzip_compression_header.h>
 
-class iqzip {
+namespace iqzip {
+
+class iqzip_impl {
+
 protected:
     uint32_t CHUNK = 10485760;
     compression::iqzip_compression_header d_ccsds_cip_hdr;
@@ -59,7 +60,7 @@ protected:
     /*!
      * Default constructor
      */
-    iqzip();
+    iqzip_impl();
 
     /*!
      * Constructor with arguments. All necessary variables for compression are
@@ -84,19 +85,19 @@ protected:
      * @param restricted_codes Secondary header restricted codes.
      * @param endianness Endianness of samples.
      */
-    iqzip(uint8_t version, uint8_t type, uint8_t sec_hdr_flag, uint16_t apid,
-          uint8_t sequence_flags, uint16_t packet_sequence_count,
-          uint16_t packet_data_length, uint16_t grouping_data_length,
-          uint8_t compression_tech_id, uint8_t reference_sample_interval,
-          uint8_t preprocessor_status, uint8_t predictor_type,
-          uint8_t mapper_type, uint16_t block_size, uint8_t data_sense,
-          uint8_t sample_resolution, uint16_t cds_per_packet,
-          uint8_t restricted_codes, uint8_t endianness);
+    iqzip_impl(uint8_t version, uint8_t type, uint8_t sec_hdr_flag, uint16_t apid,
+               uint8_t sequence_flags, uint16_t packet_sequence_count,
+               uint16_t packet_data_length, uint16_t grouping_data_length,
+               uint8_t compression_tech_id, uint8_t reference_sample_interval,
+               uint8_t preprocessor_status, uint8_t predictor_type,
+               uint8_t mapper_type, uint16_t block_size, uint8_t data_sense,
+               uint8_t sample_resolution, uint16_t cds_per_packet,
+               uint8_t restricted_codes, uint8_t endianness);
 
     /*!
      * Default destructor
      */
-    virtual ~iqzip();
+    virtual ~iqzip_impl();
 
     /*!
      * Initializes the aec stream from the class members. Used in init*
@@ -112,4 +113,6 @@ protected:
 
 };
 
-#endif /* IQZIP_H */
+} // namespace iqzip
+
+#endif /* IQZIP_IMPL_H */

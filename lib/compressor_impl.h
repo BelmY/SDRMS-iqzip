@@ -1,7 +1,5 @@
 /* -*- c++ -*- */
 /*
- *  iqzip
- *
  *  Copyright (C) 2019, Libre Space Foundation <https://libre.space/>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -33,12 +31,14 @@
 #include <iostream>
 #include <string>
 
-#include <iqzip/iqzip.h>
+#include "iqzip_impl.h"
 #include <iqzip/compressor.h>
+
+namespace iqzip {
 
 namespace compression {
 
-class compressor_impl : public iqzip, public compressor {
+class compressor_impl : public iqzip_impl, public compressor {
 
 private:
     uint32_t STREAM_CHUNK = 32768;
@@ -142,6 +142,8 @@ public:
 
 };
 
-}
+} // namespace compression
+
+} // namespace iqzip
 
 #endif /* COMPRESSOR_IMPL_H */

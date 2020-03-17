@@ -1,7 +1,5 @@
 /* -*- c++ -*- */
 /*
- *  IQzip
- *
  *  Copyright (C) 2019, Libre Space Foundation <https://libre.space/>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -24,6 +22,8 @@
 #include <cstring>
 #include <iostream>
 #include <fstream>
+
+namespace iqzip {
 
 namespace metafile {
 
@@ -420,4 +420,5 @@ create_iqzip_meta(std::string datatype, double sample_rate, std::string version,
                                  license, hw));
 }
 
-}
+} // namespace metafile
+} // namespace iqzip

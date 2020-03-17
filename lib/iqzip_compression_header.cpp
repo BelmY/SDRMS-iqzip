@@ -1,7 +1,5 @@
 /* -*- c++ -*- */
 /*
- *  IQzip
- *
  *  Copyright (C) 2019, Libre Space Foundation <https://libre.space/>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -23,6 +21,8 @@
 #include <stdexcept>
 #include <cstring>
 #include <iostream>
+
+namespace iqzip {
 
 namespace compression {
 
@@ -488,4 +488,6 @@ iqzip_compression_header::decode_iqzip_header_reference_sample_interval() const
 {
     return d_iqzip_header.rsi;
 }
-}
+
+} // namespace compression
+} // namespace iqzip

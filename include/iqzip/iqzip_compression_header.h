@@ -1,7 +1,5 @@
 /* -*- c++ -*- */
 /*
- *  IQzip
- *
  *  Copyright (C) 2019, Libre Space Foundation <https://libre.space/>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -26,6 +24,8 @@
 #include <iqzip/compression_identification_packet.h>
 
 #define IQZIP_COMPRESSION_HDR_SIZE      2
+
+namespace iqzip {
 
 namespace compression {
 
@@ -508,6 +508,7 @@ private:
     void
     encode();
 };
-}
+} // namespace compression
+} // namespace iqzip
 
 #endif /* IQZIP_COMPRESSION_HEADER_H_ */

@@ -19,7 +19,7 @@ openSUSE:
 
   before_script:
     - zypper in -y cmake gcc-c++ gcc git libaec-devel libtar-devel flatbuffers-devel libflatbuffers1 nlohmann_json-devel
-    - git clone --recurse-submodules https://github.com/deepsig/libsigmf.git
+    - git clone --recurse-submodules https://github.com/noc0lour/libsigmf.git
     - cd libsigmf
     - mkdir build
     - cd build
@@ -37,12 +37,12 @@ openSUSE:
 
 debian:
   stage: build
-  image: debian:buster
+  image: debian:bullseye
 
   before_script: 
     - apt-get update -qq -y
     - apt-get install -q -y cmake g++ gcc git libaec-dev libtar-dev libflatbuffers-dev libflatbuffers1 nlohmann-json-dev
-    - git clone --recurse-submodules https://github.com/deepsig/libsigmf.git
+    - git clone --recurse-submodules https://github.com/noc0lour/libsigmf.git
     - cd libsigmf
     - mkdir build
     - cd build

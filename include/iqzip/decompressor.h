@@ -1,7 +1,5 @@
 /* -*- c++ -*- */
 /*
- *  IQzip
- *
  *  Copyright (C) 2019, Libre Space Foundation <https://libre.space/>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -23,32 +21,26 @@
 
 #include <memory>
 
+namespace iqzip {
+
 namespace compression {
 
 class decompressor;
 typedef std::shared_ptr<decompressor> decompressor_sptr;
 
 class decompressor {
-private:
-    size_t d_iqzip_header_size;
-    uint32_t STREAM_CHUNK = 32768;
-    char *d_tmp_stream;
-    size_t d_stream_avail_in;
-    char *d_out;
-    size_t d_total_out;
 
 public:
 
     /*!
-     * Default destructor. Calls iqzip_compression_header destructor.
+     * Default destructor.
      */
     virtual ~decompressor() {};
 
     /*!
      * Initializes necessary variables for decompression. Should always be called
      * before decompressing. It opens the fin and fout files. The CCSDS header is
-     * read from the file specified by fin. The aec_stream parameter used by
-     * libaec is also initialized.
+     * read from the file specified by fin.
      * @param fin Name of input file.
      * @param fout Name of output file.
      * @return 0 on success, != 0 otherwise.
@@ -56,15 +48,15 @@ public:
     virtual int decompress_init(const std::string fin, const std::string fout) = 0;
 
     /*!
-     * Reads the input file given in iqzip_decompress_init, decompresses it, and
-     * writes the results to fout given in iqzip_decompress_init.
+     * Reads the input file given in decompress_init, decompresses it, and
+     * writes the results to fout given in decompress_init.
      * @return 0 on succes, != 0 otherwise.
      */
     virtual int decompress() = 0;
 
     /*!
      * Reads the input file given in iqzip_decompress_init, decompresses it,
-     * and writes the results to fout given in iqzip_decompress_init.
+     * and writes the results to fout given in decompress_init.
      * @param inbuf buffer to read samples from.
      * @param nbytes number of bytes to read from buffer.
      * @return 0 on success, !=0 otherwise.
@@ -72,22 +64,29 @@ public:
     virtual int stream_decompress(const char *inbuf, size_t nbytes) = 0;
 
     /*!
-     * Finalizes the decompression and clears aec_stream. Should always be called
-     * after iqzip_decompress otherwise output file may not be written correctly.
+     * Finalizes the decompression and clears internal variables. Should always be called
+     * after decompress otherwise output file may not be written correctly.
      * @return 0 on success, != 0 otherwise.
      */
     virtual int decompress_fin() = 0;
 
     /*!
      * Finalizes the decompression and clears aec_stream. Should always be called
-     * after iqzip_stream_decompress otherwise output file may not be written correctly.
+     * after stream_decompress otherwise output file may not be written correctly.
      * @return
      */
     virtual int stream_decompress_fin() = 0;
 };
 
+
+/*!
+ * Instantiates a decompressor class object.
+ * @return a std::shared_ptr<decompressor>
+ */
 decompressor_sptr create_decompressor();
 
-}
+} // namespace compression
+
+} // namespace iqzip
 
 #endif /* IQZIP_DECOMPRESSOR_H */

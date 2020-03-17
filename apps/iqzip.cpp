@@ -46,8 +46,6 @@
  * CLI frontend for Adaptive Entropy Coding library
  *
  *
- *  IQzip
- *
  *  Copyright (C) 2019, Libre Space Foundation <https://libre.space/>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -160,7 +158,8 @@ main(int argc, char *argv[])
     outfn = argv[iarg + 1];
 
     if (dflag) {
-        compression::decompressor_sptr sptr = compression::create_decompressor();
+        iqzip::compression::decompressor_sptr sptr =
+            iqzip::compression::create_decompressor();
         /* Initialize decompressor */
         sptr->decompress_init(infn, outfn);
         /* Decompress file */
@@ -169,26 +168,27 @@ main(int argc, char *argv[])
         sptr->decompress_fin();
     }
     else {
-        compression::compressor_sptr sptr = compression::create_compressor(
-                                                (uint8_t)0,
-                                                (uint8_t)0,
-                                                (uint8_t)0,
-                                                (uint16_t)0x7,
-                                                (uint8_t)1,
-                                                0xdffe,
-                                                0x7efe,
-                                                0xffff,
-                                                (uint8_t)1,
-                                                reference_sample_interval,
-                                                enable_preprocessing,
-                                                (uint8_t)0x7,
-                                                (uint8_t)0,
-                                                block_size,
-                                                data_sense,
-                                                8,
-                                                1,
-                                                restricted_codes,
-                                                endianness);
+        iqzip::compression::compressor_sptr sptr =
+            iqzip::compression::create_compressor(
+                (uint8_t)0,
+                (uint8_t)0,
+                (uint8_t)0,
+                (uint16_t)0x7,
+                (uint8_t)1,
+                0xdffe,
+                0x7efe,
+                0xffff,
+                (uint8_t)1,
+                reference_sample_interval,
+                enable_preprocessing,
+                (uint8_t)0x7,
+                (uint8_t)0,
+                block_size,
+                data_sense,
+                8,
+                1,
+                restricted_codes,
+                endianness);
         /* Initialize compressor */
         sptr->compress_init(infn, outfn);
         /* Compress file */

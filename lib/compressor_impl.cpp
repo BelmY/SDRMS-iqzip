@@ -1,7 +1,5 @@
 /* -*- c++ -*- */
 /*
- *  IQzip
- *
  *  Copyright (C) 2019, Libre Space Foundation <https://libre.space/>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -20,6 +18,8 @@
 
 #include "compressor_impl.h"
 #include <cstring>
+
+namespace iqzip {
 
 namespace compression {
 
@@ -40,13 +40,13 @@ compressor_impl::compressor_impl(uint8_t version, uint8_t type,
                                  uint16_t cds_per_packet,
                                  uint8_t restricted_codes,
                                  uint8_t endianness) :
-    iqzip(version, type, sec_hdr_flag, apid, sequence_flags,
-          sequence_count, packet_data_length,
-          grouping_data_length, compression_tech_id,
-          reference_sample_interval, preprocessor_status,
-          predictor_type, mapper_type, block_size, data_sense,
-          sample_resolution, cds_per_packet, restricted_codes,
-          endianness),
+    iqzip_impl(version, type, sec_hdr_flag, apid, sequence_flags,
+               sequence_count, packet_data_length,
+               grouping_data_length, compression_tech_id,
+               reference_sample_interval, preprocessor_status,
+               predictor_type, mapper_type, block_size, data_sense,
+               sample_resolution, cds_per_packet, restricted_codes,
+               endianness),
     d_tmp_stream(new char[sample_resolution * STREAM_CHUNK]),
     d_reference_samples_bytes((reference_sample_interval + 1) *
                               sample_resolution / 8 * block_size),
@@ -309,4 +309,5 @@ create_compressor(uint8_t version, uint8_t type,
                                        endianness));
 }
 
-}
+} // namespace compression
+} // namespace iqzip

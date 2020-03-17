@@ -1,7 +1,5 @@
 /* -*- c++ -*- */
 /*
- *  IQzip
- *
  *  Copyright (C) 2019, Libre Space Foundation <https://libre.space/>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -22,10 +20,12 @@
 
 #include <cstring>
 
+namespace iqzip {
+
 namespace compression {
 
 decompressor_impl::decompressor_impl() :
-    iqzip(),
+    iqzip_impl(),
     d_iqzip_header_size(0),
     d_tmp_stream(new char[STREAM_CHUNK]),
     d_stream_avail_in(0),
@@ -249,4 +249,6 @@ create_decompressor()
 {
     return std::shared_ptr<decompressor>(new decompressor_impl);
 }
-}
+
+} // namespace compression
+} // namespace iqzip

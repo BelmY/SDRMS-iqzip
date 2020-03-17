@@ -1,7 +1,5 @@
 /* -*- c++ -*- */
 /*
- *  IQzip
- *
  *  Copyright (C) 2019, Libre Space Foundation <https://libre.space/>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -56,6 +54,8 @@
 #define EXTENDED_PARAMETERS_REFERENCE_SAMPLE_INTERVAL_MASK  0xf
 
 #define INSTRUMENT_CONFIG_SUBFIELD_SIZE                     2
+
+namespace iqzip {
 
 namespace compression {
 
@@ -570,6 +570,7 @@ private:
     encode_extended_parameters();
 
 };
-}
+} // namespace compression
+} // namespace iqzip
 
 #endif /* COMPRESSION_IDENTIFICATION_PACKET_H_ */

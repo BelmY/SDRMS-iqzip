@@ -1,7 +1,5 @@
 /* -*- c++ -*- */
 /*
- *  iqzip
- *
  *  Copyright (C) 2019, Libre Space Foundation <https://libre.space/>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -33,12 +31,14 @@
 #include <iostream>
 #include <string>
 
-#include <iqzip/iqzip.h>
+#include "iqzip_impl.h"
 #include <iqzip/decompressor.h>
+
+namespace iqzip {
 
 namespace compression {
 
-class decompressor_impl : public iqzip, public decompressor {
+class decompressor_impl : public iqzip_impl, public decompressor {
 
 private:
     size_t d_iqzip_header_size;
@@ -103,6 +103,7 @@ public:
 
 };
 
-}
+} // namespace compression
+} // namespace iqzip
 
 #endif /* DECOMPRESSOR_IMPL_H */

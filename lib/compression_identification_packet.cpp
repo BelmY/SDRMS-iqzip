@@ -1,7 +1,5 @@
 /* -*- c++ -*- */
 /*
- *  IQzip
- *
  *  Copyright (C) 2019, Libre Space Foundation <https://libre.space/>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -24,6 +22,8 @@
 #include <cstring>
 #include <byteswap.h>
 #include <iostream>
+
+namespace iqzip {
 
 namespace compression {
 
@@ -524,5 +524,6 @@ const
            EXTENDED_PARAMETERS_RESTRICTED_CODES_MASK;
 }
 
-}
+} // namespace compression
+} // namespace iqzip
 

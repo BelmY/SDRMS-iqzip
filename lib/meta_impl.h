@@ -29,10 +29,9 @@ extern "C" {
 
 #include <stdint.h>
 #include <string>
-
-#include <sigmf/sigmf_core_generated.h>
-#include <sigmf/sigmf_antenna_generated.h>
 #include <sigmf/sigmf.h>
+
+namespace iqzip {
 
 namespace metafile {
 
@@ -184,6 +183,7 @@ private:
 
 };
 
-} //namespace meta_impl
+} // namespace metafile
+} // namespace iqzip
 
 #endif /* META_IMPL_H_ */

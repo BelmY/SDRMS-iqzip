@@ -46,7 +46,7 @@ add_library(iqzip SHARED ${iqzip_sources})
 target_link_libraries(iqzip ${AEC_LIBRARIES} ${LIBTAR_LIBRARIES})
 
 target_sources(iqzip PRIVATE
-    iqzip.cpp
+    iqzip_impl.cpp
     compressor_impl.cpp
     decompressor_impl.cpp
     meta_impl.cpp

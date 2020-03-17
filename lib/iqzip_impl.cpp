@@ -1,7 +1,5 @@
 /* -*- c++ -*- */
 /*
- *  iqzip
- *
  *  Copyright (C) 2019, Libre Space Foundation <https://libre.space/>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -20,9 +18,11 @@
 
 #include <iostream>
 
-#include <iqzip/iqzip.h>
+#include "iqzip_impl.h"
 
-iqzip::iqzip() :
+namespace iqzip {
+
+iqzip_impl::iqzip_impl() :
     d_version(0),
     d_type(0),
     d_sec_hdr_flag(0),
@@ -46,15 +46,15 @@ iqzip::iqzip() :
     d_ccsds_cip_hdr = compression::iqzip_compression_header();
 }
 
-iqzip::iqzip(uint8_t version, uint8_t type, uint8_t sec_hdr_flag,
-             uint16_t apid, uint8_t sequence_flags,
-             uint16_t packet_sequence_count, uint16_t packet_data_length,
-             uint16_t grouping_data_length, uint8_t compression_tech_id,
-             uint8_t reference_sample_interval, uint8_t preprocessor_status,
-             uint8_t predictor_type, uint8_t mapper_type, uint16_t block_size,
-             uint8_t data_sense, uint8_t sample_resolution,
-             uint16_t cds_per_packet, uint8_t restricted_codes,
-             uint8_t endianness) :
+iqzip_impl::iqzip_impl(uint8_t version, uint8_t type, uint8_t sec_hdr_flag,
+                       uint16_t apid, uint8_t sequence_flags,
+                       uint16_t packet_sequence_count, uint16_t packet_data_length,
+                       uint16_t grouping_data_length, uint8_t compression_tech_id,
+                       uint8_t reference_sample_interval, uint8_t preprocessor_status,
+                       uint8_t predictor_type, uint8_t mapper_type, uint16_t block_size,
+                       uint8_t data_sense, uint8_t sample_resolution,
+                       uint16_t cds_per_packet, uint8_t restricted_codes,
+                       uint8_t endianness) :
     d_version(version),
     d_type(type),
     d_sec_hdr_flag(sec_hdr_flag),
@@ -84,12 +84,12 @@ iqzip::iqzip(uint8_t version, uint8_t type, uint8_t sec_hdr_flag,
                           d_sample_resolution, d_cds_per_packet, d_restricted_codes, d_endianness);
 }
 
-iqzip::~iqzip()
+iqzip_impl::~iqzip_impl()
 {
 }
 
 void
-iqzip::init_aec_stream(void)
+iqzip_impl::init_aec_stream(void)
 {
     d_strm.avail_in = 0;
     d_strm.avail_out = CHUNK;
@@ -116,7 +116,7 @@ iqzip::init_aec_stream(void)
 }
 
 void
-iqzip::print_error(int status)
+iqzip_impl::print_error(int status)
 {
     switch (status) {
     case AEC_CONF_ERROR:
@@ -136,3 +136,4 @@ iqzip::print_error(int status)
     }
 }
 
+} // namespace iqzip
