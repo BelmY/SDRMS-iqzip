@@ -41,7 +41,7 @@ debian:
 
   before_script: 
     - apt-get update -qq -y
-    - apt-get install -q -y cmake g++ gcc git libaec-dev libtar-dev libflatbuffers-dev libflatbuffers1 nlohmann-json-dev
+    - apt-get install -q -y cmake g++ gcc git libaec-dev libtar-dev libflatbuffers-dev libflatbuffers1 nlohmann-json3-dev
     - git clone --recurse-submodules https://github.com/noc0lour/libsigmf.git
     - cd libsigmf
     - mkdir build
