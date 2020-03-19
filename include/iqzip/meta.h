@@ -103,6 +103,9 @@ public:
                            double frequency, std::string datetime) = 0;
 
     virtual void
+    append_capture_segment(std::string capture_json) = 0;
+
+    virtual void
     set_capture_global_index(uint64_t sample_start, uint64_t global_index) = 0;
 
     virtual void
@@ -125,6 +128,9 @@ public:
                               std::string generator, std::string comment,
                               double freq_lower_edge,
                               double freq_upper_edge) = 0;
+
+    virtual void
+    append_annotation_segment(std::string annotation_json) = 0;
 
     virtual void write_json(std::string filename) = 0;
 

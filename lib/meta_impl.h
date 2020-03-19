@@ -22,6 +22,7 @@
 #define META_IMPL_H_
 
 #include <iqzip/meta.h>
+#include <sigmf/sigmf.h>
 
 extern "C" {
 #include <libtar.h>
@@ -29,7 +30,6 @@ extern "C" {
 
 #include <stdint.h>
 #include <string>
-#include <sigmf/sigmf.h>
 
 namespace iqzip {
 
@@ -117,6 +117,8 @@ public:
     append_capture_segment(uint64_t sample_start, uint64_t global_index,
                            double frequency, std::string datetime);
 
+    void append_capture_segment(std::string capture_json);
+
     void
     set_capture_global_index(uint64_t sample_start, uint64_t global_index);
 
@@ -140,6 +142,9 @@ public:
                               std::string generator, std::string comment,
                               double freq_lower_edge,
                               double freq_upper_edge);
+
+    void
+    append_annotation_segment(std::string annotation_json);
 
     void write_json(std::string filename);
 

@@ -214,6 +214,14 @@ meta_impl::append_capture_segment(uint64_t sample_start,
 }
 
 void
+meta_impl::append_capture_segment(std::string capture_json)
+{
+    auto new_capture = sigmf::VariadicDataClass<core::CaptureT>();
+    new_capture.from_json(nlohmann::json::parse(capture_json));
+    d_sigmf.captures.emplace_back(new_capture);
+}
+
+void
 meta_impl::set_capture_global_index(uint64_t sample_start,
                                     uint64_t global_index)
 {
@@ -306,6 +314,14 @@ meta_impl::append_annotation_segment(uint64_t sample_start,
     new_annotation.access<core::AnnotationT> ().freq_upper_edge =
         freq_upper_edge;
     d_sigmf.annotations.emplace_back(new_annotation);
+}
+
+void
+meta_impl::append_annotation_segment(std::string annotation_json)
+{
+    auto new_anno = sigmf::VariadicDataClass<core::AnnotationT>();
+    new_anno.from_json(nlohmann::json::parse(annotation_json));
+    d_sigmf.annotations.emplace_back(new_anno);
 }
 
 void

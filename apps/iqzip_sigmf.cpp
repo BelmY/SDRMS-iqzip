@@ -36,18 +36,24 @@
 int main()
 {
 
-    iqzip::metafile::meta_sptr sptr = iqzip::metafile::create_iqzip_meta("u8",
+    iqzip::metafile::meta_sptr meta = iqzip::metafile::create_iqzip_meta("u8",
                                       "0.0.1");
-    std::cout << "My sigmf: " <<
-              sptr->get_global_datatype() << std::endl;
 
-    sptr->append_capture_segment(10);
-    sptr->append_capture_segment(20);
-    sptr->append_capture_segment(25);
-    sptr->set_capture_global_index(20, 1);
+    meta->append_capture_segment(10);
+    meta->append_capture_segment(20);
+    meta->append_capture_segment(25);
+    meta->set_capture_global_index(20, 1);
 
-    sptr->write_json("meta.sigmf-meta");
-    sptr->parse_json("meta.sigmf-meta");
-    sptr->create_archive("satnogs.sigmf", "meta.sigmf-meta");
+    std::string ano_json = R"({
+      "core:description": "Pretty easy",
+      "core:generator": "iqzip",
+      "core:sample_count": 600000
+  	})";
+
+    meta->append_annotation_segment(ano_json);
+
+    meta->write_json("meta.sigmf-meta");
+
+    meta->create_archive("satnogs.sigmf", "meta.sigmf-meta");
     return 0;
 }
