@@ -27,9 +27,7 @@ list(APPEND iqzip_sources
 
 list(APPEND IQZIP_INCLUDE_DIRS
             ${PROJECT_SOURCE_DIR}/include
-            ${SIGMF_INCLUDE_DIRS}
-            ${AEC_INCLUDE_DIR}
-            ${LIBTAR_INCLUDE_HEADERS})
+            ${AEC_INCLUDE_DIR})
 
 if(NOT iqzip_sources)
   message(STATUS "No C++ sources... skipping lib/")
@@ -43,13 +41,12 @@ if(APPLE)
 endif(APPLE)
 
 add_library(iqzip SHARED ${iqzip_sources})
-target_link_libraries(iqzip ${AEC_LIBRARIES} ${LIBTAR_LIBRARIES})
+target_link_libraries(iqzip ${AEC_LIBRARIES})
 
 target_sources(iqzip PRIVATE
     iqzip_impl.cpp
     compressor_impl.cpp
     decompressor_impl.cpp
-    meta_impl.cpp
     )
 
 target_include_directories(iqzip

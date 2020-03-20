@@ -17,7 +17,6 @@
  */
 
 #include <iqzip/iqzip_compression_header.h>
-#include <sigmf/annotation.h>
 #include <stdexcept>
 #include <cstring>
 #include <iostream>

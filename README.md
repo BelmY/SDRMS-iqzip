@@ -1,16 +1,10 @@
 ## iqzip: A library to facilitate the creation of signal databases.
 
-The iqzip library provides a simple API to facilitate the compression/decompression of raw IQ signal recordings and their characterization through
-metafile generation.
+The iqzip library provides a simple API to facilitate the compression/decompression of raw IQ signal recordings.
 
 ## Introduction
 Efficiently storing and processing signal recordings has always been a challenging problem for scientist and signal analysts, due to their
-excessive storage requirements. In addition, the emerging interest in combined applications of different scientific fields, as well
-space telecommunications, require a robust and portable across multiple platforms specification to describe databases of signal recordings.
-
-The iqzip library provides the required functionallity to efficiently store IQ data by incorporating the compression scheme proposed by the CCSDS
-121.0-B-2 "Lossless Data Compression" [1]. Moreover, given a simplified set of functions, there is the
-ability to fully describe the compressed signal recordings, by generating appropriate metafiles that conform the Signal Meta File (SigMF) [2] specification format.
+excessive storage requirements. The iqzip library provides the required functionallity to efficiently store IQ data by incorporating the compression scheme proposed by the CCSDS 121.0-B-2 "Lossless Data Compression" [1].
 
 ## Compression
 
@@ -39,21 +33,11 @@ Coder (e.g the number of samples per processing block). However, the analysis [4
 In that direction, the iqzip library appropriately extends the libaec implementation alongside with the CIP packet described in the CCSDS 121.0-B standard, in order to optionally support non-standard configuration. Consequently, an extension compression header is injected automatically between the standard CIP packet header and the
 actual compressed data, whenever non-standard configuration is selected.
 
-## Metafile generation
-Regarding the metafile generation for the signal recordings, the iqzip makes use of the libsigmf
-[5]. The libsigmf is a powerful and generic library that enables the generation of JSON metafiles that
-conform to the SigMF specification for the core or custom namespaces.  
-
-The iqzip provides an abstraction layer between the libsigmf and the user by giving a simplified set of functions
-for the creation or parsing of SigMF metafiles. Currently, the iqzip metafile API only supports the core SigMF namespace.
-
 ## Requirements
 * GNU Radio ( > 3.7.7 )
 * CMake ( > 2.6)
-* G++ (with C++14 support)
+* G++ (with C++11 support)
 * libaec (will be dowloaded automatically during building)
-* libsigmf (will be dowloaded automatically during building)
-* libtar
 
 ## Installation
 

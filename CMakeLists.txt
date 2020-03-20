@@ -24,9 +24,9 @@ project(iqzip CXX C)
 enable_testing()
 
 # Enable C++14 support
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-add_definitions(-std=c++14)
+add_definitions(-std=c++11)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra")
 
 # select the release build type by default to get optimization flags
@@ -85,8 +85,6 @@ set(IQZIP_PKG_LIBEXEC_DIR ${IQZIP_LIBEXEC_DIR}/${CMAKE_PROJECT_NAME})
 # Search for the dependencies
 # ##############################################################################
 find_package(AEC REQUIRED)
-find_package(SigMF REQUIRED)
-find_package(Libtar REQUIRED)
 
 # ##############################################################################
 # Setup doxygen option

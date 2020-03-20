@@ -18,16 +18,7 @@ openSUSE:
   image: opensuse/tumbleweed
 
   before_script:
-    - zypper in -y cmake gcc-c++ gcc git libaec-devel libtar-devel flatbuffers-devel libflatbuffers1 nlohmann_json-devel
-    - git clone --recurse-submodules https://github.com/noc0lour/libsigmf.git
-    - cd libsigmf
-    - git checkout cleanup
-    - mkdir build
-    - cd build
-    - cmake -DCMAKE_INSTALL_PREFIX=/usr ..
-    - make -j $(nproc --all)
-    - make install
-    - cd ../..
+    - zypper in -y cmake gcc-c++ gcc git libaec-devel
 
   script:
     - mkdir -p build
@@ -42,16 +33,7 @@ debian:
 
   before_script: 
     - apt-get update -qq -y
-    - apt-get install -q -y cmake g++ gcc git libaec-dev libtar-dev libflatbuffers-dev libflatbuffers1 nlohmann-json3-dev
-    - git clone --recurse-submodules https://github.com/noc0lour/libsigmf.git
-    - cd libsigmf
-    - git checkout cleanup
-    - mkdir build
-    - cd build
-    - cmake -DCMAKE_INSTALL_PREFIX=/usr ..
-    - make -j $(nproc --all)
-    - make install
-    - cd ../..
+    - apt-get install -q -y cmake g++ gcc git libaec-dev
 
   script:
     - mkdir -p build
@@ -67,16 +49,7 @@ pages:
 
   before_script:
     - apt-get update -qq -y
-    - apt-get install -q -y doxygen cmake g++ gcc git libaec-dev libtar-dev
-    - git clone --recurse-submodules https://github.com/deepsig/libsigmf.git
-    - cd libsigmf
-    - git checkout cleanup
-    - mkdir build
-    - cd build
-    - cmake -DCMAKE_INSTALL_PREFIX=/usr ..
-    - make -j $(nproc --all)
-    - make install
-    - cd ../..
+    - apt-get install -q -y doxygen cmake g++ gcc git libaec-dev
 
   script:
     - mkdir -p build
