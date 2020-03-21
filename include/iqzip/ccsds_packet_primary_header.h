@@ -20,6 +20,7 @@
 #define CCSDS_PACKET_PRIMARY_HEADER_H_
 
 #include <stdint.h>
+#include <iqzip/ccsds_types.h>
 
 #define CCSDS_PRIMARY_HEADER_SIZE               6
 
@@ -38,6 +39,8 @@
 namespace iqzip {
 
 namespace compression {
+
+namespace header {
 
 /*!
  *
@@ -81,47 +84,6 @@ public:
      */
 
     typedef uint8_t packet_primary_header_t[CCSDS_PRIMARY_HEADER_SIZE];
-
-    /*!
-     * The default version value as defined by the CCSDS Space Packet Protocol Blue Book.
-     */
-    enum class PACKET_VERSION {
-        CCSDS_PACKET_VERSION_1 = 0x0,
-    };
-
-    /*!
-     * The default type values as defined by the CCSDS Space Packet Protocol Blue Book.
-     */
-    enum class PACKET_TYPE {
-        CCSDS_TELEMETRY = 0x0, CCSDS_TELECOMMAND = 0x1,
-    };
-
-    /*!
-     * The default secondary header flag value as defined by the CCSDS Space Packet
-     * Protocol Blue Book.
-     */
-    enum class PACKET_SECONDARY_HEADER_FLAG {
-        IDLE_PACKET = 0x0, SEC_HDR_NOT_PRESENT = 0x0, SEC_HDR_PRESENT = 0x1,
-    };
-
-    /*!
-     * The default application process identifier value as defined by the CCSDS Space Packet
-     * Protocol Blue Book.
-     */
-    enum class PACKET_APPLICATION_PROCESS_IDENTIFIER {
-        IDLE_PACKET = 0x7FF,
-    };
-
-    /*!
-     * The default packet sequence flags as defined by the CCSDS Space Packet
-     * Protocol Blue Book.
-     */
-    enum class PACKET_SEQUENCE_FLAGS {
-        CONTINUATION_SEGMENT = 0x0,
-        FIRST_SEGMENT = 0x1,
-        LAST_SEGMENT = 0x2,
-        UNSEGMENTED = 0x3
-    };
 
     ccsds_packet_primary_header(uint8_t version, uint8_t type,
                                 uint8_t sec_hdr_flag, uint16_t apid,
@@ -256,6 +218,7 @@ private:
     packet_primary_header_t d_primary_header;
 
 };
+} // namespace header
 } // namespace compression
 } // namespace iqzip
 

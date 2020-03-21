@@ -18,7 +18,8 @@
 # ##############################################################################
 # Install Iqzip headers
 # ##############################################################################
-install(FILES ccsds_packet_primary_header.h
+install(FILES ccsds_types.h
+			  ccsds_packet_primary_header.h
               compression_identification_packet.h
               iqzip_compression_header.h
               compressor.h

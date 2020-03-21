@@ -25,6 +25,8 @@ namespace iqzip {
 
 namespace compression {
 
+namespace header {
+
 ccsds_packet_primary_header::ccsds_packet_primary_header(
     uint8_t version, uint8_t type, uint8_t sec_hdr_flag, uint16_t apid,
     uint8_t sequence_flags, uint16_t packet_sequence_count,
@@ -191,5 +193,6 @@ ccsds_packet_primary_header::encode_version(uint8_t version)
     d_primary_header[0] |= (version & 0x7) << 5;
 }
 
+} // namespace header
 } // namespace compression
 } // namespace iqzip

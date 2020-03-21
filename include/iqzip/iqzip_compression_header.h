@@ -29,6 +29,8 @@ namespace iqzip {
 
 namespace compression {
 
+namespace header {
+
 /*!
  *
  * \ingroup compression_header
@@ -508,6 +510,7 @@ private:
     void
     encode();
 };
+} // namespace header
 } // namespace compression
 } // namespace iqzip
 

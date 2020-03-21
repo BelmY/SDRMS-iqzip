@@ -43,7 +43,7 @@ iqzip_impl::iqzip_impl() :
     d_restricted_codes(0),
     d_endianness(0)
 {
-    d_ccsds_cip_hdr = compression::iqzip_compression_header();
+    d_ccsds_cip_hdr = compression::header::iqzip_compression_header();
 }
 
 iqzip_impl::iqzip_impl(uint8_t version, uint8_t type, uint8_t sec_hdr_flag,
@@ -76,7 +76,7 @@ iqzip_impl::iqzip_impl(uint8_t version, uint8_t type, uint8_t sec_hdr_flag,
     d_endianness(endianness)
 {
     /* Initialize IQ CCSDS header */
-    d_ccsds_cip_hdr = compression::iqzip_compression_header(
+    d_ccsds_cip_hdr = compression::header::iqzip_compression_header(
                           d_version, d_type, d_sec_hdr_flag, d_apid, d_sequence_flags,
                           d_packet_sequence_count, d_packet_data_length, d_grouping_data_length,
                           d_compression_tech_id, d_reference_sample_interval, d_preprocessor_status,

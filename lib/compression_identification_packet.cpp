@@ -27,6 +27,8 @@ namespace iqzip {
 
 namespace compression {
 
+namespace header {
+
 compression_identification_packet::compression_identification_packet(
     uint16_t grouping_data_length, uint8_t compression_tech_id,
     uint8_t reference_sample_interval, uint8_t preprocessor_status,
@@ -524,6 +526,7 @@ const
            EXTENDED_PARAMETERS_RESTRICTED_CODES_MASK;
 }
 
+} // namespace header
 } // namespace compression
 } // namespace iqzip
 

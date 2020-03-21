@@ -31,7 +31,7 @@ class iqzip_impl {
 
 protected:
     uint32_t CHUNK = 10485760;
-    compression::iqzip_compression_header d_ccsds_cip_hdr;
+    compression::header::iqzip_compression_header d_ccsds_cip_hdr;
     aec_stream d_strm;
 
     std::ofstream output_stream;

@@ -62,11 +62,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <iqzip/ccsds_types.h>
 #include <iqzip/compressor.h>
 #include <iqzip/decompressor.h>
 #include <iostream>
 #include <stdlib.h>
 #include <string.h>
+
+using namespace iqzip::compression;
 
 #define CHUNK 10485760
 
@@ -168,27 +171,27 @@ main(int argc, char *argv[])
         sptr->decompress_fin();
     }
     else {
-        iqzip::compression::compressor_sptr sptr =
+        compressor_sptr sptr =
             iqzip::compression::create_compressor(
-                (uint8_t)0,
-                (uint8_t)0,
-                (uint8_t)0,
-                (uint16_t)0x7,
+                (uint8_t)header::PACKET_VERSION::CCSDS_PACKET_VERSION_1,
+                (uint8_t)header::PACKET_TYPE::CCSDS_TELECOMMAND,
+                (uint8_t)header::PACKET_SECONDARY_HEADER_FLAG::SEC_HDR_PRESENT,
+                (uint16_t)header::PACKET_APPLICATION_PROCESS_IDENTIFIER::IDLE_PACKET,
+                (uint8_t)header::PACKET_SEQUENCE_FLAGS::CONTINUATION_SEGMENT,
+                (uint16_t)0xdffe,
+                (uint16_t)0x7efe,
+                (uint16_t)0xffff,
+                (uint8_t)header::COMPRESSION_TECHNIQUE_IDENTIFICATION::CCSDS_LOSSLESS_COMPRESSION,
+                (uint8_t)reference_sample_interval,
+                (uint8_t)enable_preprocessing,
+                (uint8_t)header::PREPROCESSOR_PREDICTOR_TYPE::APPLICATION_SPECIFIC,
+                (uint8_t)header::PREPROCESSOR_MAPPER_TYPE::PREDICTION_ERROR,
+                (uint16_t)block_size,
+                (uint8_t)data_sense,
+                (uint8_t)sample_resolution,
                 (uint8_t)1,
-                0xdffe,
-                0x7efe,
-                0xffff,
-                (uint8_t)1,
-                reference_sample_interval,
-                enable_preprocessing,
-                (uint8_t)0x7,
-                (uint8_t)0,
-                block_size,
-                data_sense,
-                8,
-                1,
-                restricted_codes,
-                endianness);
+                (uint8_t)restricted_codes,
+                (uint8_t)endianness);
         /* Initialize compressor */
         sptr->compress_init(infn, outfn);
         /* Compress file */

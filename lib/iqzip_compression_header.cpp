@@ -25,6 +25,8 @@ namespace iqzip {
 
 namespace compression {
 
+namespace header {
+
 iqzip_compression_header::iqzip_compression_header(
     uint8_t version, uint8_t type, uint8_t sec_hdr_flag, uint16_t apid,
     uint8_t sequence_flags, uint16_t packet_sequence_count,
@@ -488,5 +490,6 @@ iqzip_compression_header::decode_iqzip_header_reference_sample_interval() const
     return d_iqzip_header.rsi;
 }
 
+} // namespace header
 } // namespace compression
 } // namespace iqzip
